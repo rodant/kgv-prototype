@@ -8,9 +8,16 @@ lazy val root = (project in file(".")).
       version      := "0.1.0-SNAPSHOT"
     )),
     name := "KGV Prototype",
+    scalacOptions += "-feature",
     scalaJSUseMainModuleInitializer := true,
+    // creates single js resource file for easy integration in html page
+    skip in packageJSDependencies := false,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.5",
+      "com.github.japgolly.scalajs-react" %%% "core" % "1.3.1",
       scalaTest % Test
-    )
-  ).enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+    ),
+    npmDependencies in Compile ++= Seq(
+      "react" -> "16.5.1",
+      "react-dom" -> "16.5.1")
+  ).enablePlugins(ScalaJSPlugin, ScalaJSWeb, ScalaJSBundlerPlugin)
