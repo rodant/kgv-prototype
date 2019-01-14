@@ -1,5 +1,9 @@
 import Dependencies._
 
+val reactVersion = "16.5.1"
+val scalaJSReactVersion = "1.3.1"
+val scalaCssVersion = "0.5.5"
+
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
@@ -14,10 +18,13 @@ lazy val root = (project in file(".")).
     skip in packageJSDependencies := false,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.5",
-      "com.github.japgolly.scalajs-react" %%% "core" % "1.3.1",
+      "com.github.japgolly.scalajs-react" %%% "core" % scalaJSReactVersion,
+      "com.github.japgolly.scalajs-react" %%% "extra" % scalaJSReactVersion,
+      "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
+      "com.github.japgolly.scalacss" %%% "ext-react" % scalaCssVersion,
       scalaTest % Test
     ),
     npmDependencies in Compile ++= Seq(
-      "react" -> "16.5.1",
-      "react-dom" -> "16.5.1")
+      "react" -> reactVersion,
+      "react-dom" -> reactVersion)
   ).enablePlugins(ScalaJSPlugin, ScalaJSWeb, ScalaJSBundlerPlugin)
