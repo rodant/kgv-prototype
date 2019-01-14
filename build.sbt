@@ -27,4 +27,4 @@ lazy val root = (project in file(".")).
     npmDependencies in Compile ++= Seq(
       "react" -> reactVersion,
       "react-dom" -> reactVersion)
-  ).enablePlugins(ScalaJSPlugin, ScalaJSWeb, ScalaJSBundlerPlugin)
+  ).enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
