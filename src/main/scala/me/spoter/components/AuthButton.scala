@@ -1,7 +1,6 @@
 package me.spoter.components
 
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.component.Js.{RawMounted, UnmountedWithRawType}
 import japgolly.scalajs.react.vdom.VdomElement
 
 import scala.scalajs.js
