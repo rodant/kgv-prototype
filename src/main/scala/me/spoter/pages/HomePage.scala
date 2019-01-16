@@ -1,8 +1,8 @@
 package me.spoter.pages
 
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.vdom.html_<^._
+import me.spoter.components.AuthButton
 import scalacss.ScalaCssReact._
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
@@ -24,9 +24,11 @@ object HomePage {
   }
 
   private val component =
-    ScalaComponent.builder
-      .static("HomePage")(<.div(Style.content, "Spoter.me Kleingarten Berlin"))
+    ScalaComponent.builder[Null]("HomePage")
+      .render_(
+        <.div(Style.content, "Spoter.me Kleingarten Berlin",
+          <.div(AuthButton("popup.html"))))
       .build
 
-  def apply(): Unmounted[Unit, Unit, Unit] = component()
+  def apply(): VdomElement = component(null).vdomElement
 }
