@@ -1,7 +1,10 @@
 package me.spoter.pages
 
-import japgolly.scalajs.react.ScalaComponent
+import java.net.URI
+
 import japgolly.scalajs.react.vdom.html_<^._
+import japgolly.scalajs.react.{CallbackTo, ScalaComponent}
+import me.spoter.models._
 import scalacss.ScalaCssReact._
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
@@ -19,7 +22,16 @@ object GardenPage {
 
     import dsl._
 
-    val container: StyleA = style(display.flex, minHeight(600.px))
+    val container: StyleA = style(
+      display.flex,
+      flexDirection.column,
+      minHeight(600.px))
+
+    val row: StyleA = style(
+      display.flex,
+      flexDirection.row,
+      margin(0.px)
+    )
   }
 
   //val uriRegex =
@@ -27,8 +39,40 @@ object GardenPage {
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
-    .render_P { P =>
-      <.div(Style.container, "Mein Garten")
+    .initialStateCallbackFromProps(fetchGarden)
+    .render_PS {
+      case (_, garden) =>
+        <.div(Style.container,
+          <.h1(garden.title),
+          <.div(Style.row,
+            <.div(
+              <.label(^.`for` := "district", "Stadtteil:"),
+              <.input(^.id := "district", ^.defaultValue := garden.district.name, ^.readOnly := true)
+            ),
+            <.div(
+              <.label(^.`for` := "location", "Standort:"),
+              <.input(^.id := "location", ^.defaultValue := garden.location.toString, ^.readOnly := true)
+            ),
+            <.div(
+              <.label(^.`for` := "price", "Preis:"),
+              <.input(^.id := "price", ^.defaultValue := garden.price.a / 100)
+            )
+          ),
+          <.div(Style.row,
+            <.div(
+              <.label(^.`for` := "bungalow", "Bungalow:"),
+              <.input(^.id := "bungalow", ^.defaultValue := garden.bungalow.map(_.uri).getOrElse("").toString, ^.readOnly := true)
+            ),
+            <.div(
+              <.label(^.`for` := "toilet", "Toilette:"),
+              <.input(^.id := "toilet", ^.defaultValue := garden.toilet.map(_.uir).getOrElse("").toString, ^.readOnly := true)
+            ),
+            <.div(
+              <.label(^.`for` := "facilities", "Ausstattung:"),
+              <.input(^.id := "facilities", ^.defaultValue := garden.facilities.toString, ^.readOnly := true)
+            )
+          ),
+        )
     }
     .build
 
@@ -38,4 +82,23 @@ object GardenPage {
 
   def apply(uri: String): VdomElement = apply(Props(uri))
 
+  def fetchGarden(props: Props): CallbackTo[Garden] = CallbackTo {
+    val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
+    val districtURI = new URI("http://www.spoter.me/districts/#spandau")
+    Garden(
+      districtURI,
+      title = "Mein Kleingarten",
+      Location(52.563464, 13.420226),
+      District(districtURI, "Spandau"),
+      Money(300000),
+      facilities = Facilities(
+        powerSupply = true,
+        watterSupply = true,
+        pool = false,
+        fountain = false,
+        planting = true,
+        gardenTools = true
+      )
+    )
+  }
 }

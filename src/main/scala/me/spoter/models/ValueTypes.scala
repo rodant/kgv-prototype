@@ -3,7 +3,7 @@ package me.spoter.models
 /**
   * A GPS location.
   */
-case class Location(lat: Float, longitude: Float)
+case class Location(lat: Double, longitude: Double)
 
 /**
   * Area in square meters

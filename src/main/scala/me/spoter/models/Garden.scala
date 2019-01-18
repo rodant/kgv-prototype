@@ -11,11 +11,15 @@ import java.net.URI
   * @param price
   * @param bungalow
   * @param toilet
+  * @param facilities
+  * @param title
   */
 case class Garden(
                    uri: URI,
+                   title: String,
                    location: Location,
                    district: District,
                    price: Money,
                    bungalow: Option[Bungalow] = None,
-                   toilet: Option[Toilet] = None)
+                   toilet: Option[Toilet] = None,
+                   facilities: Facilities)
