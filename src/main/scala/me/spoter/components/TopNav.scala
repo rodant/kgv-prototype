@@ -22,7 +22,9 @@ object TopNav {
 
     import dsl._
 
-    val navMenu: StyleA = style(display.flex,
+    val navMenu: StyleA = style(
+      display.flex,
+      flexFlow := "row-reverse",
       alignItems.center,
       backgroundColor(c"#F2706D"),
       margin.`0`,
@@ -61,8 +63,7 @@ object TopNav {
                 item.name,
                 P.ctrl setOnClick item.route
               )
-            },
-            AuthButton("popup.html")
+            }, <.li(^.id := "login-button", AuthButton("popup.html"))
           )
         )
       )

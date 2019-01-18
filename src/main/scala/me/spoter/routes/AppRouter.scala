@@ -18,22 +18,15 @@ object AppRouter {
 
   private val config = RouterConfigDsl[AppPage].buildConfig { dsl =>
     import dsl._
-    val itemRoutes: Rule =
-      Item.routes.prefixPath_/("#items").pmap[AppPage](Items) {
-        case Items(p) => p
-      }
+
     (trimSlashes
       | staticRoute(root, Home) ~> render(HomePage())
-      | dynamicRouteCT[Garden]("#garden" / string(".+").caseClass[Garden]) ~> dynRender(gp => GardenPage(gp.uri))
-      | itemRoutes)
+      | dynamicRouteCT[Garden]("#garden" / string(".+").caseClass[Garden]) ~> dynRender(gp => GardenPage(gp.uri)))
       .notFound(redirectToPage(Home)(Redirect.Replace))
       .renderWith(layout)
   }
 
-  private val mainMenu = Vector(
-    Menu("Home", Home),
-    Menu("Items", Items(Item.Info))
-  )
+  private val mainMenu = Vector()
 
   private def layout(c: RouterCtl[AppPage], r: Resolution[AppPage]) =
     <.div(
