@@ -61,7 +61,8 @@ object TopNav {
                 item.name,
                 P.ctrl setOnClick item.route
               )
-            }
+            },
+            AuthButton("popup.html")
           )
         )
       )
