@@ -16,8 +16,5 @@ object GlobalStyle extends StyleSheet.Inline {
     unsafeRoot(".ui-elem")(
       margin(5.px)
     ),
-    unsafeRoot("div,label,input")(
-      margin(5.px)
-    )
   )
 }

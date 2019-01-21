@@ -22,15 +22,16 @@ object GardenPage {
 
     import dsl._
 
-    val container: StyleA = style(
+    val pageContent: StyleA = style(
       display.flex,
       flexDirection.column,
-      minHeight(600.px))
+      minHeight(600.px),
+      margin(20.px))
 
     val row: StyleA = style(
       display.flex,
       flexDirection.row,
-      margin(0.px)
+      margin(10.px)
     )
   }
 
@@ -42,32 +43,32 @@ object GardenPage {
     .initialStateCallbackFromProps(fetchGarden)
     .render_PS {
       case (_, garden) =>
-        <.div(Style.container,
+        <.div(Style.pageContent,
           <.h1(garden.title),
           <.div(Style.row,
-            <.div(
+            <.div(^.className := ".ui-elem",
               <.label(^.`for` := "district", "Stadtteil:"),
               <.input(^.id := "district", ^.defaultValue := garden.district.name, ^.readOnly := true)
             ),
-            <.div(
+            <.div(^.className := ".ui-elem",
               <.label(^.`for` := "location", "Standort:"),
               <.input(^.id := "location", ^.defaultValue := garden.location.toString, ^.readOnly := true)
             ),
-            <.div(
+            <.div(^.className := ".ui-elem",
               <.label(^.`for` := "price", "Preis:"),
               <.input(^.id := "price", ^.defaultValue := garden.price.a / 100)
             )
           ),
           <.div(Style.row,
-            <.div(
+            <.div(^.className := ".ui-elem",
               <.label(^.`for` := "bungalow", "Bungalow:"),
               <.input(^.id := "bungalow", ^.defaultValue := garden.bungalow.map(_.uri).getOrElse("").toString, ^.readOnly := true)
             ),
-            <.div(
+            <.div(^.className := ".ui-elem",
               <.label(^.`for` := "toilet", "Toilette:"),
               <.input(^.id := "toilet", ^.defaultValue := garden.toilet.map(_.uir).getOrElse("").toString, ^.readOnly := true)
             ),
-            <.div(
+            <.div(^.className := ".ui-elem",
               <.label(^.`for` := "facilities", "Ausstattung:"),
               <.input(^.id := "facilities", ^.defaultValue := garden.facilities.toString, ^.readOnly := true)
             )
