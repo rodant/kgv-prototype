@@ -1,7 +1,7 @@
-package me.spoter.components
+package me.spoter.components.solid
 
-import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.VdomElement
+import japgolly.scalajs.react.{Children, JsComponent}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
