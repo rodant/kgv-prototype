@@ -7,13 +7,5 @@ import java.net.URI
   *
   * @param uri
   * @param area
-  * @param watterConnection
-  * @param powerConnection
-  * @param toilet
   */
-case class Bungalow(
-                     uri: URI,
-                     area: Area,
-                     watterConnection: Boolean,
-                     powerConnection: Boolean,
-                     toilet: Option[Toilet])
+case class Bungalow(uri: URI, area: Area)

@@ -22,8 +22,7 @@ object GardenPage {
 
     import dsl._
 
-    val pageContent: StyleA = style(
-      display.flex,
+    val pageContent: StyleA = style(display.flex,
       flexDirection.column,
       minHeight(600.px),
       margin(20.px))
@@ -43,35 +42,33 @@ object GardenPage {
     .initialStateCallbackFromProps(fetchGarden)
     .render_PS {
       case (_, garden) =>
-        <.div(Style.pageContent,
+        <.div(
+          Style.pageContent,
           <.h1(garden.title),
-          <.div(Style.row,
-            <.div(^.className := ".ui-elem",
-              <.label(^.`for` := "district", "Stadtteil:"),
-              <.input(^.id := "district", ^.defaultValue := garden.district.name, ^.readOnly := true)
-            ),
+          <.div(
+            Style.row,
             <.div(^.className := ".ui-elem",
               <.label(^.`for` := "location", "Standort:"),
-              <.input(^.id := "location", ^.defaultValue := garden.location.toString, ^.readOnly := true)
-            ),
+              <.input(^.id := "location",
+                ^.defaultValue := garden.location.toString,
+                ^.readOnly := true)),
             <.div(^.className := ".ui-elem",
               <.label(^.`for` := "price", "Preis:"),
-              <.input(^.id := "price", ^.defaultValue := garden.price.a / 100)
-            )
+              <.input(^.id := "price",
+                ^.defaultValue := garden.price.a / 100))
           ),
-          <.div(Style.row,
-            <.div(^.className := ".ui-elem",
+          <.div(
+            Style.row,
+            <.div(
+              ^.className := ".ui-elem",
               <.label(^.`for` := "bungalow", "Bungalow:"),
-              <.input(^.id := "bungalow", ^.defaultValue := garden.bungalow.map(_.uri).getOrElse("").toString, ^.readOnly := true)
+              <.input(^.id := "bungalow",
+                ^.defaultValue := garden.bungalow
+                  .map(_.uri)
+                  .getOrElse("")
+                  .toString,
+                ^.readOnly := true)
             ),
-            <.div(^.className := ".ui-elem",
-              <.label(^.`for` := "toilet", "Toilette:"),
-              <.input(^.id := "toilet", ^.defaultValue := garden.toilet.map(_.uir).getOrElse("").toString, ^.readOnly := true)
-            ),
-            <.div(^.className := ".ui-elem",
-              <.label(^.`for` := "facilities", "Ausstattung:"),
-              <.input(^.id := "facilities", ^.defaultValue := garden.facilities.toString, ^.readOnly := true)
-            )
           ),
         )
     }
@@ -87,19 +84,12 @@ object GardenPage {
     val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
     val districtURI = new URI("http://www.spoter.me/districts/#spandau")
     Garden(
-      districtURI,
+      uri = districtURI,
       title = "Mein Kleingarten",
-      Location(52.563464, 13.420226),
-      District(districtURI, "Spandau"),
-      Money(300000),
-      facilities = Facilities(
-        powerSupply = true,
-        watterSupply = true,
-        pool = false,
-        fountain = false,
-        planting = true,
-        gardenTools = true
-      )
+      address = Address("Slaa Straße", "14A", 12345, "Berlin", "Deutschland"),
+      location = Location(52.563464, 13.420226),
+      area = Area(500),
+      price = Money(300000)
     )
   }
 }

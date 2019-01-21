@@ -19,19 +19,33 @@ case class Area(a: Double) extends AnyVal
   */
 case class Money(a: Long) extends AnyVal
 
+import enumeratum._
+
+import scala.collection.immutable
+
 /**
   *
-  * @param powerSupply
-  * @param watterSupply
-  * @param pool
-  * @param fountain
-  * @param planting
-  * @param gardenTools
   */
-case class Facilities(
-                       powerSupply: Boolean,
-                       watterSupply: Boolean,
-                       pool: Boolean,
-                       fountain: Boolean,
-                       planting: Boolean,
-                       gardenTools: Boolean)
+sealed trait GardenCondition extends EnumEntry
+
+object GardenCondition extends Enum[GardenCondition] {
+
+  override def values: immutable.IndexedSeq[GardenCondition] = findValues
+
+  case object Excellent extends GardenCondition
+
+  case object Good extends GardenCondition
+
+  case object Poor extends GardenCondition
+
+}
+
+/**
+  *
+  * @param street
+  * @param houseNumber
+  * @param zipCode
+  * @param city
+  * @param country
+  */
+case class Address(street: String, houseNumber: String, zipCode: Int, city: String, country: String)

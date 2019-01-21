@@ -1,25 +1,27 @@
 package me.spoter.models
 
-import java.net.URI
+import java.net.{URI, URL}
+import java.time.Instant
+
+import me.spoter.models.GardenCondition.Good
 
 /**
   * Garden entity.
   *
   * @param uri
   * @param location
-  * @param district
   * @param price
   * @param bungalow
-  * @param toilet
-  * @param facilities
   * @param title
   */
-case class Garden(
-                   uri: URI,
-                   title: String,
-                   location: Location,
-                   district: District,
-                   price: Money,
-                   bungalow: Option[Bungalow] = None,
-                   toilet: Option[Toilet] = None,
-                   facilities: Facilities)
+case class Garden(uri: URI,
+                  title: String,
+                  address: Address,
+                  location: Location,
+                  images: List[URL] = List(),
+                  description: String = "",
+                  area: Area,
+                  price: Money = Money(0),
+                  bungalow: Option[Bungalow] = None,
+                  gardenCondition: GardenCondition = Good,
+                  availableAfter: Instant = Instant.EPOCH)
