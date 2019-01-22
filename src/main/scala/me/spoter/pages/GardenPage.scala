@@ -4,9 +4,8 @@ import java.net.URI
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{CallbackTo, ScalaComponent}
-import me.spoter.components.bootstrap.Container
+import me.spoter.components.bootstrap.{Col, Container, Row}
 import me.spoter.models._
-import scalacss.ScalaCssReact._
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
 
@@ -16,19 +15,6 @@ import scalacss.internal.mutable.Settings
 object GardenPage {
   // This will choose between dev/prod depending on your scalac `-Xelide-below` setting
   val CssSettings: Exports with Settings = scalacss.devOrProdDefaults
-
-  import CssSettings._
-
-  object Style extends StyleSheet.Inline {
-
-    import dsl._
-
-    val row: StyleA = style(
-      display.flex,
-      flexDirection.row,
-      margin(10.px)
-    )
-  }
 
   //val uriRegex =
   //  "(?:(https?|ircs?):\\/\\/(?:www\\.)?|www\\.)((?:(?:[-\\w]+\\.)+)[-\\w]+)(?::\\d+)?(?:\\/((?:[-a-zA-Z;./\\d#:_?=&,]*)))?"
@@ -40,22 +26,21 @@ object GardenPage {
       case (_, garden) =>
         Container(
           <.h1(garden.title),
-          <.div(
-            Style.row,
-            <.div(^.className := ".ui-elem",
+          Row(
+            Col(
               <.label(^.`for` := "location", "Standort:"),
               <.input(^.id := "location",
                 ^.defaultValue := garden.location.toString,
-                ^.readOnly := true)),
-            <.div(^.className := ".ui-elem",
+                ^.readOnly := true)
+            ),
+            Col(
               <.label(^.`for` := "price", "Preis:"),
               <.input(^.id := "price",
-                ^.defaultValue := garden.price.a / 100))
+                ^.defaultValue := garden.price.a / 100)
+            )
           ),
-          <.div(
-            Style.row,
-            <.div(
-              ^.className := ".ui-elem",
+          Row(
+            Col(
               <.label(^.`for` := "bungalow", "Bungalow:"),
               <.input(^.id := "bungalow",
                 ^.defaultValue := garden.bungalow
@@ -66,8 +51,7 @@ object GardenPage {
             )
           )
         )
-    }
-    .build
+    }.build
 
   case class Props(gardenUri: String)
 
