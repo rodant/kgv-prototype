@@ -13,8 +13,12 @@ object GlobalStyle extends StyleSheet.Inline {
       fontSize(14.px),
       fontFamily := "Roboto, sans-serif"
     ),
+    unsafeRoot(".container")(
+      minHeight(700.px),
+      margin(20.px)
+    ),
     unsafeRoot(".ui-elem")(
       margin(5.px)
-    ),
+    )
   )
 }

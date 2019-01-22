@@ -4,6 +4,7 @@ import java.net.URI
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{CallbackTo, ScalaComponent}
+import me.spoter.components.bootstrap.Container
 import me.spoter.models._
 import scalacss.ScalaCssReact._
 import scalacss.defaults.Exports
@@ -22,11 +23,6 @@ object GardenPage {
 
     import dsl._
 
-    val pageContent: StyleA = style(display.flex,
-      flexDirection.column,
-      minHeight(600.px),
-      margin(20.px))
-
     val row: StyleA = style(
       display.flex,
       flexDirection.row,
@@ -42,8 +38,7 @@ object GardenPage {
     .initialStateCallbackFromProps(fetchGarden)
     .render_PS {
       case (_, garden) =>
-        <.div(
-          Style.pageContent,
+        Container(
           <.h1(garden.title),
           <.div(
             Style.row,
@@ -68,8 +63,8 @@ object GardenPage {
                   .getOrElse("")
                   .toString,
                 ^.readOnly := true)
-            ),
-          ),
+            )
+          )
         )
     }
     .build

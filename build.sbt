@@ -31,5 +31,6 @@ lazy val root = (project in file(".")).
     npmDependencies in Compile ++= Seq(
       "react" -> reactVersion,
       "react-dom" -> reactVersion,
-      "@solid/react" -> "1.1.3"),
+      "@solid/react" -> "1.1.3",
+      "react-bootstrap" -> "1.0.0-beta.4"),
   ).enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
