@@ -4,7 +4,7 @@ import java.net.URI
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{CallbackTo, ScalaComponent}
-import me.spoter.components.bootstrap.{Col, Container, Row}
+import me.spoter.components.bootstrap._
 import me.spoter.models._
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
@@ -26,28 +26,34 @@ object GardenPage {
       case (_, garden) =>
         Container(
           <.h1(garden.title),
-          Row(
-            Col(
-              <.label(^.`for` := "location", "Standort:"),
-              <.input(^.id := "location",
-                ^.defaultValue := garden.location.toString,
-                ^.readOnly := true)
+          Form(
+            Row(
+              FormGroup(controlId = "location")(
+                Row(
+                  FormLabel(column = true)("Standort:"),
+                  Col(
+                    FormControl(defaultValue = garden.location.toString, readOnly = true, plaintext = true)
+                  )
+                )
+              ),
+              FormGroup(controlId = "price")(
+                Row(
+                  FormLabel(column = true)("Preis:"),
+                  Col(
+                    FormControl(defaultValue = (garden.price.a / 100).toString, readOnly = true, plaintext = true)
+                  )
+                )
+              )
             ),
-            Col(
-              <.label(^.`for` := "price", "Preis:"),
-              <.input(^.id := "price",
-                ^.defaultValue := garden.price.a / 100)
-            )
-          ),
-          Row(
-            Col(
-              <.label(^.`for` := "bungalow", "Bungalow:"),
-              <.input(^.id := "bungalow",
-                ^.defaultValue := garden.bungalow
-                  .map(_.uri)
-                  .getOrElse("")
-                  .toString,
-                ^.readOnly := true)
+            Row(
+              FormGroup(controlId = "bungalow")(
+                Row(
+                  FormLabel(column = true)("Bungalow:"),
+                  Col(
+                    FormControl(defaultValue = garden.bungalow.map(_.uri).getOrElse("").toString, readOnly = true, plaintext = true)
+                  )
+                )
+              )
             )
           )
         )
