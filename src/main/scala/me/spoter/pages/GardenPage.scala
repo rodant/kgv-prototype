@@ -28,32 +28,65 @@ object GardenPage {
           <.h1(garden.title),
           Form(
             Row(
-              FormGroup(controlId = "location")(
-                Row(
-                  FormLabel(column = true)("Standort:"),
-                  Col(
-                    FormControl(defaultValue = garden.location.toString, readOnly = true, plaintext = true)
+              Col(
+                Carousel(
+                  CarouselItem(
+                    <.img(^.src := "assets/images/image-1.svg", ^.alt := "Bild 1", ^.className := "d-block w-100")
+                  ),
+                  CarouselItem(
+                    <.img(^.src := "assets/images/image-2.svg", ^.alt := "Bild 2", ^.className := "d-block w-100")
+                  ),
+                  CarouselItem(
+                    <.img(^.src := "assets/images/image-3.svg", ^.alt := "Bild 3", ^.className := "d-block w-100")
                   )
                 )
               ),
-              FormGroup(controlId = "price")(
-                Row(
-                  FormLabel(column = true)("Preis:"),
-                  Col(
-                    FormControl(defaultValue = (garden.price.a / 100).toString, readOnly = true, plaintext = true)
+              Col(
+                FormGroup(controlId = "location") {
+                  Row(
+                    FormLabel(column = true)("Standort:"),
+                    Col(
+                      FormControl(defaultValue = garden.location.toString, readOnly = true, plaintext = true)
+                    )
                   )
-                )
+                }
+              ),
+              Col(
+                FormGroup(controlId = "size") {
+                  Row(
+                    FormLabel(column = true)("Größe:"),
+                    Col(
+                      FormControl(defaultValue = garden.area.a.toString, readOnly = true, plaintext = true)
+                    )
+                  )
+                },
+                FormGroup(controlId = "address") {
+                  Row(
+                    FormLabel(column = true)("Adresse:"),
+                    Col(
+                      FormControl(defaultValue = garden.address.toString, readOnly = true, plaintext = true)
+                    )
+                  )
+                },
+                FormGroup(controlId = "price") {
+                  Row(
+                    FormLabel(column = true)("Preis:"),
+                    Col(
+                      FormControl(defaultValue = (garden.price.a / 100).toString, readOnly = true, plaintext = true)
+                    )
+                  )
+                }
               )
             ),
             Row(
-              FormGroup(controlId = "bungalow")(
+              FormGroup(controlId = "bungalow") {
                 Row(
                   FormLabel(column = true)("Bungalow:"),
                   Col(
-                    FormControl(defaultValue = garden.bungalow.map(_.uri).getOrElse("").toString, readOnly = true, plaintext = true)
+                    FormControl(defaultValue = garden.bungalow.map(_ => "Ja").getOrElse("Nein"), readOnly = true, plaintext = true)
                   )
                 )
-              )
+              }
             )
           )
         )
