@@ -18,21 +18,38 @@ object FormControl {
 
   @js.native
   trait Props extends js.Object {
+    var as: String = js.native
     var defaultValue: String = js.native
     var readOnly: Option[Boolean] = js.native
     var plaintext: Option[Boolean] = js.native
+    var rows: Int = js.native
   }
 
-  private def props(defaultValue: String, readOnly: Boolean, plaintext: Boolean): Props = {
+  private def props(as: String, defaultValue: String, readOnly: Boolean, plaintext: Boolean, rows: Int): Props = {
     val p = (new js.Object).asInstanceOf[Props]
+    p.as = as
     p.defaultValue = defaultValue
     p.readOnly = if (readOnly) Some(readOnly) else None
     p.plaintext = if (plaintext) Some(plaintext) else None
+    p.rows = rows
     p
   }
 
   val component = JsComponent[Props, Children.None, Null](RawComponent)
 
-  def apply(defaultValue: String, readOnly: Boolean = false, plaintext: Boolean = false): VdomElement =
-    component(props(defaultValue, readOnly, plaintext)).vdomElement
+  /**
+    *
+    * @param as input | textarea | elementType
+    * @param defaultValue
+    * @param readOnly
+    * @param plaintext
+    * @param rows
+    * @return
+    */
+  def apply(as: String = "input",
+            defaultValue: String,
+            readOnly: Boolean = false,
+            plaintext: Boolean = false,
+            rows: Int = 3): VdomElement =
+    component(props(as, defaultValue, readOnly, plaintext, rows)).vdomElement
 }
