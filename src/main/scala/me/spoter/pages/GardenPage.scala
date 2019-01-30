@@ -79,7 +79,7 @@ object GardenPage {
               )
             ),
             Row(
-              Col(xl = "8", lg = "8", md = "8") {
+              Col(xl = 8, lg = 8, md = 8) {
                 FormGroup(controlId = "description") {
                   FormControl(as = "textarea", defaultValue = garden.description, rows = 10, plaintext = true)
                 }

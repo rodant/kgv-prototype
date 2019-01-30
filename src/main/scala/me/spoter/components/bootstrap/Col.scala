@@ -19,20 +19,20 @@ object Col {
 
   @js.native
   trait Props extends js.Object {
-    var xl: js.UndefOr[String] = js.native
-    var lg: js.UndefOr[String] = js.native
-    var md: js.UndefOr[String] = js.native
-    var sm: js.UndefOr[String] = js.native
-    var xs: js.UndefOr[String] = js.native
+    var xl: js.Any = js.native
+    var lg: js.Any = js.native
+    var md: js.Any = js.native
+    var sm: js.Any = js.native
+    var xs: js.Any = js.native
   }
 
-  private def props(xl: String, lg: String, md: String, sm: String, xs: String): Props = {
+  private def props(xl: js.Any, lg: js.Any, md: js.Any, sm: js.Any, xs: js.Any): Props = {
     val p = (new js.Object).asInstanceOf[Props]
-    p.xl = if (xl == "") js.undefined else xl
-    p.lg = if (lg == "") js.undefined else lg
-    p.md = if (md == "") js.undefined else md
-    p.sm = if (sm == "") js.undefined else sm
-    p.xs = if (xs == "") js.undefined else xs
+    p.xl = xl
+    p.lg = lg
+    p.md = md
+    p.sm = sm
+    p.xs = xs
     p
   }
 
@@ -40,18 +40,14 @@ object Col {
 
   /**
     *
-    * @param xl
-    * @param lg
-    * @param md
-    * @param sm
-    * @param xs
-    * @param children
-    * @return
+    * @param xl       true | auto | 1 |...| 12
+    * @param lg       true | auto | 1 |...| 12
+    * @param md       true | auto | 1 |...| 12
+    * @param sm       true | auto | 1 |...| 12
+    * @param xs       true | auto | 1 |...| 12
+    * @param children the children components
+    * @return a Vdom object
     */
-  def apply(xl: String = "",
-            lg: String = "",
-            md: String = "",
-            sm: String = "",
-            xs: String = "")(children: ChildArg*): VdomElement =
-    component(props(xl, lg, md, sm, xs))(children: _*).vdomElement
+  def apply(xl: js.Any = true, lg: js.Any = true, md: js.Any = true, sm: js.Any = true, xs: js.Any = true)
+           (children: ChildArg*): VdomElement = component(props(xl, lg, md, sm, xs))(children: _*).vdomElement
 }
