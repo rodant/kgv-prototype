@@ -32,5 +32,6 @@ lazy val root = (project in file(".")).
       "react" -> reactVersion,
       "react-dom" -> reactVersion,
       "@solid/react" -> "1.1.3",
+      "rdflib" -> "0.19.1",
       "react-bootstrap" -> "1.0.0-beta.4"),
   ).enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
