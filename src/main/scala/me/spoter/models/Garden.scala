@@ -1,7 +1,6 @@
 package me.spoter.models
 
 import java.net.URI
-import java.time.Instant
 
 import me.spoter.models.GardenCondition.Good
 
@@ -15,13 +14,12 @@ import me.spoter.models.GardenCondition.Good
   * @param title
   */
 case class Garden(uri: URI,
-                  title: String,
-                  address: Address,
-                  location: Location,
+                  title: String = "",
+                  address: Address = Address("", 0, "", ""),
+                  location: Location = Location(0, 0),
                   images: List[URI] = List(),
                   description: String = "",
-                  area: Area,
+                  area: Area = Area(0),
                   price: Money = Money(0),
                   bungalow: Option[Bungalow] = None,
-                  gardenCondition: GardenCondition = Good,
-                  availableAfter: Instant = Instant.EPOCH)
+                  gardenCondition: GardenCondition = Good)

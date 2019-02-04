@@ -42,10 +42,9 @@ object GardenCondition extends Enum[GardenCondition] {
 
 /**
   *
-  * @param street
-  * @param houseNumber
+  * @param streetAndNumber
   * @param zipCode
-  * @param city
+  * @param region
   * @param country
   */
-case class Address(street: String, houseNumber: String, zipCode: Int, city: String, country: String)
+case class Address(streetAndNumber: String, zipCode: Int, region: String, country: String)

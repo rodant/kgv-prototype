@@ -1,0 +1,60 @@
+@prefix : <#>.
+@prefix n0: <>.
+@prefix v1: <http://purl.org/goodrelations/v1#>.
+@prefix ldp: <http://www.w3.org/ns/ldp#>.
+@prefix terms: <http://purl.org/dc/terms/>.
+@prefix XML: <http://www.w3.org/2001/XMLSchema#>.
+@prefix im: <images/>.
+@prefix st: <http://www.w3.org/ns/posix/stat#>.
+
+n0:
+    <"http://schema.org/address>
+            [
+                <"http://schema.org/addressCountry> "Deutschland"@de;
+                <"http://schema.org/addressRegion> "Berlin"@de;
+                <"http://schema.org/postalCode> "13189";
+                <"http://schema.org/streetAddress> "Bagelstra\u00dfe 12"@de;
+                a <"http://schema.org/PostalAddress>
+            ];
+    <"http://schema.org/geo>
+            [
+                <"http://schema.org/latitude>
+                "53.2"^^<"http://www.w3.org/2001/XMLSchema#"float>;
+                <"http://schema.org/longitude>
+                "40.5"^^<"http://www.w3.org/2001/XMLSchema#"float>;
+                a <"http://schema.org/GeoCoordinates>
+            ];
+    <"http://schema.org/image> "images/";
+    a
+        v1:Individual,
+        <http://www.productontology.org/id/Allotment_(gardening)>,
+        ldp:BasicContainer, ldp:Container;
+    terms:modified "2019-02-04T15:53:36Z"^^XML:dateTime;
+    v1:condition "gut"@de;
+    v1:depth
+            [
+                a v1:QuantitativeValueFloat;
+                v1:hasUnitOfMeasurement
+                "MT"^^<"http://www.w3.org/2001/XMLSchema#"string>;
+                v1:hasValueFloat
+                "50.0"^^<"http://www.w3.org/2001/XMLSchema#"float>
+            ];
+    v1:description
+        "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."@de;
+    v1:name "Mein sch\u00f6ner Garten 2"@de;
+    v1:width
+            [
+                a v1:QuantitativeValueFloat;
+                v1:hasUnitOfMeasurement
+                "MT"^^<"http://www.w3.org/2001/XMLSchema#"string>;
+                v1:hasValueFloat
+                "10.0"^^<"http://www.w3.org/2001/XMLSchema#"float>
+            ];
+    ldp:contains im:;
+    st:mtime 1549295616.782;
+    st:size 4096.
+im:
+    a ldp:BasicContainer, ldp:Container, ldp:Resource;
+    terms:modified "2019-02-04T20:11:24Z"^^XML:dateTime;
+    st:mtime 1549311084.861;
+    st:size 4096.

@@ -139,7 +139,7 @@ object GardenPage {
     }
 
     def fetchGarden: Callback = Callback {
-      val allotmentUri = new URI("https://orisha1.solid.community/spoterme/allotment_gardens/allotment_12345")
+      val allotmentUri = new URI("https://orisha1.solid.community/spoterme/allotment_gardens/13dd0a8d-443d-4b22-b7d9-1998b76a458a/")
       RDFHelper.load(allotmentUri)
         .then[Garden] { _ =>
         val allotmentTitle = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("name"))
@@ -149,10 +149,6 @@ object GardenPage {
         val allotment = Garden(
           uri = uri,
           title = allotmentTitle.toString,
-          address = Address("Slaa Straße", "14A", 12345, "Berlin", "Deutschland"),
-          location = Location(52.563464, 13.420226),
-          area = Area(500),
-          price = Money(300000),
           description = allotmentDesc.toString
         )
         allotment
@@ -167,14 +163,7 @@ object GardenPage {
     val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
     Garden(
       uri = uri,
-      title = "Mein Kleingarten",
-      images = List(new URI("assets/images/image-1.svg"), new URI("assets/images/image-2.svg"), new URI("assets/images/image-3.svg")),
-      address = Address("Slaa Straße", "14A", 12345, "Berlin", "Deutschland"),
-      location = Location(52.563464, 13.420226),
-      area = Area(500),
-      price = Money(300000),
-      description =
-        "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+      images = List(new URI("assets/images/image-1.svg"))
     )
   }
 }
