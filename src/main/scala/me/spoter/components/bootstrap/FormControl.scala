@@ -19,18 +19,21 @@ object FormControl {
   @js.native
   trait Props extends js.Object {
     var as: String = js.native
-    var defaultValue: String = js.native
-    var readOnly: Option[Boolean] = js.native
-    var plaintext: Option[Boolean] = js.native
+    var defaultValue: js.UndefOr[String] = js.native
+    var value: js.UndefOr[String] = js.native
+    var readOnly: Boolean = js.native
+    var plaintext: Boolean = js.native
     var rows: Int = js.native
   }
 
-  private def props(as: String, defaultValue: String, readOnly: Boolean, plaintext: Boolean, rows: Int): Props = {
+  private def props(as: String, defaultValue: String, value: String, readOnly: Boolean, plaintext: Boolean, rows: Int): Props = {
+    import js.JSConverters._
     val p = (new js.Object).asInstanceOf[Props]
     p.as = as
-    p.defaultValue = defaultValue
-    p.readOnly = if (readOnly) Some(readOnly) else None
-    p.plaintext = if (plaintext) Some(plaintext) else None
+    p.defaultValue = Some(defaultValue).orUndefined
+    p.value = Some(value).orUndefined
+    p.readOnly = readOnly
+    p.plaintext = plaintext
     p.rows = rows
     p
   }
@@ -47,9 +50,10 @@ object FormControl {
     * @return
     */
   def apply(as: String = "input",
-            defaultValue: String,
+            defaultValue: String = null,
+            value: String = null,
             readOnly: Boolean = false,
             plaintext: Boolean = false,
             rows: Int = 3): VdomElement =
-    component(props(as, defaultValue, readOnly, plaintext, rows)).vdomElement
+    component(props(as, defaultValue, value, readOnly, plaintext, rows)).vdomElement
 }

@@ -65,7 +65,8 @@ object GardenPage {
                 Row(
                   FormLabel(column = true)("Standort:"),
                   Col() {
-                    FormControl(defaultValue = garden.location.toString,
+                    FormControl(
+                      value = garden.location.toString,
                       readOnly = true,
                       plaintext = true)
                   }
@@ -77,7 +78,8 @@ object GardenPage {
                 Row(
                   FormLabel(column = true)("Größe:"),
                   Col() {
-                    FormControl(defaultValue = garden.area.a.toString,
+                    FormControl(
+                      value = garden.area.a.toString,
                       readOnly = true,
                       plaintext = true)
                   }
@@ -87,7 +89,8 @@ object GardenPage {
                 Row(
                   FormLabel(column = true)("Adresse:"),
                   Col() {
-                    FormControl(defaultValue = garden.address.toString,
+                    FormControl(
+                      value = garden.address.toString,
                       readOnly = true,
                       plaintext = true)
                   }
@@ -98,7 +101,7 @@ object GardenPage {
                   FormLabel(column = true)("Preis:"),
                   Col() {
                     FormControl(
-                      defaultValue = (garden.price.a / 100).toString,
+                      value = (garden.price.a / 100).toString,
                       readOnly = true,
                       plaintext = true)
                   }
@@ -109,9 +112,11 @@ object GardenPage {
           Row(
             Col(xl = 8, lg = 8, md = 8) {
               FormGroup(controlId = "description") {
-                FormControl(as = "textarea",
-                  defaultValue = garden.description,
+                FormControl(
+                  as = "textarea",
+                  value = garden.description,
                   rows = 10,
+                  readOnly = true,
                   plaintext = true)
               }
             },
@@ -121,8 +126,7 @@ object GardenPage {
                   FormLabel(column = true)("Bungalow:"),
                   Col() {
                     FormControl(
-                      defaultValue =
-                        garden.bungalow.map(_ => "Ja").getOrElse("Nein"),
+                      value = garden.bungalow.map(_ => "Ja").getOrElse("Nein"),
                       readOnly = true,
                       plaintext = true)
                   }
@@ -130,7 +134,8 @@ object GardenPage {
               },
               FormGroup(controlId = "condition") {
                 Row(FormLabel(column = true)("Zustand:"), Col() {
-                  FormControl(defaultValue = garden.gardenCondition.toString,
+                  FormControl(
+                    value = garden.gardenCondition.toString,
                     readOnly = true,
                     plaintext = true)
                 })
@@ -160,7 +165,8 @@ object GardenPage {
         )
         allotment
       }.then[Unit](g => {
-        bs.modState(_ => g).runNow(); ()
+        bs.modState(_ => g).runNow();
+        ()
       }, js.UndefOr.any2undefOrA(_ => ()))
     }
   }
