@@ -43,21 +43,13 @@ object GardenPage {
           Row(
             Col() {
               Carousel(
-                CarouselItem(
-                  <.img(^.src := "assets/images/image-1.svg",
-                    ^.alt := "Bild 1",
-                    ^.className := "d-block w-100")
-                ),
-                CarouselItem(
-                  <.img(^.src := "assets/images/image-2.svg",
-                    ^.alt := "Bild 2",
-                    ^.className := "d-block w-100")
-                ),
-                CarouselItem(
-                  <.img(^.src := "assets/images/image-3.svg",
-                    ^.alt := "Bild 3",
-                    ^.className := "d-block w-100")
-                )
+                garden.images.map { uri =>
+                  CarouselItem(
+                    <.img(^.src := uri.toString,
+                      ^.alt := "Bild x",
+                      ^.className := "d-block w-100")
+                  )
+                }: _*
               )
             },
             Col() {
@@ -165,7 +157,7 @@ object GardenPage {
         )
         allotment
       }.then[Unit](g => {
-        bs.modState(_ => g).runNow();
+        bs.modState(prev => g.copy(images = prev.images)).runNow()
         ()
       }, js.UndefOr.any2undefOrA(_ => ()))
     }
@@ -176,6 +168,7 @@ object GardenPage {
     Garden(
       uri = uri,
       title = "Mein Kleingarten",
+      images = List(new URI("assets/images/image-1.svg"), new URI("assets/images/image-2.svg"), new URI("assets/images/image-3.svg")),
       address = Address("Slaa Straße", "14A", 12345, "Berlin", "Deutschland"),
       location = Location(52.563464, 13.420226),
       area = Area(500),

@@ -1,6 +1,6 @@
 package me.spoter.models
 
-import java.net.{URI, URL}
+import java.net.URI
 import java.time.Instant
 
 import me.spoter.models.GardenCondition.Good
@@ -18,7 +18,7 @@ case class Garden(uri: URI,
                   title: String,
                   address: Address,
                   location: Location,
-                  images: List[URL] = List(),
+                  images: List[URI] = List(),
                   description: String = "",
                   area: Area,
                   price: Money = Money(0),

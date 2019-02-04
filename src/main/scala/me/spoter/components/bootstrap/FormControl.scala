@@ -30,8 +30,8 @@ object FormControl {
     import js.JSConverters._
     val p = (new js.Object).asInstanceOf[Props]
     p.as = as
-    p.defaultValue = Some(defaultValue).orUndefined
-    p.value = Some(value).orUndefined
+    p.defaultValue = Option(defaultValue).orUndefined
+    p.value = Option(value).orUndefined
     p.readOnly = readOnly
     p.plaintext = plaintext
     p.rows = rows
