@@ -1,7 +1,7 @@
-package me.spoter.rdflib
+package me.spoter.rdf
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSGlobal, JSImport, JSName}
+import scala.scalajs.js.annotation.JSImport
 
 /**
   *
