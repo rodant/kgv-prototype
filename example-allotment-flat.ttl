@@ -1,0 +1,30 @@
+@prefix : <#>.
+@prefix n0: <>.
+@prefix pto: <http://www.productontology.org/id/>.
+@prefix gr: <http://purl.org/goodrelations/v1#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix so: <http://schema.org/>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+
+n0: a <http://www.productontology.org/id/Allotment_(gardening)> ;
+	a gr:Individual ;
+	gr:name "Mein schöner Garten 2"@de ;
+	gr:description "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."@de ;
+
+        so:image "images/" ;
+
+        gr:width "10.0" ;
+        gr:depth "50.0" ;
+
+        so:streetAddress "Bagelstraße 12"@de;
+        so:postalCode "13189";
+        so:addressRegion "Berlin"@de;
+        so:addressCountry "Deutschland"@de ;
+
+        gr:includes "Bungalow"@en ;
+
+        so:latitude "53.2"^^xsd:float ;
+        so:longitude "40.5"^^xsd:float ;
+
+        gr:condition "Good"@en .
+

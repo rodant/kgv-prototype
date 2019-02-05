@@ -8,4 +8,4 @@ import java.net.URI
   * @param uri
   * @param area
   */
-case class Bungalow(uri: URI, area: Area)
+case class Bungalow(uri: URI = new URI(""), area: Area = Area())

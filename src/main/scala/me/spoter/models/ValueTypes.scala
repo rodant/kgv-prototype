@@ -10,7 +10,7 @@ case class Location(lat: Double, longitude: Double)
   *
   * @param a value
   */
-case class Area(a: Double) extends AnyVal
+case class Area(a: Double = 0) extends AnyVal
 
 /**
   * Amount of money in €.
@@ -26,17 +26,19 @@ import scala.collection.immutable
 /**
   *
   */
-sealed trait GardenCondition extends EnumEntry
+sealed trait AllotmentCondition extends EnumEntry
 
-object GardenCondition extends Enum[GardenCondition] {
+object AllotmentCondition extends Enum[AllotmentCondition] {
 
-  override def values: immutable.IndexedSeq[GardenCondition] = findValues
+  override def values: immutable.IndexedSeq[AllotmentCondition] = findValues
 
-  case object Excellent extends GardenCondition
+  case object Excellent extends AllotmentCondition
 
-  case object Good extends GardenCondition
+  case object Good extends AllotmentCondition
 
-  case object Poor extends GardenCondition
+  case object Poor extends AllotmentCondition
+
+  case object Undefined extends AllotmentCondition
 
 }
 

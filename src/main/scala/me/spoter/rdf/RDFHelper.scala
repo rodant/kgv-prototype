@@ -9,11 +9,13 @@ import scala.scalajs.js
   */
 // TODO: avoid dependency to JS, hint: use the RDF typescript defs.
 object RDFHelper {
+  val FOAF: js.Dynamic = RDFLib.Namespace("http://xmlns.com/foaf/0.1/")
   val GOOD_REL: js.Dynamic = RDFLib.Namespace("http://purl.org/goodrelations/v1#")
+  val SCHEMA_ORG: js.Dynamic = RDFLib.Namespace("http://schema.org/")
   private val store = RDFLib.graph()
   private val fetcher = new RDFFetcher(store)
 
   def load(sub: URI): js.Promise[js.Object] = fetcher.load(sub.toString)
 
-  def get(sub: URI, prop: js.Dynamic): Any = store.any(RDFLib.sym(sub.toString), prop)
+  def get(sub: URI, prop: js.Dynamic): js.Dynamic = store.any(RDFLib.sym(sub.toString), prop)
 }

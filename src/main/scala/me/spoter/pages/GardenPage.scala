@@ -24,9 +24,9 @@ object GardenPage {
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
-    .initialState(initialGarden())
+    .initialState(initialAllotmentGarden())
     .renderBackend[Backend]
-    .componentDidMount(_.backend.fetchGarden)
+    .componentDidMount(_.backend.fetchAllotmentGarden)
     .build
 
   case class Props(gardenUri: String)
@@ -35,8 +35,8 @@ object GardenPage {
 
   def apply(uri: String): VdomElement = apply(Props(uri))
 
-  class Backend(bs: BackendScope[Props, Garden]) {
-    def render(props: Props, garden: Garden): VdomElement = {
+  class Backend(bs: BackendScope[Props, AllotmentGarden]) {
+    def render(props: Props, garden: AllotmentGarden): VdomElement = {
       Container(
         <.h1(garden.title),
         Form(
@@ -127,7 +127,7 @@ object GardenPage {
               FormGroup(controlId = "condition") {
                 Row(FormLabel(column = true)("Zustand:"), Col() {
                   FormControl(
-                    value = garden.gardenCondition.toString,
+                    value = garden.condition.toString,
                     readOnly = true,
                     plaintext = true)
                 })
@@ -138,18 +138,41 @@ object GardenPage {
       )
     }
 
-    def fetchGarden: Callback = Callback {
+    def fetchAllotmentGarden: Callback = Callback {
       val allotmentUri = new URI("https://orisha1.solid.community/spoterme/allotment_gardens/13dd0a8d-443d-4b22-b7d9-1998b76a458a/")
       RDFHelper.load(allotmentUri)
-        .then[Garden] { _ =>
+        .then[AllotmentGarden] { _ =>
         val allotmentTitle = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("name"))
         val allotmentDesc = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("description"))
 
+        val image = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
+
+        val latitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("latitude"))
+        val longitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("longitude"))
+        val location = Location(latitude.toString.toDouble, longitude.toString.toDouble)
+
+        val streetAddress = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("streetAddress"))
+        val postalCode = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("postalCode"))
+        val addressRegion = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("addressRegion"))
+        val addressCountry = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("addressCountry"))
+        val address = Address(streetAddress.toString, postalCode.toString.toInt, addressRegion.toString, addressCountry.toString)
+
+        val includes = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("includes"))
+
+        val condition = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("condition"))
+        val width = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("width"))
+        val depth = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("depth"))
+
         val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
-        val allotment = Garden(
+        val allotment = AllotmentGarden(
           uri = uri,
           title = allotmentTitle.toString,
-          description = allotmentDesc.toString
+          description = allotmentDesc.toString,
+          location = location,
+          address = address,
+          bungalow = if (!includes.toString.isEmpty) Some(Bungalow()) else None,
+          area = Area(width.toString.toDouble * depth.toString.toDouble),
+          condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
         )
         allotment
       }.then[Unit](g => {
@@ -159,9 +182,9 @@ object GardenPage {
     }
   }
 
-  def initialGarden(): Garden = {
+  def initialAllotmentGarden(): AllotmentGarden = {
     val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
-    Garden(
+    AllotmentGarden(
       uri = uri,
       images = List(new URI("assets/images/image-1.svg"))
     )
