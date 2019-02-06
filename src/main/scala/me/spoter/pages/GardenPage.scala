@@ -61,7 +61,7 @@ object GardenPage {
                     FormControl(
                       value = garden.location.toString,
                       readOnly = true,
-                      plaintext = true)
+                      plaintext = true)()
                   }
                 )
               }
@@ -74,7 +74,7 @@ object GardenPage {
                     FormControl(
                       value = garden.area.a.toString,
                       readOnly = true,
-                      plaintext = true)
+                      plaintext = true)()
                   }
                 )
               },
@@ -85,7 +85,7 @@ object GardenPage {
                     FormControl(
                       value = garden.address.toString,
                       readOnly = true,
-                      plaintext = true)
+                      plaintext = true)()
                   }
                 )
               },
@@ -96,7 +96,7 @@ object GardenPage {
                     FormControl(
                       value = (garden.price.a / 100).toString,
                       readOnly = true,
-                      plaintext = true)
+                      plaintext = true)()
                   }
                 )
               }
@@ -110,7 +110,7 @@ object GardenPage {
                   value = garden.description,
                   rows = 10,
                   readOnly = true,
-                  plaintext = true)
+                  plaintext = true)()
               }
             },
             Col()(
@@ -121,7 +121,7 @@ object GardenPage {
                     FormControl(
                       value = garden.bungalow.map(_ => "Ja").getOrElse("Nein"),
                       readOnly = true,
-                      plaintext = true)
+                      plaintext = true)()
                   }
                 )
               },
@@ -130,7 +130,7 @@ object GardenPage {
                   FormControl(
                     value = garden.condition.toString,
                     readOnly = true,
-                    plaintext = true)
+                    plaintext = true)()
                 })
               }
             ),

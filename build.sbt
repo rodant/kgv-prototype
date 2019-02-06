@@ -24,6 +24,7 @@ lazy val root = (project in file(".")).
       "com.github.japgolly.scalajs-react" %%% "extra" % scalaJSReactVersion,
       "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
       "com.github.japgolly.scalacss" %%% "ext-react" % scalaCssVersion,
+      "com.payalabs" %%% "scalajs-react-bridge" % "0.7.0",
       "org.scala-js" %%% "scalajs-java-time" % "0.2.5",
       "com.beachape" %%% "enumeratum" % "1.5.13",
       scalaTest % Test

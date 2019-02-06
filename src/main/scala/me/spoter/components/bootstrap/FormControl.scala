@@ -1,5 +1,6 @@
 package me.spoter.components.bootstrap
 
+import japgolly.scalajs.react.CtorType.ChildArg
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.{Children, JsComponent}
 
@@ -38,7 +39,7 @@ object FormControl {
     p
   }
 
-  val component = JsComponent[Props, Children.None, Null](RawComponent)
+  val component = JsComponent[Props, Children.Varargs, Null](RawComponent)
 
   /**
     *
@@ -54,6 +55,7 @@ object FormControl {
             value: String = null,
             readOnly: Boolean = false,
             plaintext: Boolean = false,
-            rows: Int = 3): VdomElement =
-    component(props(as, defaultValue, value, readOnly, plaintext, rows)).vdomElement
+            rows: Int = 3)
+           (children: ChildArg*): VdomElement =
+    component(props(as, defaultValue, value, readOnly, plaintext, rows))(children: _*).vdomElement
 }
