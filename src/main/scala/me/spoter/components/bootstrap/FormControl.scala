@@ -2,9 +2,10 @@ package me.spoter.components.bootstrap
 
 import japgolly.scalajs.react.CtorType.ChildArg
 import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.{Children, JsComponent}
+import japgolly.scalajs.react.{Callback, Children, JsComponent}
 
 import scala.scalajs.js
+import scala.scalajs.js.UndefOr
 import scala.scalajs.js.annotation.JSImport
 
 /**
@@ -25,9 +26,10 @@ object FormControl {
     var readOnly: Boolean = js.native
     var plaintext: Boolean = js.native
     var rows: Int = js.native
+    var onChange: js.UndefOr[js.Function1[js.Dynamic, Callback]] = js.native
   }
 
-  private def props(as: String, defaultValue: String, value: String, readOnly: Boolean, plaintext: Boolean, rows: Int): Props = {
+  private def props(as: String, defaultValue: String, value: String, readOnly: Boolean, plaintext: Boolean, rows: Int, onChange: js.Dynamic => Callback): Props = {
     import js.JSConverters._
     val p = (new js.Object).asInstanceOf[Props]
     p.as = as
@@ -36,6 +38,7 @@ object FormControl {
     p.readOnly = readOnly
     p.plaintext = plaintext
     p.rows = rows
+    p.onChange = UndefOr.any2undefOrA(onChange)
     p
   }
 
@@ -55,7 +58,8 @@ object FormControl {
             value: String = null,
             readOnly: Boolean = false,
             plaintext: Boolean = false,
-            rows: Int = 3)
+            rows: Int = 3,
+            onChange: js.Dynamic => Callback = _ => Callback())
            (children: ChildArg*): VdomElement =
-    component(props(as, defaultValue, value, readOnly, plaintext, rows))(children: _*).vdomElement
+    component(props(as, defaultValue, value, readOnly, plaintext, rows, onChange))(children: _*).vdomElement
 }
