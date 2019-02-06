@@ -13,7 +13,7 @@ import me.spoter.models.AllotmentCondition.Good
   * @param bungalow
   * @param title
   */
-case class AllotmentGarden(uri: URI,
+case class AllotmentGarden(uri: URI = new URI(""),
                            title: String = "",
                            address: Address = Address("", 0, "", ""),
                            location: Location = Location(0, 0),

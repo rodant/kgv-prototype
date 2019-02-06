@@ -10,6 +10,7 @@ import me.spoter.rdf.RDFHelper
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
 
+import scala.collection.mutable
 import scala.scalajs.js
 
 /**
@@ -24,7 +25,7 @@ object GardenPage {
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
-    .initialState(initialAllotmentGarden())
+    .initialState(AllotmentGarden())
     .renderBackend[Backend]
     .componentDidMount(_.backend.fetchAllotmentGarden)
     .build
@@ -141,11 +142,9 @@ object GardenPage {
     def fetchAllotmentGarden: Callback = Callback {
       val allotmentUri = new URI("https://orisha1.solid.community/spoterme/allotment_gardens/13dd0a8d-443d-4b22-b7d9-1998b76a458a/")
       RDFHelper.load(allotmentUri)
-        .then[AllotmentGarden] { _ =>
+        .then[Unit] { _ =>
         val allotmentTitle = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("name"))
         val allotmentDesc = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("description"))
-
-        val image = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
 
         val latitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("latitude"))
         val longitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("longitude"))
@@ -158,38 +157,44 @@ object GardenPage {
         val address = Address(streetAddress.toString, postalCode.toString.toInt, addressRegion.toString, addressCountry.toString)
 
         val includes = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("includes"))
-
         val condition = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("condition"))
+
         val width = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("width"))
         val depth = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("depth"))
 
-        val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
-        val allotment = AllotmentGarden(
-          uri = uri,
-          title = allotmentTitle.toString,
-          description = allotmentDesc.toString,
-          location = location,
-          address = address,
-          bungalow = if (!includes.toString.isEmpty) Some(Bungalow()) else None,
-          area = Area(width.toString.toDouble * depth.toString.toDouble),
-          condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
-        )
-        allotment
-      }.then[Unit](g => {
-        bs.modState(prev => g.copy(images = prev.images)).runNow()
-        ()
-      }, js.UndefOr.any2undefOrA(_ => ()))
+        val imageDir = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
+        val imageDirUri = new URI(allotmentUri.toString + imageDir.toString)
+        RDFHelper.load(imageDirUri)
+          .then[List[URI]] { _ =>
+          val filesNodes: mutable.Seq[js.Dynamic] =
+            RDFHelper.getAll(imageDirUri, RDFHelper.LDP("contains")).asInstanceOf[js.Array[js.Dynamic]]
+          val files = filesNodes.map((f: js.Dynamic) => new URI(f.value.toString))
+          files.toList
+        }.then[AllotmentGarden](
+          (imageUris: List[URI]) => {
+            val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
+            val allotment = AllotmentGarden(
+              uri = imageDirUri,
+              title = allotmentTitle.toString,
+              images = if (imageUris.nonEmpty) imageUris else List(
+                new URI("/public/kgv/images/image-1.svg"),
+                new URI("/public/kgv/images/image-2.svg"),
+                new URI("/public/kgv/images/image-3.svg")),
+              description = allotmentDesc.toString,
+              location = location,
+              address = address,
+              bungalow = if (!includes.toString.isEmpty) Some(Bungalow()) else None,
+              area = Area(width.toString.toDouble * depth.toString.toDouble),
+              condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
+            )
+            allotment
+          }, js.UndefOr.any2undefOrA(_ => AllotmentGarden()))
+          .then[Unit](g => {
+          bs.modState(_ => g).runNow()
+          ()
+        }, js.UndefOr.any2undefOrA(_ => ()))
+      }
     }
   }
 
-  def initialAllotmentGarden(): AllotmentGarden = {
-    val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
-    AllotmentGarden(
-      uri = uri,
-      images = List(
-        new URI("/public/kgv/images/image-1.svg"),
-        new URI("/public/kgv/images/image-2.svg"),
-        new URI("/public/kgv/images/image-3.svg"))
-    )
-  }
 }
