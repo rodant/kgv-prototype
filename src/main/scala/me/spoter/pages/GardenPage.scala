@@ -119,7 +119,7 @@ object GardenPage {
                   FormLabel(column = true)("Bungalow:"),
                   Col() {
                     FormControl(
-                      value = garden.bungalow.map(_ => "Ja").getOrElse("Nein"),
+                      value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
                       readOnly = true,
                       plaintext = true)()
                   }

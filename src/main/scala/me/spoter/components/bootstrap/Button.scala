@@ -1,6 +1,6 @@
 package me.spoter.components.bootstrap
 
-import com.payalabs.scalajs.react.bridge.{ReactBridgeComponent, WithPropsAndTagsMods}
+import com.payalabs.scalajs.react.bridge.{ReactBridgeComponent, WithProps, WithPropsAndTagsMods}
 import japgolly.scalajs.react.Callback
 
 import scala.scalajs.js
@@ -22,7 +22,6 @@ object Button extends ReactBridgeComponent {
             size: js.UndefOr[String] = js.undefined,
             href: js.UndefOr[String] = js.undefined,
             active: js.UndefOr[Boolean] = js.undefined,
-            disabled: js.UndefOr[Boolean] = js.undefined,
-            onClick: js.UndefOr[Callback] = js.undefined): WithPropsAndTagsMods = autoNoTagMods
+            disabled: js.UndefOr[Boolean] = js.undefined): WithProps = auto
 }
 
