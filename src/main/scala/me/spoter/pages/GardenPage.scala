@@ -186,7 +186,10 @@ object GardenPage {
     val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
     AllotmentGarden(
       uri = uri,
-      images = List(new URI("/public/kgv/assets/images/image-1.svg"))
+      images = List(
+        new URI("/public/kgv/images/image-1.svg"),
+        new URI("/public/kgv/images/image-2.svg"),
+        new URI("/public/kgv/images/image-3.svg"))
     )
   }
 }
