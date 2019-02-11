@@ -1,9 +1,7 @@
 package me.spoter.components.bootstrap
 
 import com.payalabs.scalajs.react.bridge.{ReactBridgeComponent, WithProps}
-import japgolly.scalajs.react.Callback
-import japgolly.scalajs.react.raw.SyntheticEvent
-import org.scalajs.dom.html
+import japgolly.scalajs.react.{Callback, ReactEventFromInput}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
@@ -26,6 +24,6 @@ object FormControl extends ReactBridgeComponent {
             readOnly: js.UndefOr[Boolean] = js.undefined,
             plaintext: js.UndefOr[Boolean] = js.undefined,
             rows: js.UndefOr[Int] = js.undefined,
-            onChange: js.UndefOr[SyntheticEvent[html.Input] => Callback] = js.undefined): WithProps = auto
+            onChange: js.UndefOr[ReactEventFromInput => Callback] = js.undefined): WithProps = auto
 
 }

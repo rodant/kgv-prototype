@@ -1,10 +1,8 @@
 package me.spoter.pages
 
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.raw.SyntheticEvent
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.bootstrap._
-import org.scalajs.dom.html
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
 
@@ -14,9 +12,7 @@ object HomePage {
 
   class Backend(bs: BackendScope[Null, String]) {
 
-    def selectAllotment(e: SyntheticEvent[html.Input]): Callback = {
-      bs.setState(e.target.value)
-    }
+    def selectAllotment(e: ReactEventFromInput): Callback = bs.setState(e.target.value)
 
     def render(id: String): VdomElement = {
       Container(
@@ -31,7 +27,7 @@ object HomePage {
               )
             },
             Col() {
-              Button(href = "#garden/" + bs.state.runNow())("Suchen")
+              Button(href = "#garden/" + id)("Suchen")
             }
           )
         )
