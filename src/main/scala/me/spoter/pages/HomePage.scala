@@ -16,14 +16,14 @@ object HomePage {
 
     def render(id: String): VdomElement = {
       Container(
-        <.h1("Spoter.me Kleingarten Berlin"),
+        <.h1("spoter.ME Kleingarten Berlin"),
         Form(
           Row(
             Col() {
               FormControl(as = "select", onChange = selectAllotment _)(
                 <.option("13dd0a8d-443d-4b22-b7d9-1998b76a458a"),
                 <.option("73691542-b1c6-4db7-9c96-7b173ecc0252"),
-                <.option("89d41980-9d6c-4522-8fc0-598c8bd438a4")
+                //<.option("89d41980-9d6c-4522-8fc0-598c8bd438a4")
               )
             },
             Col() {

@@ -27,17 +27,17 @@ object GardenPage {
     .builder[Props]("GardenPage")
     .initialState(AllotmentGarden())
     .renderBackend[Backend]
-    .componentDidMount(_.backend.fetchAllotmentGarden)
+    .componentDidMount(c => c.backend.fetchAllotmentGarden(c.props))
     .build
 
-  case class Props(gardenUri: String)
+  case class Props(id: String)
 
   def apply(props: Props): VdomElement = component(props).vdomElement
 
   def apply(uri: String): VdomElement = apply(Props(uri))
 
   class Backend(bs: BackendScope[Props, AllotmentGarden]) {
-    def render(props: Props, garden: AllotmentGarden): VdomElement = {
+    def render(garden: AllotmentGarden): VdomElement = {
       Container(
         <.h1(garden.title),
         Form(
@@ -108,7 +108,7 @@ object GardenPage {
                 FormControl(
                   as = "textarea",
                   value = garden.description,
-                  rows = 10,
+                  rows = 20,
                   readOnly = true,
                   plaintext = true)()
               }
@@ -139,8 +139,8 @@ object GardenPage {
       )
     }
 
-    def fetchAllotmentGarden: Callback = Callback {
-      val allotmentUri = new URI("https://orisha1.solid.community/spoterme/allotment_gardens/13dd0a8d-443d-4b22-b7d9-1998b76a458a/")
+    def fetchAllotmentGarden(props: Props): Callback = Callback {
+      val allotmentUri = new URI(s"https://orisha1.solid.community/spoterme/allotment_gardens/${props.id}/")
       RDFHelper.load(allotmentUri)
         .then[Unit] { _ =>
         val allotmentTitle = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("name"))
