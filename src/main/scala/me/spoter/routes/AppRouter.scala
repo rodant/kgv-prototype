@@ -3,7 +3,6 @@ package me.spoter.routes
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.{Footer, TopNav}
-import me.spoter.models.Menu
 import me.spoter.pages.{GardenPage, HomePage}
 
 object AppRouter {
@@ -14,14 +13,14 @@ object AppRouter {
 
   case class Items(p: Item) extends AppPage
 
-  case class Garden(uri: String) extends AppPage
+  case class Garden(id: String) extends AppPage
 
   private val config = RouterConfigDsl[AppPage].buildConfig { dsl =>
     import dsl._
 
     (trimSlashes
       | staticRoute(root, Home) ~> render(HomePage())
-      | dynamicRouteCT[Garden]("#garden" / string(".+").caseClass[Garden]) ~> dynRender(gp => GardenPage(gp.uri)))
+      | dynamicRouteCT[Garden]("#offering" / string(".+").caseClass[Garden]) ~> dynRender(gp => GardenPage(gp.id)))
       .notFound(redirectToPage(Home)(Redirect.Replace))
       .renderWith(layout)
   }

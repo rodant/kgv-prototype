@@ -21,13 +21,13 @@ object HomePage {
           Row(
             Col() {
               FormControl(as = "select", onChange = selectAllotment _)(
-                <.option("13dd0a8d-443d-4b22-b7d9-1998b76a458a"),
-                <.option("73691542-b1c6-4db7-9c96-7b173ecc0252"),
+                <.option("17be10f3-802f-42be-bbd0-bb03be89c812"),
+                <.option("630cedbb-162a-4021-b38c-38cb7b6ed5d7"),
                 //<.option("89d41980-9d6c-4522-8fc0-598c8bd438a4")
               )
             },
             Col() {
-              Button(href = "#garden/" + id)("Suchen")
+              Button(href = "#offering/" + id)("Suchen")
             }
           )
         )
@@ -37,7 +37,7 @@ object HomePage {
 
   private val component =
     ScalaComponent.builder[Null]("HomePage")
-      .initialState("13dd0a8d-443d-4b22-b7d9-1998b76a458a")
+      .initialState("17be10f3-802f-42be-bbd0-bb03be89c812")
       .renderBackend[Backend]
       .build
 

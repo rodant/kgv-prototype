@@ -1,9 +1,10 @@
 package me.spoter.pages
 
 import java.net.URI
+import java.time.LocalDate
 
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
+import japgolly.scalajs.react.{BackendScope, Callback, CallbackTo, ScalaComponent}
 import me.spoter.components.bootstrap._
 import me.spoter.models._
 import me.spoter.rdf.RDFHelper
@@ -12,6 +13,7 @@ import scalacss.internal.mutable.Settings
 
 import scala.collection.mutable
 import scala.scalajs.js
+import scala.scalajs.js.Thenable
 
 /**
   *
@@ -25,21 +27,22 @@ object GardenPage {
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
-    .initialState(AllotmentGarden())
+    .initialState(AllotmentOffering(offeredBy = new URI(""), garden = AllotmentGarden()))
     .renderBackend[Backend]
-    .componentDidMount(c => c.backend.fetchAllotmentGarden(c.props))
+    .componentDidMount(c => c.backend.fetchOffering(c.props))
     .build
 
-  case class Props(id: String)
+  case class Props(uri: URI)
 
   def apply(props: Props): VdomElement = component(props).vdomElement
 
-  def apply(uri: String): VdomElement = apply(Props(uri))
+  def apply(id: String): VdomElement = apply(Props(new URI(s"https://orisha1.solid.community/spoterme/offers/$id")))
 
-  class Backend(bs: BackendScope[Props, AllotmentGarden]) {
-    def render(garden: AllotmentGarden): VdomElement = {
+  class Backend(bs: BackendScope[Props, AllotmentOffering]) {
+    def render(offering: AllotmentOffering): VdomElement = {
+      val garden = offering.garden
       Container(
-        <.h1(garden.title),
+        <.h1(offering.title),
         Form(
           Row(
             Col() {
@@ -94,7 +97,7 @@ object GardenPage {
                   FormLabel(column = true)("Preis:"),
                   Col() {
                     FormControl(
-                      value = (garden.price.a / 100).toString,
+                      value = (offering.price.a / 100).toString,
                       readOnly = true,
                       plaintext = true)()
                   }
@@ -107,7 +110,7 @@ object GardenPage {
               FormGroup(controlId = "description") {
                 FormControl(
                   as = "textarea",
-                  value = garden.description,
+                  value = offering.description,
                   rows = 20,
                   readOnly = true,
                   plaintext = true)()
@@ -139,10 +142,44 @@ object GardenPage {
       )
     }
 
-    def fetchAllotmentGarden(props: Props): Callback = Callback {
-      val allotmentUri = new URI(s"https://orisha1.solid.community/spoterme/allotment_gardens/${props.id}/")
-      RDFHelper.load(allotmentUri)
+    def fetchOffering(props: Props): Callback = Callback {
+      val offeringUri = props.uri
+      RDFHelper.load(offeringUri)
         .then[Unit] { _ =>
+        val title = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("name"))
+        val desc = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("description"))
+        val price = RDFHelper.get(offeringUri, RDFHelper.SCHEMA_ORG("price"))
+        val availabilityStarts = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("availabilityStarts"))
+        val offerorUri = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("offeredBy")).value
+
+        val allotmentUri = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("includes")).value
+        val callbackOffering: CallbackTo[Thenable[AllotmentOffering]] = fetchGarden(new URI(allotmentUri.toString))
+          .map { ta =>
+            ta.then[AllotmentOffering](a =>
+              AllotmentOffering(
+                offeringUri,
+                title.toString,
+                desc.toString,
+                Money(price.toString.toLong),
+                offeredBy = new URI(offerorUri.toString),
+                availabilityStarts = LocalDate.now(),
+                garden = a
+              ), js.undefined)
+          }
+
+        val res: CallbackTo[Unit] = callbackOffering.map[Unit] { to: Thenable[AllotmentOffering] =>
+          to.then[Unit](o => {
+            bs.modState(_ => o).runNow()
+            ()
+          }, js.undefined)
+        }
+        res.runNow()
+      }
+    }
+
+    private def fetchGarden(allotmentUri: URI) = CallbackTo[Thenable[AllotmentGarden]] {
+      RDFHelper.load(allotmentUri)
+        .then[AllotmentGarden] { _ =>
         val allotmentTitle = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("name"))
         val allotmentDesc = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("description"))
 
@@ -189,10 +226,6 @@ object GardenPage {
             )
             allotment
           }, js.UndefOr.any2undefOrA(_ => AllotmentGarden()))
-          .then[Unit](g => {
-          bs.modState(_ => g).runNow()
-          ()
-        }, js.UndefOr.any2undefOrA(_ => ()))
       }
     }
   }
