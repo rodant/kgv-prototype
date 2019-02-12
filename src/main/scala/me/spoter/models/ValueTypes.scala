@@ -15,9 +15,9 @@ case class Area(a: Double = 0) extends AnyVal
 /**
   * Amount of money in €.
   *
-  * @param a amount of cents
+  * @param amount amount of cents
   */
-case class Money(a: Long) extends AnyVal
+case class Money(amount: Long) extends AnyVal
 
 import enumeratum._
 
@@ -44,9 +44,9 @@ object AllotmentCondition extends Enum[AllotmentCondition] {
 
 /**
   *
-  * @param streetAndNumber
-  * @param zipCode
-  * @param region
-  * @param country
+  * @param streetAndNumber street and address string
+  * @param zipCode the zip code
+  * @param region something like city or state
+  * @param country the country
   */
 case class Address(streetAndNumber: String, zipCode: Int, region: String, country: String)

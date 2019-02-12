@@ -1,11 +1,11 @@
 package me.spoter.pages
 
 import java.net.URI
-import java.time.LocalDate
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, CallbackTo, ScalaComponent}
 import me.spoter.components.bootstrap._
+import me.spoter.models.AllotmentCondition._
 import me.spoter.models._
 import me.spoter.rdf.RDFHelper
 import scalacss.defaults.Exports
@@ -60,7 +60,7 @@ object GardenPage {
               FormGroup(controlId = "location") {
                 Row(
                   FormLabel(column = true)("Standort:"),
-                  Col() {
+                  Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
                       value = garden.location.toString,
                       readOnly = true,
@@ -73,9 +73,9 @@ object GardenPage {
               FormGroup(controlId = "size") {
                 Row(
                   FormLabel(column = true)("Größe:"),
-                  Col() {
+                  Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
-                      value = garden.area.a.toString,
+                      value = s"${garden.area.a} qm",
                       readOnly = true,
                       plaintext = true)()
                   }
@@ -84,9 +84,9 @@ object GardenPage {
               FormGroup(controlId = "address") {
                 Row(
                   FormLabel(column = true)("Adresse:"),
-                  Col() {
+                  Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
-                      value = garden.address.toString,
+                      value = s"${garden.address.streetAndNumber}, ${garden.address.zipCode} ${garden.address.region}",
                       readOnly = true,
                       plaintext = true)()
                   }
@@ -95,9 +95,9 @@ object GardenPage {
               FormGroup(controlId = "price") {
                 Row(
                   FormLabel(column = true)("Preis:"),
-                  Col() {
+                  Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
-                      value = (offering.price.a / 100).toString,
+                      value = (offering.price.amount / 100.0).formatted("%.2f €"),
                       readOnly = true,
                       plaintext = true)()
                   }
@@ -120,7 +120,7 @@ object GardenPage {
               FormGroup(controlId = "bungalow") {
                 Row(
                   FormLabel(column = true)("Bungalow:"),
-                  Col() {
+                  Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
                       value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
                       readOnly = true,
@@ -129,12 +129,39 @@ object GardenPage {
                 )
               },
               FormGroup(controlId = "condition") {
-                Row(FormLabel(column = true)("Zustand:"), Col() {
-                  FormControl(
-                    value = garden.condition.toString,
-                    readOnly = true,
-                    plaintext = true)()
-                })
+                Row(
+                  FormLabel(column = true)("Zustand:"),
+                  Col(xl = 8, lg = 8, md = 8) {
+                    FormControl(
+                      value = garden.condition match {
+                        case Excellent => "Ausgezeichnet"
+                        case Good => "Gut"
+                        case Poor => "Dürftig"
+                        case Undefined => "KA"
+                      },
+                      readOnly = true,
+                      plaintext = true)()
+                  })
+              },
+              FormGroup(controlId = "availabilityStarts") {
+                Row(
+                  FormLabel(column = true)("Verfügbar ab:"),
+                  Col(xl = 8, lg = 8, md = 8) {
+                    FormControl(
+                      value = offering.availabilityStarts.toLocaleDateString(),
+                      readOnly = true,
+                      plaintext = true)()
+                  })
+              },
+              FormGroup(controlId = "contact") {
+                Row(
+                  FormLabel(column = true)("Kontakt:"),
+                  Col(xl = 8, lg = 8, md = 8) {
+                    FormControl(
+                      value = offering.offeredBy.toString,
+                      readOnly = true,
+                      plaintext = true)()
+                  })
               }
             ),
           )
@@ -149,7 +176,7 @@ object GardenPage {
         val title = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("name"))
         val desc = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("description"))
         val price = RDFHelper.get(offeringUri, RDFHelper.SCHEMA_ORG("price"))
-        val availabilityStarts = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("availabilityStarts"))
+        val availabilityStarts = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("availabilityStarts")).toString
         val offerorUri = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("offeredBy")).value
 
         val allotmentUri = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("includes")).value
@@ -162,7 +189,7 @@ object GardenPage {
                 desc.toString,
                 Money(price.toString.toLong),
                 offeredBy = new URI(offerorUri.toString),
-                availabilityStarts = LocalDate.now(),
+                availabilityStarts = new js.Date(availabilityStarts),
                 garden = a
               ), js.undefined)
           }
@@ -173,7 +200,8 @@ object GardenPage {
             ()
           }, js.undefined)
         }
-        res.runNow()
+        res
+          .runNow()
       }
     }
 
@@ -207,8 +235,10 @@ object GardenPage {
             RDFHelper.getAll(imageDirUri, RDFHelper.LDP("contains")).asInstanceOf[js.Array[js.Dynamic]]
           val files = filesNodes.map((f: js.Dynamic) => new URI(f.value.toString))
           files.toList
-        }.then[AllotmentGarden](
-          (imageUris: List[URI]) => {
+        }
+          .then[AllotmentGarden](
+          (imageUris: List[URI])
+          => {
             val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
             val allotment = AllotmentGarden(
               uri = imageDirUri,
