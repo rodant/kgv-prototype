@@ -1,6 +1,6 @@
 import Dependencies._
 
-val reactVersion = "16.5.1"
+val reactVersion = "16.7.0"
 val scalaJSReactVersion = "1.3.1"
 val scalaCssVersion = "0.5.5"
 

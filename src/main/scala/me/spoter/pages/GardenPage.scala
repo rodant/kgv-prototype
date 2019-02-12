@@ -172,7 +172,7 @@ object GardenPage {
     def fetchOffering(props: Props): Callback = Callback {
       val offeringUri = props.uri
       RDFHelper.load(offeringUri)
-        .then[Unit] { _ =>
+        .`then`[Unit] { _ =>
         val title = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("name"))
         val desc = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("description"))
         val price = RDFHelper.get(offeringUri, RDFHelper.SCHEMA_ORG("price"))
@@ -182,7 +182,7 @@ object GardenPage {
         val allotmentUri = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("includes")).value
         val callbackOffering: CallbackTo[Thenable[AllotmentOffering]] = fetchGarden(new URI(allotmentUri.toString))
           .map { ta =>
-            ta.then[AllotmentOffering](a =>
+            ta.`then`[AllotmentOffering](a =>
               AllotmentOffering(
                 offeringUri,
                 title.toString,
@@ -195,19 +195,18 @@ object GardenPage {
           }
 
         val res: CallbackTo[Unit] = callbackOffering.map[Unit] { to: Thenable[AllotmentOffering] =>
-          to.then[Unit](o => {
+          to.`then`[Unit](o => {
             bs.modState(_ => o).runNow()
             ()
           }, js.undefined)
         }
-        res
-          .runNow()
+        res.runNow()
       }
     }
 
     private def fetchGarden(allotmentUri: URI) = CallbackTo[Thenable[AllotmentGarden]] {
       RDFHelper.load(allotmentUri)
-        .then[AllotmentGarden] { _ =>
+        .`then`[AllotmentGarden] { _ =>
         val allotmentTitle = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("name"))
         val allotmentDesc = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("description"))
 
@@ -230,13 +229,13 @@ object GardenPage {
         val imageDir = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
         val imageDirUri = new URI(allotmentUri.toString + imageDir.toString)
         RDFHelper.load(imageDirUri)
-          .then[List[URI]] { _ =>
+          .`then`[List[URI]] { _ =>
           val filesNodes: mutable.Seq[js.Dynamic] =
             RDFHelper.getAll(imageDirUri, RDFHelper.LDP("contains")).asInstanceOf[js.Array[js.Dynamic]]
           val files = filesNodes.map((f: js.Dynamic) => new URI(f.value.toString))
           files.toList
         }
-          .then[AllotmentGarden](
+          .`then`[AllotmentGarden](
           (imageUris: List[URI])
           => {
             val uri = new URI("http://www.user_x.spoter.me/gardens/#1")
