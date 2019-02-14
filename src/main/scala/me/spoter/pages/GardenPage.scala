@@ -26,7 +26,7 @@ object GardenPage {
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
-    .initialState(AllotmentOffering(offeredBy = new URI(""), garden = AllotmentGarden()))
+    .initialState(AllotmentOffering(offeredBy = User(new URI("")), garden = AllotmentGarden()))
     .renderBackend[Backend]
     .componentDidMount(c => c.backend.updateState(c.props))
     .build
@@ -157,9 +157,9 @@ object GardenPage {
                   FormLabel(column = true)("Kontakt:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
-                      value = offering.offeredBy.toString,
+                      as = "a",
                       readOnly = true,
-                      plaintext = true)()
+                      plaintext = true)(^.href := offering.offeredBy.emailUri.fold("KA")(_.toString))("Email zum Anbieter")
                   })
               }
             ),
@@ -175,15 +175,29 @@ object GardenPage {
     private def fetchOffering(offeringUri: URI): Future[AllotmentOffering] =
       RDFHelper.loadEntity(offeringUri) {
         val gardenUri = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("includes")).value.toString)
-        val offeror = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("offeredBy")).value.toString)
+        val offerorUri = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("offeredBy")).value.toString)
 
-        fetchGarden(gardenUri)
-          .map[AllotmentOffering] { g =>
-          createOffering(offeringUri, g, offeror)
+        fetchGarden(gardenUri).zip(fetchOfferor(offerorUri))
+          .map[AllotmentOffering] { case (g, u) =>
+          createOffering(offeringUri, g, u)
         }
       }.flatten
 
-    private def createOffering(offeringUri: URI, g: AllotmentGarden, offeror: URI): AllotmentOffering = {
+    private def fetchOfferor(offerorUri: URI): Future[User] = {
+      RDFHelper.loadEntity(offerorUri) {
+        val hasEmailNode = RDFHelper.get(offerorUri, RDFHelper.VCARD("hasEmail"))
+        hasEmailNode match {
+          case n if n == js.undefined => Future(User(offerorUri, None))
+          case _ =>
+            val emailUri = new URI(hasEmailNode.value.toString)
+            RDFHelper.loadEntity(emailUri)(
+              User(offerorUri, Some(new URI(RDFHelper.get(emailUri, RDFHelper.VCARD("value")).value.toString)))
+            )
+        }
+      }.flatten
+    }
+
+    private def createOffering(offeringUri: URI, g: AllotmentGarden, offeror: User): AllotmentOffering = {
       val title = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("name"))
       val desc = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("description"))
       val price = RDFHelper.get(offeringUri, RDFHelper.SCHEMA_ORG("price"))

@@ -12,5 +12,5 @@ case class AllotmentOffering(uri: URI = new URI(""),
                              description: String = "",
                              price: Money = Money(0),
                              availabilityStarts: js.Date = new js.Date(),
-                             offeredBy: URI,
+                             offeredBy: User,
                              garden: AllotmentGarden)
