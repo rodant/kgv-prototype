@@ -1,8 +1,6 @@
 package me.spoter.components.bootstrap
 
-import japgolly.scalajs.react.CtorType.ChildArg
-import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.{Children, JsComponent}
+import com.payalabs.scalajs.react.bridge.{ReactBridgeComponent, WithProps}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
@@ -11,13 +9,13 @@ import scala.scalajs.js.annotation.JSImport
   *
   */
 
-object Row {
+object Row extends ReactBridgeComponent {
 
   @JSImport("react-bootstrap", "Row")
   @js.native
   object RawComponent extends js.Object
 
-  val component = JsComponent[Null, Children.Varargs, Null](RawComponent)
+  override protected lazy val componentValue: js.Any = RawComponent
 
-  def apply(children: ChildArg*): VdomElement = component(children: _*).vdomElement
+  def apply(): WithProps = auto
 }

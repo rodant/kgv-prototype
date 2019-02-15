@@ -4,6 +4,7 @@ import java.net.URI
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
+import me.spoter.components.Leaflet
 import me.spoter.components.bootstrap._
 import me.spoter.models.AllotmentCondition._
 import me.spoter.models._
@@ -29,6 +30,7 @@ object GardenPage {
     .initialState(AllotmentOffering(offeredBy = User(new URI("")), garden = AllotmentGarden()))
     .renderBackend[Backend]
     .componentDidMount(c => c.backend.updateState(c.props))
+    .componentDidUpdate(c => c.backend.renderMap(c.currentState.garden.location))
     .build
 
   case class Props(uri: URI)
@@ -43,7 +45,7 @@ object GardenPage {
       Container(
         <.h1(offering.title),
         Form(
-          Row(
+          Row()(^.height := 280.px)(
             Col() {
               Carousel(
                 garden.images.map { uri =>
@@ -56,21 +58,11 @@ object GardenPage {
               )
             },
             Col() {
-              FormGroup(controlId = "location") {
-                Row(
-                  FormLabel(column = true)("Standort:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = garden.location.toString,
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
-              }
+              <.div(^.id := "map", ^.height := 100.pct)
             },
             Col()(
               FormGroup(controlId = "size") {
-                Row(
+                Row()(
                   FormLabel(column = true)("Größe:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
@@ -81,7 +73,7 @@ object GardenPage {
                 )
               },
               FormGroup(controlId = "address") {
-                Row(
+                Row()(
                   FormLabel(column = true)("Adresse:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
@@ -92,7 +84,7 @@ object GardenPage {
                 )
               },
               FormGroup(controlId = "price") {
-                Row(
+                Row()(
                   FormLabel(column = true)("Preis:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
@@ -104,7 +96,7 @@ object GardenPage {
               }
             )
           ),
-          Row(
+          Row()(
             Col(xl = 8, lg = 8, md = 8) {
               FormGroup(controlId = "description") {
                 FormControl(
@@ -117,7 +109,7 @@ object GardenPage {
             },
             Col()(
               FormGroup(controlId = "bungalow") {
-                Row(
+                Row()(
                   FormLabel(column = true)("Bungalow:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
@@ -128,7 +120,7 @@ object GardenPage {
                 )
               },
               FormGroup(controlId = "condition") {
-                Row(
+                Row()(
                   FormLabel(column = true)("Zustand:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
@@ -143,7 +135,7 @@ object GardenPage {
                   })
               },
               FormGroup(controlId = "availabilityStarts") {
-                Row(
+                Row()(
                   FormLabel(column = true)("Verfügbar ab:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
@@ -153,7 +145,7 @@ object GardenPage {
                   })
               },
               FormGroup(controlId = "contact") {
-                Row(
+                Row()(
                   FormLabel(column = true)("Kontakt:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
@@ -166,6 +158,23 @@ object GardenPage {
           )
         )
       )
+    }
+
+    def renderMap(location: Location): Callback = Callback {
+      val credits = "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> " +
+        "contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, " +
+        "Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>"
+
+      val map = Leaflet.map("map").setView(Leaflet.latLng(location.lat, location.longitude), 16)
+      Leaflet.tileLayer(
+        "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
+        js.Dynamic.literal(
+          attribution = credits,
+          maxZoom = 20,
+          id = "mapbox.streets",
+          accessToken = "pk.eyJ1Ijoicm9kYW50NjgiLCJhIjoiY2pzNXdmMHBkMDN1NzQzcWNjZWprOG0xMyJ9.I7FPD7O6HS03uDeh5v1vqg"
+        )
+      ).addTo(map)
     }
 
     import scala.concurrent.ExecutionContext.Implicits.global

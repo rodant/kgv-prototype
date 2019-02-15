@@ -18,7 +18,7 @@ object HomePage {
       Container(
         <.h1("spoter.ME Kleingarten Berlin"),
         Form(
-          Row(
+          Row()(
             Col() {
               FormControl(as = "select", onChange = selectAllotment _)(
                 <.option("17be10f3-802f-42be-bbd0-bb03be89c812"),
