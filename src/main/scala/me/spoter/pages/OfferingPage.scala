@@ -18,7 +18,7 @@ import scala.scalajs.js
 /**
   *
   */
-object GardenPage {
+object OfferingPage {
   // This will choose between dev/prod depending on your scalac `-Xelide-below` setting
   val CssSettings: Exports with Settings = scalacss.devOrProdDefaults
 
@@ -26,7 +26,7 @@ object GardenPage {
   //  "(?:(https?|ircs?):\\/\\/(?:www\\.)?|www\\.)((?:(?:[-\\w]+\\.)+)[-\\w]+)(?::\\d+)?(?:\\/((?:[-a-zA-Z;./\\d#:_?=&,]*)))?"
 
   private val component = ScalaComponent
-    .builder[Props]("GardenPage")
+    .builder[Props]("OfferingPage")
     .initialState(AllotmentOffering(offeredBy = User(new URI("")), garden = AllotmentGarden()))
     .renderBackend[Backend]
     .componentDidMount(c => c.backend.updateState(c.props))
@@ -37,7 +37,7 @@ object GardenPage {
 
   def apply(props: Props): VdomElement = component(props).vdomElement
 
-  def apply(id: String): VdomElement = apply(Props(new URI(s"https://orisha1.solid.community/spoterme/offers/$id")))
+  def apply(uri: String): VdomElement = apply(Props(new URI(uri)))
 
   class Backend(bs: BackendScope[Props, AllotmentOffering]) {
     def render(offering: AllotmentOffering): VdomElement = {
@@ -231,10 +231,10 @@ object GardenPage {
         val imageDir = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
         val imageDirUri = new URI(allotmentUri.toString + imageDir.toString)
 
-        RDFHelper.listDir(imageDirUri).map[AllotmentGarden](createAllotment(allotmentUri))
+        RDFHelper.listDir(imageDirUri).map[AllotmentGarden](createGarden(allotmentUri))
       }.flatten
 
-    private def createAllotment(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
+    private def createGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
       val imagesUrisOrPlaceholder = if (imageUris.nonEmpty) imageUris else List(
         new URI("/public/kgv/images/image-1.svg"),
         new URI("/public/kgv/images/image-2.svg"),

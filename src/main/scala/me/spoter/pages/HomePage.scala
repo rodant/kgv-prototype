@@ -10,24 +10,26 @@ object HomePage {
   // This will choose between dev/prod depending on your scalac `-Xelide-below` setting
   val CssSettings: Exports with Settings = scalacss.devOrProdDefaults
 
+  val baseUrl = "https://orisha1.solid.community/spoterme/offers/"
+
   class Backend(bs: BackendScope[Null, String]) {
 
     def selectAllotment(e: ReactEventFromInput): Callback = bs.setState(e.target.value)
 
-    def render(id: String): VdomElement = {
+    def render(uri: String): VdomElement = {
       Container(
         <.h1("spoter.ME Kleingarten Berlin"),
         Form(
           Row()(
             Col() {
               FormControl(as = "select", onChange = selectAllotment _)(
-                <.option("17be10f3-802f-42be-bbd0-bb03be89c812"),
-                <.option("630cedbb-162a-4021-b38c-38cb7b6ed5d7"),
+                <.option(s"${baseUrl}17be10f3-802f-42be-bbd0-bb03be89c812"),
+                <.option(s"${baseUrl}630cedbb-162a-4021-b38c-38cb7b6ed5d7"),
                 //<.option("89d41980-9d6c-4522-8fc0-598c8bd438a4")
               )
             },
             Col() {
-              Button(href = "#offering/" + id)("Suchen")
+              Button(href = "#offering?uri=" + uri)("Suchen")
             }
           )
         )
@@ -37,7 +39,7 @@ object HomePage {
 
   private val component =
     ScalaComponent.builder[Null]("HomePage")
-      .initialState("17be10f3-802f-42be-bbd0-bb03be89c812")
+      .initialState(s"${baseUrl}17be10f3-802f-42be-bbd0-bb03be89c812")
       .renderBackend[Backend]
       .build
 
