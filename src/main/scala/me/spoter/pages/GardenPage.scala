@@ -165,7 +165,8 @@ object GardenPage {
         "contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, " +
         "Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>"
 
-      val map = Leaflet.map("map").setView(Leaflet.latLng(location.lat, location.longitude), 16)
+      val center = Leaflet.latLng(location.lat, location.longitude)
+      val map = Leaflet.map("map").setView(center, 16)
       Leaflet.tileLayer(
         "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
         js.Dynamic.literal(
@@ -175,6 +176,8 @@ object GardenPage {
           accessToken = "pk.eyJ1Ijoicm9kYW50NjgiLCJhIjoiY2pzNXdmMHBkMDN1NzQzcWNjZWprOG0xMyJ9.I7FPD7O6HS03uDeh5v1vqg"
         )
       ).addTo(map)
+
+      Leaflet.marker(center).addTo(map)
     }
 
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -196,7 +199,7 @@ object GardenPage {
       RDFHelper.loadEntity(offerorUri) {
         val hasEmailNode = RDFHelper.get(offerorUri, RDFHelper.VCARD("hasEmail"))
         hasEmailNode match {
-          case n if n == js.undefined => Future(User(offerorUri, None))
+          case n if js.isUndefined(n) => Future(User(offerorUri, None))
           case _ =>
             val emailUri = new URI(hasEmailNode.value.toString)
             RDFHelper.loadEntity(emailUri)(

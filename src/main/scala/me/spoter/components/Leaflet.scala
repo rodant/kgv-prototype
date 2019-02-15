@@ -14,6 +14,8 @@ object Leaflet extends js.Object {
   def latLng(lat: Double, lng: Double): js.Object = js.native
 
   def tileLayer(urlTemplate: String, ops: js.Dynamic = js.Dynamic.literal()): js.Dynamic = js.native
+
+  def marker(latLng: js.Object, ops: js.Dynamic = js.Dynamic.literal()): js.Dynamic = js.native
 }
 
 @js.native
