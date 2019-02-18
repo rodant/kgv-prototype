@@ -15,7 +15,7 @@ n0: a gr:Offering ;
 
     gr:offeredBy <https://orisha1.solid.community/profile/card#me> ;
 
-    so:price "10000.00" ;
+    so:price "1000000" ;
 
     gr:availabilityStarts "2019-05-01"^^xsd:date .
 
