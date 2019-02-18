@@ -25,7 +25,7 @@ object HomePage {
               FormControl(as = "select", onChange = selectAllotment _)(
                 <.option(s"${baseUrl}17be10f3-802f-42be-bbd0-bb03be89c812"),
                 <.option(s"${baseUrl}630cedbb-162a-4021-b38c-38cb7b6ed5d7"),
-                //<.option("89d41980-9d6c-4522-8fc0-598c8bd438a4")
+                <.option("https://orisha2.solid.community/spoterme/offers/94e1194d-33a9-46de-b45b-100d17fd4236")
               )
             },
             Col() {
