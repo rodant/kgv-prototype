@@ -148,10 +148,9 @@ object OfferingPage {
                 Row()(
                   FormLabel(column = true)("Kontakt:"),
                   Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      as = "a",
-                      readOnly = true,
-                      plaintext = true)(^.href := offering.offeredBy.emailUri.fold("KA")(_.toString))("Email zum Anbieter")
+                    offering.offeredBy.emailUri.fold(FormControl(value = "KA", readOnly = true, plaintext = true)()) { uri =>
+                      FormControl(as = "a", readOnly = true, plaintext = true)(^.href := uri.toString)("Email zum Anbieter")
+                    }
                   })
               }
             ),
@@ -199,7 +198,7 @@ object OfferingPage {
       RDFHelper.loadEntity(offerorUri) {
         val hasEmailNode = RDFHelper.get(offerorUri, RDFHelper.VCARD("hasEmail"))
         hasEmailNode match {
-          case n if js.isUndefined(n) => Future(User(offerorUri, None))
+          case n if js.isUndefined(n) => Future(User(offerorUri))
           case _ =>
             val emailUri = new URI(hasEmailNode.value.toString)
             RDFHelper.loadEntity(emailUri)(
