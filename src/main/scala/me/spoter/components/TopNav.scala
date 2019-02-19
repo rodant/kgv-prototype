@@ -5,7 +5,7 @@ import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
-import me.spoter.components.solid.{AuthButton, Value}
+import me.spoter.components.solid.Value
 import me.spoter.models.Menu
 import me.spoter.routes.AppRouter.AppPage
 import scalacss.ScalaCssReact._

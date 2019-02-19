@@ -1,7 +1,6 @@
 package me.spoter.components.bootstrap
 
-import com.payalabs.scalajs.react.bridge.{ReactBridgeComponent, WithProps, WithPropsAndTagsMods}
-import japgolly.scalajs.react.Callback
+import com.payalabs.scalajs.react.bridge.{ReactBridgeComponent, WithProps}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
