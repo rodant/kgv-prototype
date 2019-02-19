@@ -1,4 +1,4 @@
-package me.spoter.rdf
+package me.spoter.solid_libs
 
 import java.net.URI
 

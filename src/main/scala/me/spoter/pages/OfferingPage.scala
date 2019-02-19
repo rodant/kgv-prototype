@@ -8,7 +8,7 @@ import me.spoter.components.Leaflet
 import me.spoter.components.bootstrap._
 import me.spoter.models.AllotmentCondition._
 import me.spoter.models._
-import me.spoter.rdf.RDFHelper
+import me.spoter.solid_libs.RDFHelper
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
 
