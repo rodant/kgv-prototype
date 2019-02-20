@@ -65,7 +65,7 @@ object TopNav {
                 P.ctrl setOnClick item.route
               )
             },
-            <.li(^.id := "login-button", ^.className := "ui-elem", AuthButton("popup.html")),
+            <.li(^.id := "login-button", ^.className := "ui-elem", AuthButton("https://spoterme.solid.community/common/popup.html")),
             <.li(^.id := "logged-in-user", ^.className := "ui-elem", Value("user.name"))
           )
         )
