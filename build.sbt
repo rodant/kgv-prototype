@@ -1,6 +1,6 @@
 import Dependencies._
 
-val reactVersion = "16.5.1"
+val reactVersion = "16.7.0"
 val scalaJSReactVersion = "1.3.1"
 val scalaCssVersion = "0.5.5"
 
@@ -13,6 +13,7 @@ lazy val root = (project in file(".")).
     )),
     name := "KGV Prototype",
     scalacOptions += "-feature",
+    scalacOptions += "-Ypartial-unification",
     scalaJSUseMainModuleInitializer := true,
     // creates single js resource file for easy integration in html page
     skip in packageJSDependencies := false,
@@ -24,10 +25,19 @@ lazy val root = (project in file(".")).
       "com.github.japgolly.scalajs-react" %%% "extra" % scalaJSReactVersion,
       "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
       "com.github.japgolly.scalacss" %%% "ext-react" % scalaCssVersion,
+      "com.payalabs" %%% "scalajs-react-bridge" % "0.7.0",
+      "org.scala-js" %%% "scalajs-java-time" % "0.2.5",
+      "com.beachape" %%% "enumeratum" % "1.5.13",
+      //"org.typelevel" %%% "cats-core" % "1.6.0",
+      //"org.typelevel" %%% "cats-macros" % "1.6.0",
+      //"org.typelevel" %%% "cats-kernel" % "1.6.0",
       scalaTest % Test
     ),
     npmDependencies in Compile ++= Seq(
       "react" -> reactVersion,
       "react-dom" -> reactVersion,
-      "@solid/react" -> "1.1.3"),
+      "@solid/react" -> "1.1.3",
+      "rdflib" -> "0.19.1",
+      "react-bootstrap" -> "1.0.0-beta.4",
+      "leaflet" -> "1.4.0"),
   ).enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)

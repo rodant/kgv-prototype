@@ -10,28 +10,43 @@ case class Location(lat: Double, longitude: Double)
   *
   * @param a value
   */
-case class Area(a: Double) extends AnyVal
+case class Area(a: Double = 0) extends AnyVal
 
 /**
   * Amount of money in €.
   *
-  * @param a amount of cents
+  * @param amount amount of cents
   */
-case class Money(a: Long) extends AnyVal
+case class Money(amount: Long) extends AnyVal
+
+import enumeratum._
+
+import scala.collection.immutable
 
 /**
   *
-  * @param powerSupply
-  * @param watterSupply
-  * @param pool
-  * @param fountain
-  * @param planting
-  * @param gardenTools
   */
-case class Facilities(
-                       powerSupply: Boolean,
-                       watterSupply: Boolean,
-                       pool: Boolean,
-                       fountain: Boolean,
-                       planting: Boolean,
-                       gardenTools: Boolean)
+sealed trait AllotmentCondition extends EnumEntry
+
+object AllotmentCondition extends Enum[AllotmentCondition] {
+
+  override def values: immutable.IndexedSeq[AllotmentCondition] = findValues
+
+  case object Excellent extends AllotmentCondition
+
+  case object Good extends AllotmentCondition
+
+  case object Poor extends AllotmentCondition
+
+  case object Undefined extends AllotmentCondition
+
+}
+
+/**
+  *
+  * @param streetAndNumber street and address string
+  * @param zipCode the zip code
+  * @param region something like city or state
+  * @param country the country
+  */
+case class Address(streetAndNumber: String, zipCode: Int, region: String, country: String)

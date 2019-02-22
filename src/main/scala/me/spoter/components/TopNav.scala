@@ -2,11 +2,14 @@ package me.spoter.components
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.component.Scala.Unmounted
+import japgolly.scalajs.react.component.builder.Lifecycle.ComponentDidMount
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
+import me.spoter.components.solid.Value
 import me.spoter.models.Menu
 import me.spoter.routes.AppRouter.AppPage
+import me.spoter.solid_libs.SolidAuth
 import scalacss.ScalaCssReact._
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
@@ -51,26 +54,40 @@ object TopNav {
 
   private val component = ScalaComponent
     .builder[Props]("TopNav")
-    .render_P { P =>
+    .initialState(false)
+    .render_PS { (props, loggedIn) =>
       <.header(
         <.nav(
           <.ul(
             Style.navMenu,
-            P.menus.toTagMod { item =>
+            props.menus.toTagMod { item =>
               <.li(
                 ^.key := item.name,
-                Style.menuItem(item.route.getClass == P.selectedPage.getClass),
+                Style.menuItem(item.route.getClass == props.selectedPage.getClass),
                 item.name,
-                P.ctrl setOnClick item.route
+                props.ctrl setOnClick item.route
               )
-            }, <.li(^.id := "login-button", AuthButton("popup.html"))
+            },
+            <.li(^.id := "login-button", ^.className := "ui-elem",
+              AuthButton("https://solid.community/common/popup.html", loggedIn = loggedIn)),
+            <.li(^.id := "logged-in-user", ^.className := "ui-elem", Value("user.name")).when(loggedIn)
           )
         )
       )
     }
+    .componentDidMount(c => trackSession(c))
     .configure(Reusability.shouldComponentUpdate)
     .build
 
-  def apply(props: Props): Unmounted[Props, Unit, Unit] = component(props)
+  def apply(props: Props): Unmounted[Props, Boolean, Unit] = component(props)
+
+  def trackSession(c: ComponentDidMount[Props, Boolean, Unit]): Callback = Callback {
+    SolidAuth.trackSession { s =>
+      (if (s != null)
+        c.modState(_ => true)
+      else
+        c.modState(_ => false)).runNow()
+    }
+  }
 
 }

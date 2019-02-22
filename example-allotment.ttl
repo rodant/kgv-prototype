@@ -1,0 +1,37 @@
+@prefix : <#>.
+@prefix n0: <>.
+@prefix pto: <http://www.productontology.org/id/>.
+@prefix gr: <http://purl.org/goodrelations/v1#>.
+@prefix xsd: <"http://www.w3.org/2001/XMLSchema#">.
+@prefix so: <"http://schema.org/>.
+
+n0: a <http://www.productontology.org/id/Allotment_(gardening)> ;
+	a gr:Individual ;
+	gr:name "Mein schöner Garten 2"@de ;
+	gr:description "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."@de ;
+
+        so:image "images/" ;
+
+        gr:width [
+                  a gr:QuantitativeValueFloat;
+                  gr:hasValueFloat "10.0"^^xsd:float;
+                  gr:hasUnitOfMeasurement "MT"^^xsd:string
+                 ] ;
+        gr:depth [
+                  a gr:QuantitativeValueFloat;
+                  gr:hasValueFloat "50.0"^^xsd:float;
+                  gr:hasUnitOfMeasurement "MT"^^xsd:string
+                 ] ;
+        so:address [ a so:PostalAddress;
+                so:streetAddress "Bagelstraße 12"@de;
+                so:postalCode "13189";
+                so:addressRegion "Berlin"@de;
+                so:addressCountry "Deutschland"@de ] ;
+
+        so:geo [ a so:GeoCoordinates ;
+                so:latitude "53.2"^^xsd:float ;
+                so:longitude "40.5"^^xsd:float ;
+              ] ;
+
+        gr:condition "gut"@de .
+

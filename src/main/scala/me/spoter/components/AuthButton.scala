@@ -1,32 +1,44 @@
 package me.spoter.components
 
-import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.VdomElement
+import japgolly.scalajs.react.vdom.html_<^._
+import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
+import me.spoter.components.bootstrap.Button
+import me.spoter.solid_libs.SolidAuth
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport
 
 /**
-  * Wrapper for Solid Login React component.
+  *
   */
 object AuthButton {
 
-  @JSImport("@solid/react", "AuthButton")
-  @js.native
-  object RawComponent extends js.Object
+  case class Props(popupUri: String, callbackUri: String, loggedIn: Boolean)
 
-  @js.native
-  trait Props extends js.Object {
-    var popup: String = js.native
+  private val component = ScalaComponent
+    .builder[Props]("AuthButton")
+    .renderBackend[Backend]
+    .build
+
+  class Backend(bs: BackendScope[Props, Unit]) {
+    def render(props: Props): VdomElement = {
+      if (!props.loggedIn)
+        Button()(^.onClick --> login)("Einlogen")
+      else
+        Button()(^.onClick --> logout)("Ausloggen")
+    }
+
+    private def login(): Callback = bs.props.map { p =>
+      val args = js.Dynamic.literal(popupUri = p.popupUri)
+      SolidAuth.popupLogin(args)
+      ()
+    }
+
+    private def logout(): Callback = bs.props.map { _ =>
+      SolidAuth.logout()
+      ()
+    }
   }
 
-  private def props(popup: String): Props = {
-    val p = (new js.Object).asInstanceOf[Props]
-    p.popup = popup
-    p
-  }
-
-  val component = JsComponent[Props, Children.None, Null](RawComponent)
-
-  def apply(popup: String): VdomElement = component(props(popup)).vdomElement
+  def apply(popupUri: String, callbackUri: String = null, loggedIn: Boolean = false): VdomElement =
+    component(Props(popupUri, callbackUri, loggedIn)).vdomElement
 }

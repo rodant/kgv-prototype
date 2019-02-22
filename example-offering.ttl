@@ -1,0 +1,21 @@
+@prefix : <#>.
+@prefix n0: <>.
+@prefix pto: <http://www.productontology.org/id/>.
+@prefix gr: <http://purl.org/goodrelations/v1#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix so: <http://schema.org/>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+
+n0: a gr:Offering ;
+	gr:name "Angebot für meinen schönen Orisha-Garten 1"@de ;
+
+	gr:description "Der Garten befindet sich in idylischer Lage... \n\nLorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."@de ;
+
+    gr:includes <https://orisha1.solid.community/spoterme/allotment_gardens/13dd0a8d-443d-4b22-b7d9-1998b76a458a/> ;
+
+    gr:offeredBy <https://orisha1.solid.community/profile/card#me> ;
+
+    so:price "1000000" ;
+
+    gr:availabilityStarts "2019-05-01"^^xsd:date .
+
