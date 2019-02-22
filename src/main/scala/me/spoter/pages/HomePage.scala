@@ -29,7 +29,7 @@ object HomePage {
               )
             },
             Col() {
-              Button(href = "#offering?uri=" + uri)("Suchen")
+              Button(href = "#offerings?uri=" + uri)("Suchen")
             }
           )
         )

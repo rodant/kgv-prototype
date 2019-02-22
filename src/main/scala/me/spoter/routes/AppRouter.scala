@@ -22,7 +22,7 @@ object AppRouter {
 
     (trimSlashes
       | staticRoute(root, Home) ~> render(HomePage())
-      | dynamicRouteCT[Offering]("#offering?uri=" ~ string(".+").caseClass[Offering]) ~> dynRender(gp => OfferingPage(gp.uri))
+      | dynamicRouteCT[Offering]("#offerings?uri=" ~ string(".+").caseClass[Offering]) ~> dynRender(gp => OfferingPage(gp.uri))
       | dynamicRouteCT[Garden]("#gardens?uri=" ~ string(".+").caseClass[Garden]) ~> dynRender(gp => GardenPage(gp.uri)))
       .notFound(redirectToPage(Home)(Redirect.Replace))
       .renderWith(layout)
