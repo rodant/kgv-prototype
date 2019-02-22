@@ -35,9 +35,7 @@ object OfferingPage {
 
   case class Props(uri: URI)
 
-  def apply(props: Props): VdomElement = component(props).vdomElement
-
-  def apply(uri: String): VdomElement = apply(Props(new URI(uri)))
+  def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
 
   class Backend(bs: BackendScope[Props, AllotmentOffering]) {
     def render(offering: AllotmentOffering): VdomElement = {

@@ -10,7 +10,7 @@ object HomePage {
   // This will choose between dev/prod depending on your scalac `-Xelide-below` setting
   val CssSettings: Exports with Settings = scalacss.devOrProdDefaults
 
-  val baseUrl = "https://orisha1.solid.community/spoterme/offers/"
+  private val baseUrl = "https://orisha1.solid.community/spoterme/offers/"
 
   class Backend(bs: BackendScope[Null, String]) {
 
