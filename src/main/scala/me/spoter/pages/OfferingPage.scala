@@ -4,7 +4,7 @@ import java.net.URI
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
-import me.spoter.components.Leaflet
+import me.spoter.components.SpoterMap
 import me.spoter.components.bootstrap._
 import me.spoter.models.AllotmentCondition._
 import me.spoter.models._
@@ -30,7 +30,6 @@ object OfferingPage {
     .initialState(AllotmentOffering(offeredBy = User(new URI("")), garden = AllotmentGarden()))
     .renderBackend[Backend]
     .componentDidMount(c => c.backend.updateState(c.props))
-    .componentDidUpdate(c => c.backend.renderMap(c.currentState.garden.location))
     .build
 
   case class Props(uri: URI)
@@ -56,7 +55,7 @@ object OfferingPage {
               )
             },
             Col() {
-              <.div(^.id := "map", ^.height := 100.pct)
+              SpoterMap(garden.location.latitude, garden.location.longitude)
             },
             Col()(
               FormGroup(controlId = "size") {
@@ -157,26 +156,6 @@ object OfferingPage {
       )
     }
 
-    def renderMap(location: Location): Callback = Callback {
-      val credits = "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> " +
-        "contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, " +
-        "Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>"
-
-      val center = Leaflet.latLng(location.lat, location.longitude)
-      val map = Leaflet.map("map").setView(center, 16)
-      Leaflet.tileLayer(
-        "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
-        js.Dynamic.literal(
-          attribution = credits,
-          maxZoom = 20,
-          id = "mapbox.streets",
-          accessToken = "pk.eyJ1Ijoicm9kYW50NjgiLCJhIjoiY2pzNXdmMHBkMDN1NzQzcWNjZWprOG0xMyJ9.I7FPD7O6HS03uDeh5v1vqg"
-        )
-      ).addTo(map)
-
-      Leaflet.marker(center).addTo(map)
-    }
-
     import scala.concurrent.ExecutionContext.Implicits.global
 
     def updateState(props: Props): Callback = Callback.future(fetchOffering(props.uri).map(o => bs.modState(_ => o)))
@@ -226,7 +205,7 @@ object OfferingPage {
     private def fetchGarden(allotmentUri: URI): Future[AllotmentGarden] =
       RDFHelper.loadEntity[Future[AllotmentGarden]](allotmentUri) {
         val imageDir = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
-        val imageDirUri = new URI(allotmentUri.toString + imageDir.toString)
+        val imageDirUri = new URI(s"${allotmentUri.toString}/${imageDir.toString}")
 
         RDFHelper.listDir(imageDirUri).map[AllotmentGarden](createGarden(allotmentUri))
       }.flatten
