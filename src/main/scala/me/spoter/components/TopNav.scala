@@ -2,19 +2,18 @@ package me.spoter.components
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.component.Scala.Unmounted
-import japgolly.scalajs.react.component.builder.Lifecycle.ComponentDidMount
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.solid.Value
 import me.spoter.models.Menu
 import me.spoter.routes.AppRouter.AppPage
-import me.spoter.solid_libs.SolidAuth
+import me.spoter.{SessionTracker, StateXSession}
 import scalacss.ScalaCssReact._
 import scalacss.defaults.Exports
 import scalacss.internal.mutable.Settings
 
-object TopNav {
+object TopNav extends SessionTracker[TopNavProps, Unit, Unit] {
   // This will choose between dev/prod depending on your scalac `-Xelide-below` setting
   val CssSettings: Exports with Settings = scalacss.devOrProdDefaults
 
@@ -45,17 +44,15 @@ object TopNav {
     }
   }
 
-  case class Props(menus: Vector[Menu],
-                   selectedPage: AppPage,
-                   ctrl: RouterCtl[AppPage])
-
   private implicit val currentPageReuse: Reusability[AppPage] = Reusability.by_==[AppPage]
-  private implicit val propsReuse: Reusability[Props] = Reusability.by((_: Props).selectedPage)
+  private implicit val propsReuse: Reusability[TopNavProps] = Reusability.by((_: TopNavProps).selectedPage)
+  private implicit val stateReuse: Reusability[StateXSession[Unit]] = Reusability.by_==[StateXSession[Unit]]
 
   private val component = ScalaComponent
-    .builder[Props]("TopNav")
-    .initialState(false)
-    .render_PS { (props, loggedIn) =>
+    .builder[TopNavProps]("TopNav")
+    .initialState(StateXSession((), None))
+    .render_PS { (props, stateXSession) =>
+      val loggedIn = stateXSession.session.isDefined
       <.header(
         <.nav(
           <.ul(
@@ -75,19 +72,14 @@ object TopNav {
         )
       )
     }
-    .componentDidMount(c => trackSession(c))
+    .componentDidMount(trackSession)
     .configure(Reusability.shouldComponentUpdate)
     .build
 
-  def apply(props: Props): Unmounted[Props, Boolean, Unit] = component(props)
-
-  def trackSession(c: ComponentDidMount[Props, Boolean, Unit]): Callback = Callback {
-    SolidAuth.trackSession { s =>
-      (if (s != null)
-        c.modState(_ => true)
-      else
-        c.modState(_ => false)).runNow()
-    }
-  }
+  def apply(props: TopNavProps): Unmounted[TopNavProps, StateXSession[Unit], Unit] = component(props)
 
 }
+
+case class TopNavProps(menus: Vector[Menu],
+                       selectedPage: AppPage,
+                       ctrl: RouterCtl[AppPage])
