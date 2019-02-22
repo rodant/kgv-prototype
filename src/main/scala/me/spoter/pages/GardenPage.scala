@@ -2,37 +2,26 @@ package me.spoter.pages
 
 import java.net.URI
 
+import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
 import me.spoter.components.SpoterMap
 import me.spoter.components.bootstrap._
-import me.spoter.models.AllotmentCondition._
+import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
-import me.spoter.services.OfferingService
+import me.spoter.services.GardenService
 
 /**
-  *
+  * A page showing the data of an allotment garden.
   */
-object OfferingPage {
-  //val uriRegex =
-  //  "(?:(https?|ircs?):\\/\\/(?:www\\.)?|www\\.)((?:(?:[-\\w]+\\.)+)[-\\w]+)(?::\\d+)?(?:\\/((?:[-a-zA-Z;./\\d#:_?=&,]*)))?"
-
-  private val component = ScalaComponent
-    .builder[Props]("OfferingPage")
-    .initialState(AllotmentOffering(offeredBy = User(new URI("")), garden = AllotmentGarden()))
-    .renderBackend[Backend]
-    .componentDidMount(c => c.backend.updateState(c.props))
-    .build
+object GardenPage {
 
   case class Props(uri: URI)
 
-  def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
-
-  class Backend(bs: BackendScope[Props, AllotmentOffering]) {
-    def render(offering: AllotmentOffering): VdomElement = {
-      val garden = offering.garden
+  class Backend(bs: BackendScope[Props, AllotmentGarden]) {
+    def render(garden: AllotmentGarden): VdomElement = {
       Container(
-        <.h1(offering.title),
+        <.h1(garden.title),
         Form(
           Row()(^.height := 280.px)(
             Col() {
@@ -71,17 +60,6 @@ object OfferingPage {
                       plaintext = true)()
                   }
                 )
-              },
-              FormGroup(controlId = "price") {
-                Row()(
-                  FormLabel(column = true)("Preis:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = (offering.price.amount / 100.0).formatted("%.2f €"),
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
               }
             )
           ),
@@ -90,7 +68,7 @@ object OfferingPage {
               FormGroup(controlId = "description") {
                 FormControl(
                   as = "textarea",
-                  value = offering.description,
+                  value = garden.description,
                   rows = 20,
                   readOnly = true,
                   plaintext = true)()
@@ -122,25 +100,6 @@ object OfferingPage {
                       readOnly = true,
                       plaintext = true)()
                   })
-              },
-              FormGroup(controlId = "availabilityStarts") {
-                Row()(
-                  FormLabel(column = true)("Verfügbar ab:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = offering.availabilityStarts.toLocaleDateString(),
-                      readOnly = true,
-                      plaintext = true)()
-                  })
-              },
-              FormGroup(controlId = "contact") {
-                Row()(
-                  FormLabel(column = true)("Kontakt:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    offering.offeredBy.emailUri.fold(FormControl(value = "KA", readOnly = true, plaintext = true)()) { uri =>
-                      FormControl(as = "a", readOnly = true, plaintext = true)(^.href := uri.toString)("Email zum Anbieter")
-                    }
-                  })
               }
             )
           )
@@ -150,8 +109,16 @@ object OfferingPage {
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    def updateState(props: Props): Callback = Callback.future(OfferingService.fetchOffering(props.uri).map(o => bs.modState(_ => o)))
+    def updateState(props: Props): Callback = Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(_ => g)))
 
   }
 
+  private val component = ScalaComponent
+    .builder[Props]("GardenPage")
+    .initialState(AllotmentGarden())
+    .renderBackend[Backend]
+    .componentDidMount(c => c.backend.updateState(c.props))
+    .build
+
+  def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
 }
