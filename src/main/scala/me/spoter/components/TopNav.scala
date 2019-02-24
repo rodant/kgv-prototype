@@ -6,18 +6,14 @@ import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.bootstrap._
 import me.spoter.components.solid.Value
-import me.spoter.routes.AppRouter.AppPage
 import me.spoter.{SessionTracker, StateXSession}
 
 object TopNav extends SessionTracker[Unit, Unit, Unit] {
-  private implicit val currentPageReuse: Reusability[AppPage] = Reusability.by_==[AppPage]
-  private implicit val stateReuse: Reusability[StateXSession[Unit]] = Reusability.by_==[StateXSession[Unit]]
-
   private val component = ScalaComponent
     .builder[Unit]("TopNav")
     .initialState(StateXSession((), None))
     .render_S(render)
-    .componentDidMount(trackSession)
+    .componentDidMount(trackSession(_ => Callback()))
     .configure(Reusability.shouldComponentUpdate)
     .build
 
