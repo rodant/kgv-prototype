@@ -5,6 +5,7 @@ import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
+import me.spoter.components.bootstrap.{Col, Row}
 import me.spoter.components.solid.Value
 import me.spoter.models.Menu
 import me.spoter.routes.AppRouter.AppPage
@@ -26,7 +27,6 @@ object TopNav extends SessionTracker[TopNavProps, Unit, Unit] {
 
     val navMenu: StyleA = style(
       display.flex,
-      flexFlow := "row-reverse",
       alignItems.center,
       backgroundColor(c"#F2706D"),
       margin.`0`,
@@ -53,21 +53,30 @@ object TopNav extends SessionTracker[TopNavProps, Unit, Unit] {
     .initialState(StateXSession((), None))
     .render_PS { (props, stateXSession) =>
       val loggedIn = stateXSession.session.isDefined
-      <.header(
-        <.nav(
-          <.ul(
-            Style.navMenu,
-            props.menus.toTagMod { item =>
-              <.li(
-                ^.key := item.name,
-                Style.menuItem(item.route.getClass == props.selectedPage.getClass),
-                item.name,
-                props.ctrl setOnClick item.route
+      <.div(^.backgroundColor := "#F2706D",
+        Row()(
+          Col(xl = 9, lg = 9, md = 9)(
+            <.header(
+              <.nav(
+                <.ul(Style.navMenu,
+                  props.menus.toTagMod { item =>
+                    <.li(
+                      ^.key := item.name,
+                      Style.menuItem(item.route.getClass == props.selectedPage.getClass),
+                      item.name,
+                      props.ctrl setOnClick item.route
+                    )
+                  }
+                )
               )
-            },
-            <.li(^.id := "login-button", ^.className := "ui-elem",
-              AuthButton("https://solid.community/common/popup.html", loggedIn = loggedIn)),
-            <.li(^.id := "logged-in-user", ^.className := "ui-elem", Value("user.name")).when(loggedIn)
+            )
+          ),
+          Col()(
+            Row()(
+              <.div(^.id := "logged-in-user", ^.className := "ui-elem", Value("user.name")).when(loggedIn),
+              <.div(^.id := "login-button", ^.className := "ui-elem",
+                AuthButton("https://solid.community/common/popup.html", loggedIn = loggedIn))
+            )
           )
         )
       )
