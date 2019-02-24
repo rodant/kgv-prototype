@@ -2,7 +2,7 @@ package me.spoter.routes
 
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
-import me.spoter.components.{Footer, TopNav, TopNavProps}
+import me.spoter.components.{Footer, TopNav}
 import me.spoter.models.Menu
 import me.spoter.pages.{GardenPage, HomePage, OfferingPage}
 
@@ -35,7 +35,7 @@ object AppRouter {
 
   private def layout(c: RouterCtl[AppPage], r: Resolution[AppPage]) =
     <.div(
-      TopNav(TopNavProps(mainMenu, r.page, c)),
+      TopNav(),
       r.render(),
       Footer()
     )

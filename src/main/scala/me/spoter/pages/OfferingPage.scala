@@ -33,7 +33,7 @@ object OfferingPage {
       val garden = offering.garden
       Container(
         <.h1(offering.title),
-        Form(
+        Form()(
           Row()(^.height := 280.px)(
             Col() {
               Carousel(

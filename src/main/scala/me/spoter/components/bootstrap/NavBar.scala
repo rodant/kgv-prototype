@@ -8,14 +8,17 @@ import scala.scalajs.js.annotation.JSImport
 /**
   *
   */
+object NavBar extends ReactBridgeComponent {
 
-object Form extends ReactBridgeComponent {
-
-  @JSImport("react-bootstrap", "Form")
+  @JSImport("react-bootstrap", "Navbar")
   @js.native
   object RawComponent extends js.Object
 
   override protected lazy val componentValue: js.Any = RawComponent
 
-  def apply(inline: js.UndefOr[Boolean] = js.undefined): WithProps = auto
+  def apply(bg: js.UndefOr[String] = js.undefined,
+            expand: js.UndefOr[String] = js.undefined,
+            fixed: js.UndefOr[String] = js.undefined,
+            variant: js.UndefOr[String] = js.undefined): WithProps = auto
 }
+

@@ -19,7 +19,7 @@ object HomePage {
     def render(uri: String): VdomElement = {
       Container(
         <.h1("spoter.ME Kleingarten Berlin"),
-        Form(
+        Form()(
           Row()(
             Col() {
               FormControl(as = "select", onChange = selectAllotment _)(

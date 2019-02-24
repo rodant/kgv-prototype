@@ -22,7 +22,7 @@ object GardenPage {
     def render(garden: AllotmentGarden): VdomElement = {
       Container(
         <.h1(garden.title),
-        Form(
+        Form()(
           Row()(^.height := 280.px)(
             Col() {
               Carousel(

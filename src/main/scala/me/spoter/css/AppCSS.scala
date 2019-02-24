@@ -1,6 +1,6 @@
 package me.spoter.css
 
-import me.spoter.components.{LeftNav, TopNav}
+import me.spoter.components.LeftNav
 import me.spoter.pages.ItemsPage
 import scalacss.internal.mutable.GlobalRegistry
 
@@ -12,7 +12,6 @@ object AppCSS {
 
   def load(): Unit = {
     GlobalRegistry.register(GlobalStyle,
-      TopNav.Style,
       LeftNav.Style,
       ItemsPage.Style)
     GlobalRegistry.onRegistration(_.addToDocument())
