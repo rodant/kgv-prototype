@@ -2,7 +2,7 @@ package me.spoter.pages
 
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.{Callback, CallbackTo, ScalaComponent}
+import japgolly.scalajs.react.{CallbackTo, ScalaComponent}
 import me.spoter.components.bootstrap.{Container, Form}
 import me.spoter.models.AllotmentGarden
 import me.spoter.{Session, SessionTracker, StateXSession}
@@ -22,7 +22,8 @@ object GardensPage extends SessionTracker[Unit, Iterable[AllotmentGarden], Unit]
           sxs.state.toVdomArray(renderGarden).when(sxs.session.isDefined))
       )
     }
-    .componentDidMount(trackSession(updateState))
+    .componentDidMount(trackSessionOn(updateState))
+    .componentWillUnmountConst(trackSessionOff())
     .configure(Reusability.shouldComponentUpdate)
     .build
 
