@@ -27,8 +27,8 @@ trait SessionTracker[P, S, B] {
     SolidAuth.addListener("logout", logoutCallback.get)
 
     sessionInBackground(f, c)
-    println(s"Login Listener Count After add = ${SolidAuth.listenerCount("login")}")
-    println(s"Logout Listener Count After add = ${SolidAuth.listenerCount("logout")}")
+    //println(s"Login Listener Count After add = ${SolidAuth.listenerCount("login")}")
+    //println(s"Logout Listener Count After add = ${SolidAuth.listenerCount("logout")}")
   }
 
   protected def trackSessionOff(): Callback = Callback {
@@ -37,8 +37,8 @@ trait SessionTracker[P, S, B] {
     logoutCallback.foreach(SolidAuth.removeListener("logout", _))
     logoutCallback = None
 
-    println(s"Login Listener Count After remove = ${SolidAuth.listenerCount("login")}")
-    println(s"Logout Listener Count After remove = ${SolidAuth.listenerCount("logout")}")
+    //println(s"Login Listener Count After remove = ${SolidAuth.listenerCount("login")}")
+    //println(s"Logout Listener Count After remove = ${SolidAuth.listenerCount("logout")}")
   }
 
   private def sessionInBackground(f: Session => CallbackTo[S], c: ComponentDidMount[P, StateXSession[S], B]): Unit = {
