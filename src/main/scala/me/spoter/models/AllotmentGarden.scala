@@ -3,6 +3,7 @@ package me.spoter.models
 import java.net.URI
 
 import me.spoter.models.AllotmentCondition.Good
+import me.spoter.pages.ListObject
 
 /**
   * AllotmentGarden entity.
@@ -22,4 +23,4 @@ case class AllotmentGarden(uri: URI = new URI(""),
                            area: Area = Area(0),
                            price: Money = Money(0),
                            bungalow: Option[Bungalow] = None,
-                           condition: AllotmentCondition = Good)
+                           condition: AllotmentCondition = Good) extends ListObject

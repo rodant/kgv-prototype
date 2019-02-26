@@ -14,6 +14,9 @@ import scala.concurrent.Future
   *
   */
 trait ObjectListPage[O <: ListObject] extends SessionTracker[Unit, Iterable[O], Unit] {
+  protected val objectsUriFragment: String
+  protected val objectsName: String
+
   private val initialSession = Session(URI.create("_blank"))
   private val component = ScalaComponent
     .builder[Unit]("OfferingsPage")
@@ -32,17 +35,13 @@ trait ObjectListPage[O <: ListObject] extends SessionTracker[Unit, Iterable[O], 
     .configure(Reusability.shouldComponentUpdate)
     .build
 
-  protected val objectsUriFragment: String
-  protected val objectsName: String
+  protected def fetchListObjects(s: Session): Future[Iterable[O]]
 
   def apply(): VdomElement = component().vdomElement
 
-  def renderListObject(g: O): VdomElement = {
+  private def renderListObject(g: O): VdomElement = {
     NavLink(href = s"#$objectsUriFragment?uri=${g.uri}")(g.title)
   }
-
-  protected def fetchListObjects(s: Session): Future[Iterable[O]]
-
 }
 
 trait ListObject {
