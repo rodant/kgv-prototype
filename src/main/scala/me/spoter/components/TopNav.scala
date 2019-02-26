@@ -8,12 +8,15 @@ import me.spoter.components.bootstrap._
 import me.spoter.components.solid.Value
 import me.spoter.{SessionTracker, StateXSession}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 object TopNav extends SessionTracker[Unit, Unit, Unit] {
   private val component = ScalaComponent
     .builder[Unit]("TopNav")
     .initialState(StateXSession((), None))
     .render_S(render)
-    .componentDidMount(trackSessionOn(_ => Callback()))
+    .componentDidMount(trackSessionOn(_ => Future()))
     .componentWillUnmountConst(trackSessionOff())
     .configure(Reusability.shouldComponentUpdate)
     .build

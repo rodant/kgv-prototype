@@ -1,11 +1,14 @@
 package me.spoter.pages
 
+import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.{CallbackTo, ScalaComponent}
 import me.spoter.components.bootstrap.{Container, Form}
 import me.spoter.models.AllotmentGarden
 import me.spoter.{Session, SessionTracker, StateXSession}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
   *
@@ -33,6 +36,9 @@ object GardensPage extends SessionTracker[Unit, Iterable[AllotmentGarden], Unit]
     <.div(^.key := g.title.hashCode, g.title)
   }
 
-  private def updateState(s: Session): CallbackTo[Iterable[AllotmentGarden]] = CallbackTo(Seq())
+  private def updateState(s: Session): Future[Iterable[AllotmentGarden]] = {
+
+    Future(Seq())
+  }
 
 }

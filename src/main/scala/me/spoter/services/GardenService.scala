@@ -2,6 +2,7 @@ package me.spoter.services
 
 import java.net.URI
 
+import me.spoter.Session
 import me.spoter.models._
 import me.spoter.solid_libs.RDFHelper
 
@@ -19,6 +20,12 @@ object GardenService {
 
       RDFHelper.listDir(imageDirUri).map[AllotmentGarden](createGarden(allotmentUri))
     }.flatten
+
+  def fetchGardensBy(session: Session): Future[Iterable[AllotmentGarden]] =
+    for {
+      gardenUris <- RDFHelper.listDir(new URI(s"${session.webId.getPath}/../spoterme/allotment_gardens"))
+      gardens <- Future.sequence(gardenUris.map(GardenService.fetchGarden))
+    } yield gardens
 
   private def createGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
     val imagesUrisOrPlaceholder = if (imageUris.nonEmpty) imageUris else List(

@@ -2,11 +2,13 @@ package me.spoter
 
 import java.net.URI
 
+import japgolly.scalajs.react.Callback
 import japgolly.scalajs.react.component.builder.Lifecycle.ComponentDidMount
 import japgolly.scalajs.react.extra.Reusability
-import japgolly.scalajs.react.{Callback, CallbackTo}
 import me.spoter.solid_libs.SolidAuth
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.scalajs.js
 import scala.util.{Failure, Success}
 
@@ -19,7 +21,7 @@ trait SessionTracker[P, S, B] {
 
   protected implicit val stateReuse: Reusability[StateXSession[S]] = Reusability.by_==[StateXSession[S]]
 
-  protected def trackSessionOn(f: Session => CallbackTo[S])(c: ComponentDidMount[P, StateXSession[S], B]): Callback = Callback {
+  protected def trackSessionOn(f: Session => Future[S])(c: ComponentDidMount[P, StateXSession[S], B]): Callback = Callback {
     if (loginCallback.isEmpty) loginCallback = Some(onLogin(f, c))
     SolidAuth.addListener("login", loginCallback.get)
 
@@ -41,9 +43,7 @@ trait SessionTracker[P, S, B] {
     //println(s"Logout Listener Count After remove = ${SolidAuth.listenerCount("logout")}")
   }
 
-  private def sessionInBackground(f: Session => CallbackTo[S], c: ComponentDidMount[P, StateXSession[S], B]): Unit = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-
+  private def sessionInBackground(f: Session => Future[S], c: ComponentDidMount[P, StateXSession[S], B]): Unit = {
     SolidAuth
       .currentSession()
       .toFuture
@@ -61,13 +61,15 @@ trait SessionTracker[P, S, B] {
       }
   }
 
-  private def onLogin(f: Session => CallbackTo[S], c: ComponentDidMount[P, StateXSession[S], B]): js.Function1[js.Dynamic, Unit] =
+  private def onLogin(f: Session => Future[S], c: ComponentDidMount[P, StateXSession[S], B]): js.Function1[js.Dynamic, Unit] =
     s => {
       val session = Session(new URI(s.webId.toString))
-      f(session).flatMap { st =>
-        c.modState(os => {
-          os.copy(state = st, session = Some(session))
-        })
+      Callback.future {
+        f(session).map { st =>
+          c.modState(os => {
+            os.copy(state = st, session = Some(session))
+          })
+        }
       }.runNow()
     }
 
