@@ -16,6 +16,7 @@ object RDFHelper {
   val SCHEMA_ORG: js.Dynamic = RDFLib.Namespace("http://schema.org/")
   val LDP: js.Dynamic = RDFLib.Namespace("http://www.w3.org/ns/ldp#")
   val VCARD: js.Dynamic = RDFLib.Namespace("http://www.w3.org/2006/vcard/ns#")
+  val PIM: js.Dynamic = RDFLib.Namespace("http://www.w3.org/ns/pim/space#")
 
   private val store = RDFLib.graph()
   private val fetcher = new RDFFetcher(store)
@@ -31,5 +32,5 @@ object RDFHelper {
 
   def get(sub: URI, prop: js.Dynamic): js.Dynamic = store.any(RDFLib.sym(sub.toString), prop)
 
-  def getAll(sub: URI, prop: js.Dynamic): js.Dynamic = store.each(RDFLib.sym(sub.toString), prop)
+  private def getAll(sub: URI, prop: js.Dynamic): js.Dynamic = store.each(RDFLib.sym(sub.toString), prop)
 }
