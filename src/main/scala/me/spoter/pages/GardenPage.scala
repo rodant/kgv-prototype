@@ -22,7 +22,7 @@ object GardenPage {
     def render(garden: AllotmentGarden): VdomElement = {
       Container(
         <.h1(garden.title),
-        Form(
+        Form()(
           Row()(^.height := 280.px)(
             Col() {
               Carousel(
@@ -44,7 +44,7 @@ object GardenPage {
                   FormLabel(column = true)("Größe:"),
                   Col(xl = 8, lg = 8, md = 8) {
                     FormControl(
-                      value = s"${garden.area.a} qm",
+                      value = s"${garden.area.a} m²",
                       readOnly = true,
                       plaintext = true)()
                   }

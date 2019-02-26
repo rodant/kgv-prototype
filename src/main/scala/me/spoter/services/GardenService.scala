@@ -2,6 +2,7 @@ package me.spoter.services
 
 import java.net.URI
 
+import me.spoter.Session
 import me.spoter.models._
 import me.spoter.solid_libs.RDFHelper
 
@@ -19,6 +20,19 @@ object GardenService {
 
       RDFHelper.listDir(imageDirUri).map[AllotmentGarden](createGarden(allotmentUri))
     }.flatten
+
+  def fetchGardensBy(session: Session): Future[Iterable[AllotmentGarden]] =
+    for {
+      storageUriStr <- RDFHelper.loadEntity(session.webId)(RDFHelper.get(session.webId, RDFHelper.PIM("storage")).value.toString)
+      gardenUris <- RDFHelper.listDir(new URI(s"$storageUriStr/spoterme/allotment_gardens/").normalize())
+        .recover[Seq[URI]] {
+        case e if e.getMessage.contains("Not Found") || e.getMessage.contains("404") => Seq()
+        case e =>
+          println(s"Got unexpected server error ${e.getMessage},\n when fetching the gardens dir for user ${session.webId}")
+          Seq()
+      }
+      gardens <- Future.sequence(gardenUris.map(GardenService.fetchGarden))
+    } yield gardens
 
   private def createGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
     val imagesUrisOrPlaceholder = if (imageUris.nonEmpty) imageUris else List(
