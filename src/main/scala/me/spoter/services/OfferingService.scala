@@ -2,6 +2,7 @@ package me.spoter.services
 
 import java.net.URI
 
+import me.spoter.Session
 import me.spoter.models.{AllotmentGarden, AllotmentOffering, Money, User}
 import me.spoter.solid_libs.RDFHelper
 
@@ -24,6 +25,19 @@ object OfferingService {
         createOffering(offeringUri, g, u)
       }
     }.flatten
+
+  def fetchOfferingsBy(session: Session): Future[Iterable[AllotmentOffering]] =
+    for {
+      storageUriStr <- RDFHelper.loadEntity(session.webId)(RDFHelper.get(session.webId, RDFHelper.PIM("storage")).value.toString)
+      offerUris <- RDFHelper.listDir(new URI(s"$storageUriStr/spoterme/offers/").normalize())
+        .recover[Seq[URI]] {
+        case e if e.getMessage.contains("Not Found") || e.getMessage.contains("404") => Seq()
+        case e =>
+          println(s"Got unexpected server error ${e.getMessage},\n when fetching the offers dir for user ${session.webId}")
+          Seq()
+      }
+      offers <- Future.sequence(offerUris.map(OfferingService.fetchOffering))
+    } yield offers
 
   private def createOffering(offeringUri: URI, g: AllotmentGarden, offeror: User): AllotmentOffering = {
     val title = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("name"))

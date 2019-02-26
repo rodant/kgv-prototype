@@ -4,7 +4,7 @@ import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.{Footer, TopNav}
 import me.spoter.models.Menu
-import me.spoter.pages.{GardenPage, GardensPage, HomePage, OfferingPage}
+import me.spoter.pages._
 
 object AppRouter {
 
@@ -13,6 +13,8 @@ object AppRouter {
   case object Home extends AppPage
 
   case class Items(p: Item) extends AppPage
+
+  case object Offerings extends AppPage
 
   case class Offering(uri: String) extends AppPage
 
@@ -27,7 +29,8 @@ object AppRouter {
       | staticRoute(root, Home) ~> render(HomePage())
       | dynamicRouteCT[Offering]("#offerings?uri=" ~ string(".+").caseClass[Offering]) ~> dynRender(gp => OfferingPage(gp.uri))
       | dynamicRouteCT[Garden]("#gardens?uri=" ~ string(".+").caseClass[Garden]) ~> dynRender(gp => GardenPage(gp.uri))
-      | staticRoute("#gardens", Gardens) ~> render(GardensPage()))
+      | staticRoute("#gardens", Gardens) ~> render(GardensPage())
+      | staticRoute("#offerings", Offerings) ~> render(OfferingsPage()))
       .notFound(redirectToPage(Home)(Redirect.Replace))
       .renderWith(layout)
   }
