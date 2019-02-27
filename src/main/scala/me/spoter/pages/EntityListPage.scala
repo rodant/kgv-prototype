@@ -5,7 +5,8 @@ import java.net.URI
 import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.html_<^._
-import me.spoter.components.bootstrap.{Container, Form, NavLink}
+import me.spoter.components.EntityList
+import me.spoter.components.bootstrap.Container
 import me.spoter.models.KGVEntity
 import me.spoter.{Session, SessionTracker, StateXSession}
 
@@ -26,10 +27,15 @@ trait EntityListPage[E <: KGVEntity] extends SessionTracker[Unit, Iterable[E], U
     .render_S { sxs =>
       Container(
         <.h1(s"Meine $entityRenderName"),
-        Form()(
-          <.h2("Bitten einloggen!").when(sxs.session.isEmpty),
-          <.h2(s"Keine $entityRenderName gefunden.").when(sxs.state.isEmpty && sxs.session.getOrElse(initialSession) != initialSession),
-          sxs.state.toTagMod(renderEntity).when(sxs.session.isDefined))
+        renderWhen(sxs.session.isEmpty) {
+          <.h2("Bitten einloggen!")
+        },
+        renderWhen(sxs.state.isEmpty && sxs.session.getOrElse(initialSession) != initialSession) {
+          <.h2(s"Keine $entityRenderName gefunden.")
+        },
+        renderWhen(sxs.session.isDefined) {
+          EntityList(entityUriFragment, sxs.state)
+        }
       )
     }
     .componentDidMount(trackSessionOn(fetchEntities))
@@ -41,7 +47,5 @@ trait EntityListPage[E <: KGVEntity] extends SessionTracker[Unit, Iterable[E], U
 
   def apply(): VdomElement = component().vdomElement
 
-  private def renderEntity(e: E): VdomElement = {
-    NavLink(href = s"#$entityUriFragment?uri=${e.uri}")(e.title)
-  }
+  private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
 }

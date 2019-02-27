@@ -6,8 +6,8 @@ import me.spoter.services.OfferingService
 
 import scala.concurrent.Future
 
-object OfferingsPage extends EntityListPage[AllotmentOffering] {
-  override protected val componentName: String = "OfferingsPage"
+object MyOfferingsPage extends EntityListPage[AllotmentOffering] {
+  override protected val componentName: String = "MyOfferingsPage"
 
   override protected val entityRenderName: String = "Gartenangebote"
 
