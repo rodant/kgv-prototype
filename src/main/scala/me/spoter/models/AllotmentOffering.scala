@@ -13,4 +13,4 @@ case class AllotmentOffering(uri: URI = new URI(""),
                              price: Money = Money(0),
                              availabilityStarts: js.Date = new js.Date(),
                              offeredBy: User,
-                             garden: AllotmentGarden)
+                             garden: AllotmentGarden) extends KGVEntity

@@ -7,11 +7,6 @@ import me.spoter.models.AllotmentCondition.Good
 /**
   * AllotmentGarden entity.
   *
-  * @param uri
-  * @param location
-  * @param price
-  * @param bungalow
-  * @param title
   */
 case class AllotmentGarden(uri: URI = new URI(""),
                            title: String = "",
@@ -22,4 +17,4 @@ case class AllotmentGarden(uri: URI = new URI(""),
                            area: Area = Area(0),
                            price: Money = Money(0),
                            bungalow: Option[Bungalow] = None,
-                           condition: AllotmentCondition = Good)
+                           condition: AllotmentCondition = Good) extends KGVEntity
