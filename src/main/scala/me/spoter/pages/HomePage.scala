@@ -12,6 +12,9 @@ object HomePage {
 
   private val baseUrl = "https://orisha1.solid.community/spoterme/offers/"
 
+  private val uriParamLeft = "?district="
+  private val initialState = uriParamLeft + "*"
+
   class Backend(bs: BackendScope[Null, String]) {
 
     def selectAllotment(e: ReactEventFromInput): Callback = bs.setState(e.target.value)
@@ -23,10 +26,10 @@ object HomePage {
           Row()(
             Col() {
               FormControl(as = "select", onChange = selectAllotment _)(
-                <.option(^.value := "", "Alle Bezirke"),
-                <.option(^.value := s"?uri=${baseUrl}17be10f3-802f-42be-bbd0-bb03be89c812", "Angebot 1"),
-                <.option(^.value := s"?uri=${baseUrl}630cedbb-162a-4021-b38c-38cb7b6ed5d7", "Angebot 2"),
-                <.option(^.value := "?uri=https://orisha2.solid.community/spoterme/offers/94e1194d-33a9-46de-b45b-100d17fd4236", "Angebot 3")
+                <.option(^.value := initialState, "Alle Bezirke"),
+                <.option(^.value := s"${uriParamLeft}mitte", "Mitte"),
+                <.option(^.value := s"${uriParamLeft}friedrichshain-kreuzberg", "Friedrichshain-Kreuzberg"),
+                <.option(^.value := s"${uriParamLeft}pankow", "Pankow"),
               )
             },
             Col() {
@@ -40,7 +43,7 @@ object HomePage {
 
   private val component =
     ScalaComponent.builder[Null]("HomePage")
-      .initialState("")
+      .initialState(initialState)
       .renderBackend[Backend]
       .build
 

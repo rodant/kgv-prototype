@@ -3,7 +3,6 @@ package me.spoter.routes
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.{Footer, TopNav}
-import me.spoter.models.Menu
 import me.spoter.pages._
 
 object AppRouter {
@@ -18,6 +17,8 @@ object AppRouter {
 
   case class Offering(uri: String) extends AppPage
 
+  case class SearchResult(district: String) extends AppPage
+
   case object Gardens extends AppPage
 
   case class Garden(uri: String) extends AppPage
@@ -27,17 +28,15 @@ object AppRouter {
 
     (trimSlashes
       | staticRoute(root, Home) ~> render(HomePage())
-      | dynamicRouteCT[Offering]("#offerings?uri=" ~ string(".+").caseClass[Offering]) ~> dynRender(gp => OfferingPage(gp.uri))
-      | dynamicRouteCT[Garden]("#gardens?uri=" ~ string(".+").caseClass[Garden]) ~> dynRender(gp => GardenPage(gp.uri))
+      | dynamicRouteCT[Offering]("#offerings?uri=" ~ string(".+").caseClass[Offering]) ~> dynRender(ap => OfferingPage(ap.uri))
+      | dynamicRouteCT[Garden]("#gardens?uri=" ~ string(".+").caseClass[Garden]) ~> dynRender(ap => GardenPage(ap.uri))
+      | dynamicRouteCT[SearchResult]("#offerings?district=" ~ string(".+").caseClass[SearchResult])
+      ~> dynRender(ap => SearchResultPage(ap.district))
       | staticRoute("#gardens", Gardens) ~> render(MyGardensPage())
       | staticRoute("#offerings", Offerings) ~> render(MyOfferingsPage()))
       .notFound(redirectToPage(Home)(Redirect.Replace))
       .renderWith(layout)
   }
-
-  private val mainMenu = Vector(Menu(
-    "Gärten", Garden("https://orisha1.solid.community/spoterme/allotment_gardens/13dd0a8d-443d-4b22-b7d9-1998b76a458a")),
-    Menu("Gartenangebote", Offering("https://orisha1.solid.community/spoterme/offers/17be10f3-802f-42be-bbd0-bb03be89c812")))
 
   private def layout(c: RouterCtl[AppPage], r: Resolution[AppPage]) =
     <.div(
