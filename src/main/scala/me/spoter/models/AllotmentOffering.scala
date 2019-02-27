@@ -2,8 +2,6 @@ package me.spoter.models
 
 import java.net.URI
 
-import me.spoter.pages.ListObject
-
 import scala.scalajs.js
 
 /**
@@ -15,4 +13,4 @@ case class AllotmentOffering(uri: URI = new URI(""),
                              price: Money = Money(0),
                              availabilityStarts: js.Date = new js.Date(),
                              offeredBy: User,
-                             garden: AllotmentGarden) extends ListObject
+                             garden: AllotmentGarden) extends KGVEntity

@@ -6,13 +6,12 @@ import me.spoter.services.GardenService
 
 import scala.concurrent.Future
 
-/**
-  *
-  */
-object GardensPage extends ObjectListPage[AllotmentGarden] {
-  override protected val objectsName: String = "Gärten"
+object GardensPage extends EntityListPage[AllotmentGarden] {
+  override protected val componentName: String = "GardenPage"
 
-  override protected val objectsUriFragment: String = "gardens"
+  override protected val entityRenderName: String = "Gärten"
 
-  override protected def fetchListObjects(s: Session): Future[Iterable[AllotmentGarden]] = GardenService.fetchGardensBy(s)
+  override protected val entityUriFragment: String = "gardens"
+
+  override protected def fetchEntities(s: Session): Future[Iterable[AllotmentGarden]] = GardenService.fetchGardensBy(s)
 }
