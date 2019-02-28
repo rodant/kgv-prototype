@@ -27,16 +27,17 @@ object SearchResultPage {
 
   def apply(district: String): VdomElement = component(Props(district)).vdomElement
 
-  private val offeringsUris = Seq(
-    "https://orisha1.solid.community/spoterme/offers/17be10f3-802f-42be-bbd0-bb03be89c812",
-    "https://orisha1.solid.community/spoterme/offers/630cedbb-162a-4021-b38c-38cb7b6ed5d7",
-    "https://orisha2.solid.community/spoterme/offers/94e1194d-33a9-46de-b45b-100d17fd4236"
+  private val userIds = Seq(
+    URI.create("https://orisha1.solid.community/profile/card#me"),
+    URI.create("https://orisha2.solid.community/profile/card#me")
   )
 
   private def fetchOfferings(c: ComponentDidMount[Props, Seq[AllotmentOffering], Unit]): Callback = {
     import scala.concurrent.ExecutionContext.Implicits.global
     Callback.future {
-      Future.sequence(offeringsUris.map(uStr => OfferingService.fetchOffering(URI.create(uStr)))).map(c.setState)
+      Future.sequence(userIds.map(uid => OfferingService.fetchOfferingsByWebId(uid)))
+        .map(_.flatten)
+        .map(c.setState)
     }
   }
 }

@@ -13,5 +13,6 @@ object MyOfferingsPage extends EntityListPage[AllotmentOffering] {
 
   override protected val entityUriFragment: String = "offerings"
 
-  override protected def fetchEntities(s: Session): Future[Iterable[AllotmentOffering]] = OfferingService.fetchOfferingsBy(s)
+  override protected def fetchEntities(s: Session): Future[Iterable[AllotmentOffering]] =
+    OfferingService.fetchOfferingsByWebId(s.webId)
 }
