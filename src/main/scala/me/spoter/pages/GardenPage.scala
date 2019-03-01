@@ -2,9 +2,8 @@ package me.spoter.pages
 
 import java.net.URI
 
-import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
+import japgolly.scalajs.react._
+import japgolly.scalajs.react.vdom.html_<^.{VdomElement, _}
 import me.spoter.components.SpoterMap
 import me.spoter.components.bootstrap._
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
@@ -18,10 +17,19 @@ object GardenPage {
 
   case class Props(uri: URI)
 
-  class Backend(bs: BackendScope[Props, AllotmentGarden]) {
-    def render(garden: AllotmentGarden): VdomElement = {
+  case class State(g: AllotmentGarden = AllotmentGarden(), editing: Boolean = false)
+
+  class Backend(bs: BackendScope[Props, State]) {
+    def render(state: State): VdomElement = {
+      val garden = state.g
       Container(
-        <.h1(garden.title),
+        renderWhen(!state.editing)(<.h1(garden.title)),
+        renderWhen(state.editing) {
+          FormControl(
+            value = s"${garden.title}",
+            onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(title = e.target.value)))(
+            ^.placeholder := "Name des Gartens")()
+        },
         Form()(
           Row()(^.height := 280.px)(
             Col() {
@@ -36,7 +44,7 @@ object GardenPage {
               )
             },
             Col() {
-              SpoterMap(garden.location.latitude, garden.location.longitude)
+              renderWhen(!state.editing)(SpoterMap(garden.location.latitude, garden.location.longitude))
             },
             Col()(
               FormGroup(controlId = "size") {
@@ -70,8 +78,10 @@ object GardenPage {
                   as = "textarea",
                   value = garden.description,
                   rows = 20,
-                  readOnly = true,
-                  plaintext = true)()
+                  readOnly = !state.editing,
+                  plaintext = !state.editing,
+                  onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(description = e.target.value)))(
+                  ^.placeholder := "Beschreibung")()
               }
             },
             Col()(
@@ -100,7 +110,8 @@ object GardenPage {
                       readOnly = true,
                       plaintext = true)()
                   })
-              }
+              },
+              renderWhen(state.editing)(Button(disabled = state.g.title.isEmpty)("Speichern"))
             )
           )
         )
@@ -109,16 +120,25 @@ object GardenPage {
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    def updateState(props: Props): Callback = Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(_ => g)))
+    def updateState(props: Props): Callback =
+      if (props.uri.toString == "_blank") Callback()
+      else Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(s => s.copy(g = g))))
 
   }
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
-    .initialState(AllotmentGarden())
+    .initialStateFromProps(props => State().copy(editing = props.uri.toString == "_blank"))
     .renderBackend[Backend]
     .componentDidMount(c => c.backend.updateState(c.props))
     .build
 
   def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
+
+  private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])(transform: AllotmentGarden => AllotmentGarden): Callback = {
+    e.persist()
+    bs.modState(old => old.copy(g = transform(old.g)))
+  }
+
+  private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
 }

@@ -6,7 +6,7 @@ import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.EntityList
-import me.spoter.components.bootstrap.Container
+import me.spoter.components.bootstrap.{Container, Row}
 import me.spoter.models.KGVEntity
 import me.spoter.{Session, SessionTracker, StateXSession}
 
@@ -26,7 +26,16 @@ trait EntityListPage[E <: KGVEntity] extends SessionTracker[Unit, Iterable[E], U
     .initialState(StateXSession[Iterable[E]](Seq(), Some(initialSession)))
     .render_S { sxs =>
       Container(
-        <.h1(s"Meine $entityRenderName"),
+        Row()(
+          <.h1(s"Meine $entityRenderName"),
+          renderWhen(sxs.session.isDefined) {
+            <.a(^.href := s"#$entityUriFragment?uri=_blank",
+              <.i(^.className := "fas fa-plus-circle fa-2x",
+                ^.title := "Neu Anlegen",
+                ^.color := "darkseagreen",
+                ^.marginLeft := 30.px))
+          }
+        ),
         renderWhen(sxs.session.isEmpty) {
           <.h2("Bitten einloggen!")
         },
