@@ -6,12 +6,12 @@ import me.spoter.services.GardenService
 
 import scala.concurrent.Future
 
-object GardensPage extends EntityListPage[AllotmentGarden] {
-  override protected val componentName: String = "GardenPage"
+object MyGardensPage extends EntityListPage[AllotmentGarden] {
+  override protected val componentName: String = "MyGardenPage"
 
   override protected val entityRenderName: String = "Gärten"
 
   override protected val entityUriFragment: String = "gardens"
 
-  override protected def fetchEntities(s: Session): Future[Iterable[AllotmentGarden]] = GardenService.fetchGardensBy(s)
+  override protected def fetchEntities(s: Session): Future[Iterable[AllotmentGarden]] = GardenService.fetchGardensByWebId(s.webId)
 }

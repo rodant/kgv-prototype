@@ -18,7 +18,7 @@ object GlobalStyle extends StyleSheet.Inline {
       margin(20.px)
     ),
     unsafeRoot(".ui-elem")(
-      margin(5.px)
+      marginRight(5.px)
     ),
     unsafeRoot(".form-group")(
       marginRight(50.px)
