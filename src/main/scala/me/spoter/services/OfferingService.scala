@@ -19,7 +19,7 @@ object OfferingService {
       val gardenUri = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("includes")).value.toString)
       val offerorUri = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("offeredBy")).value.toString)
 
-      GardenService.fetchGarden(gardenUri).zip(fetchOfferor(offerorUri))
+      GardenService.fetchGarden(gardenUri).zip(UserService.fetchUser(offerorUri))
         .map[AllotmentOffering] { case (g, u) =>
         createOffering(offeringUri, g, u)
       }
@@ -54,19 +54,5 @@ object OfferingService {
       availabilityStarts = new js.Date(availabilityStarts),
       garden = g
     )
-  }
-
-  private def fetchOfferor(offerorUri: URI): Future[User] = {
-    RDFHelper.loadEntity(offerorUri) {
-      val hasEmailNode = RDFHelper.get(offerorUri, RDFHelper.VCARD("hasEmail"))
-      hasEmailNode match {
-        case n if js.isUndefined(n) => Future(User(offerorUri))
-        case _ =>
-          val emailUri = new URI(hasEmailNode.value.toString)
-          RDFHelper.loadEntity(emailUri)(
-            User(offerorUri, Some(new URI(RDFHelper.get(emailUri, RDFHelper.VCARD("value")).value.toString)))
-          )
-      }
-    }.flatten
   }
 }

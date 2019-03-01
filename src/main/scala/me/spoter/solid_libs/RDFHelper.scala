@@ -32,5 +32,14 @@ object RDFHelper {
 
   def get(sub: URI, prop: js.Dynamic): js.Dynamic = store.any(RDFLib.sym(sub.toString), prop)
 
+  def statementsMatching(sub: Option[URI], prop: Option[js.Dynamic], obj: Option[URI], doc: Option[URI]): Seq[js.Dynamic] = {
+    import js.JSConverters._
+    val subNode = sub.map(s => RDFLib.sym(s.toString)).orUndefined
+    val objNode = obj.map(o => RDFLib.sym(o.toString)).orUndefined
+    val propNode = prop.orUndefined
+    val docNode = doc.map(d => RDFLib.sym(d.toString)).orUndefined
+    store.`match`(subNode, propNode, objNode, docNode).asInstanceOf[js.Array[js.Dynamic]]
+  }
+
   private def getAll(sub: URI, prop: js.Dynamic): js.Dynamic = store.each(RDFLib.sym(sub.toString), prop)
 }

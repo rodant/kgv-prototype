@@ -30,6 +30,7 @@ object HomePage {
                 <.option(^.value := s"${uriParamLeft}mitte", "Mitte"),
                 <.option(^.value := s"${uriParamLeft}friedrichshain-kreuzberg", "Friedrichshain-Kreuzberg"),
                 <.option(^.value := s"${uriParamLeft}pankow", "Pankow"),
+                <.option(^.value := s"$uriParamLeft...", "...")
               )
             },
             Col() {
