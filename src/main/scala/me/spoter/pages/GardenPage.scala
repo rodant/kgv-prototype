@@ -120,25 +120,24 @@ object GardenPage {
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    def updateState(props: Props): Callback =
+    def fetchDataIfNotEditing(props: Props): Callback =
       if (props.uri.toString == "_blank") Callback()
       else Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(s => s.copy(g = g))))
 
+    private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])(transform: AllotmentGarden => AllotmentGarden): Callback = {
+      e.persist()
+      bs.modState(old => old.copy(g = transform(old.g)))
+    }
   }
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
     .initialStateFromProps(props => State().copy(editing = props.uri.toString == "_blank"))
     .renderBackend[Backend]
-    .componentDidMount(c => c.backend.updateState(c.props))
+    .componentDidMount(c => c.backend.fetchDataIfNotEditing(c.props))
     .build
 
   def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
-
-  private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])(transform: AllotmentGarden => AllotmentGarden): Callback = {
-    e.persist()
-    bs.modState(old => old.copy(g = transform(old.g)))
-  }
 
   private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
 }
