@@ -5,12 +5,14 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.JSConverters._
 
 /**
   * First draft of an abstraction over the RDFLib.
   */
 // TODO: avoid dependency to JS, hint: use the RDF typescript defs.
 object RDFHelper {
+  val RDF: js.Dynamic = RDFLib.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
   val FOAF: js.Dynamic = RDFLib.Namespace("http://xmlns.com/foaf/0.1/")
   val GOOD_REL: js.Dynamic = RDFLib.Namespace("http://purl.org/goodrelations/v1#")
   val SCHEMA_ORG: js.Dynamic = RDFLib.Namespace("http://schema.org/")
@@ -20,6 +22,7 @@ object RDFHelper {
 
   private val store = RDFLib.graph()
   private val fetcher = new RDFFetcher(store)
+  private val updateManager = new RDFUpdateManager(store)
 
   private def load(sub: URI): Future[js.Object] = fetcher.load(sub.toString).toFuture
 
@@ -39,6 +42,17 @@ object RDFHelper {
     val propNode = prop.orUndefined
     val docNode = doc.map(d => RDFLib.sym(d.toString)).orUndefined
     store.`match`(subNode, propNode, objNode, docNode).asInstanceOf[js.Array[js.Dynamic]]
+  }
+
+  def createFileResource(sub: URI, data: Seq[js.Dynamic], callback: js.Function): Future[js.Object] = {
+    updateManager.put(RDFLib.sym(sub.toString), data.toJSArray, "text/turtle", callback).toFuture
+  }
+
+  /**
+    * don't use @metaString, there is a bug in the rdflib: https://github.com/linkeddata/rdflib.js/issues/266
+    */
+  def createContainerResource(parentUri: URI, containerName: String, metaString: Option[String] = None): Future[js.Object] = {
+    fetcher.createContainer(parentUri.toString, containerName, metaString.orUndefined).toFuture
   }
 
   private def getAll(sub: URI, prop: js.Dynamic): js.Dynamic = store.each(RDFLib.sym(sub.toString), prop)
