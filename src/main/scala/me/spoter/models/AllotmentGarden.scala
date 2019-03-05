@@ -16,4 +16,7 @@ case class AllotmentGarden(uri: URI = new URI(""),
                            description: String = "",
                            area: Area = Area(),
                            bungalow: Option[Bungalow] = None,
-                           condition: AllotmentCondition = Good) extends KGVEntity
+                           condition: AllotmentCondition = Good) extends KGVEntity {
+
+  override def withNewTitle(t: String): KGVEntity = copy(title = t)
+}
