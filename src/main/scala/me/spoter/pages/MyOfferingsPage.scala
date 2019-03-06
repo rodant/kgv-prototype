@@ -2,10 +2,10 @@ package me.spoter.pages
 
 import java.net.URI
 
-import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.VdomElement
+import japgolly.scalajs.react.{Callback, ScalaComponent}
 import me.spoter.models.{AllotmentGarden, AllotmentOffering, User}
 import me.spoter.services.OfferingService
 import me.spoter.{Session, SessionTracker, StateXSession}
@@ -21,6 +21,8 @@ class MyOfferingsBackend(bs: BackendScope[Unit, StateXSession[State]]) extends E
 
   override protected def newEntity(): AllotmentOffering =
     AllotmentOffering(offeredBy = User(URI.create("_blank")), garden = AllotmentGarden())
+
+  override protected def createEntity(sxs: StateXSession[State]): Callback = Callback()
 }
 
 object MyOfferingsPage extends SessionTracker[Unit, State, MyOfferingsBackend] {

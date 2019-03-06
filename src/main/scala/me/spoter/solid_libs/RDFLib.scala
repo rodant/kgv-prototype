@@ -14,6 +14,8 @@ object RDFLib extends js.Object {
   def graph(): js.Dynamic = js.native
 
   def sym(subject: String): js.Dynamic = js.native
+
+  def st(subject: js.Dynamic, predicate: js.Dynamic, `object`: js.Dynamic, doc: js.Dynamic): js.Dynamic = js.native
 }
 
 @js.native
@@ -27,5 +29,10 @@ class RDFFetcher(store: js.Dynamic) extends js.Object {
 @js.native
 @JSImport("rdflib", "UpdateManager")
 class RDFUpdateManager(store: js.Dynamic) extends js.Object {
+  /**
+    * Suitable for creating a new file resource. For containers @see RDFFetcher#createContainer.
+    */
   def put(doc: js.Dynamic, data: js.Array[js.Dynamic], contentType: String, callback: js.Function): js.Promise[js.Object] = js.native
+
+  def update(deletions: js.UndefOr[js.Array[js.Dynamic]], insertions: js.UndefOr[js.Array[js.Dynamic]], callback: js.Function): Unit = js.native
 }

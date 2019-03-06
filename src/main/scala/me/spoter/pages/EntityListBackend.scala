@@ -18,6 +18,8 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
 
   protected def newEntity(): KGVEntity
 
+  protected def createEntity(sxs: StateXSession[State]): Callback
+
   def render(sxs: StateXSession[State]): VdomElement = {
     val es = sxs.state.es
     Container(
@@ -44,7 +46,8 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
             <.i(^.className := "fas fa-check fa-lg",
               ^.title := "Bestätigen",
               ^.color := "darkseagreen",
-              ^.marginLeft := 10.px),
+              ^.marginLeft := 10.px,
+              ^.onClick --> bs.state.flatMap[Unit](onCreateGarden)),
             <.i(^.className := "fas fa-times fa-lg",
               ^.title := "Abbrechen",
               ^.color := "red",
@@ -57,6 +60,10 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
       }
     )
   }
+
+  private def onCreateGarden(sxs: StateXSession[State]): Callback =
+    if (sxs.state.addingEntity.get.title.isEmpty) Callback()
+    else createEntity(sxs)
 
   private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
 

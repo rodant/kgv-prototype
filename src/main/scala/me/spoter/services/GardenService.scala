@@ -22,16 +22,21 @@ object GardenService {
 
   def fetchGardensByWebId(webId: URI): Future[Seq[AllotmentGarden]] = {
     for {
-      storageUriStr <- RDFHelper.loadEntity(webId)(RDFHelper.get(webId, RDFHelper.PIM("storage")).value.toString)
-      gardenUris <- RDFHelper.listDir(new URI(s"$storageUriStr/spoterme/allotment_gardens/").normalize())
-        .recover[Seq[URI]] {
+      gardensDirUri <- fetchGardensDirByWebId(webId)
+      gardenUris <- RDFHelper.listDir(gardensDirUri).recover[Seq[URI]] {
         case e if e.getMessage.contains("Not Found") || e.getMessage.contains("404") => Seq()
         case e =>
-          println(s"Got unexpected server error ${e.getMessage},\n when fetching the gardens dir for user ${webId}")
+          println(s"Got unexpected server error ${e.getMessage},\n when fetching the gardens dir for user $webId")
           Seq()
       }
       gardens <- Future.sequence(gardenUris.map(GardenService.fetchGarden))
     } yield gardens
+  }
+
+  def fetchGardensDirByWebId(webId: URI): Future[URI] = RDFHelper.loadEntity(webId) {
+    RDFHelper.get(webId, RDFHelper.PIM("storage")).value.toString
+  }.map { s =>
+    URI.create(s"$s/spoterme/allotment_gardens/").normalize()
   }
 
   private def createGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {

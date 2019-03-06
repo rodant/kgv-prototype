@@ -3,7 +3,7 @@ package me.spoter.solid_libs
 import java.net.URI
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
@@ -33,6 +33,8 @@ object RDFHelper {
     filesNodes.map(f => new URI(f.value.toString))
   }
 
+  private def getAll(sub: URI, prop: js.Dynamic): js.Dynamic = store.each(RDFLib.sym(sub.toString), prop)
+
   def get(sub: URI, prop: js.Dynamic): js.Dynamic = store.any(RDFLib.sym(sub.toString), prop)
 
   def statementsMatching(sub: Option[URI], prop: Option[js.Dynamic], obj: Option[URI], doc: Option[URI]): Seq[js.Dynamic] = {
@@ -55,5 +57,16 @@ object RDFHelper {
     fetcher.createContainer(parentUri.toString, containerName, metaString.orUndefined).toFuture
   }
 
-  private def getAll(sub: URI, prop: js.Dynamic): js.Dynamic = store.each(RDFLib.sym(sub.toString), prop)
+  def addStatementToWeb(st: js.Dynamic): Future[Unit] = {
+    val p = Promise[Unit]()
+    val callback = (uri: js.UndefOr[String], success: Boolean, error: js.UndefOr[String]) => {
+      if (success) {
+        p.success()
+      } else {
+        p.failure(new Exception(error.get))
+      }
+    }
+    updateManager.update(js.undefined, js.Array(st), callback)
+    p.future
+  }
 }
