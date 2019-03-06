@@ -7,11 +7,11 @@ import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.EntityList
 import me.spoter.components.bootstrap.{Container, FormControl, Row}
 import me.spoter.models.KGVEntity
-import me.spoter.{Session, SessionTracker, StateXSession}
+import me.spoter.{Session, StateXSession}
 
 case class State(es: Iterable[KGVEntity], addingEntity: Option[KGVEntity] = None)
 
-abstract class Backend(bs: BackendScope[Unit, StateXSession[State]]) {
+abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
   private val initialSession = Session(URI.create("_blank"))
   protected val entityUriFragment: String
   protected val entityRenderName: String
@@ -67,11 +67,4 @@ abstract class Backend(bs: BackendScope[Unit, StateXSession[State]]) {
         old.state.copy(addingEntity =
           old.state.addingEntity.map(_.withNewTitle(e.target.value)))))
   }
-}
-
-/**
-  * Abstraction over a page showing a list of kgv entities (e.g. garden, offering) conforming to the shape defined through KGVEntity.
-  */
-trait EntityListPage[E <: KGVEntity, B <: Backend] extends SessionTracker[Unit, State, B] {
-  protected val initialSession = Session(URI.create("_blank"))
 }

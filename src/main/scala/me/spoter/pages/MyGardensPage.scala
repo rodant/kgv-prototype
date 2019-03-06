@@ -6,12 +6,12 @@ import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.VdomElement
 import me.spoter.models.AllotmentGarden
 import me.spoter.services.GardenService
-import me.spoter.{Session, StateXSession}
+import me.spoter.{Session, SessionTracker, StateXSession}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Backend(bs) {
+class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends EntityListBackend(bs) {
   override protected val entityUriFragment: String = "gardens"
   override protected val entityRenderName: String = "Gärten"
 
@@ -20,7 +20,7 @@ class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Bac
   override protected def newEntity(): AllotmentGarden = AllotmentGarden()
 }
 
-object MyGardensPage extends EntityListPage[AllotmentGarden, MyGardensBackend] {
+object MyGardensPage extends SessionTracker[Unit, State, MyGardensBackend] {
   private val componentName: String = "MyGardensPage"
 
   private val component = ScalaComponent

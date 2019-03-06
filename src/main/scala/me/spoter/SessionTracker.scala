@@ -19,6 +19,7 @@ trait SessionTracker[P, S, B] {
   private var loginCallback: Option[js.Function1[js.Dynamic, Unit]] = None
   private var logoutCallback: Option[js.Function1[js.Dynamic, Unit]] = None
 
+  protected val initialSession = Session(URI.create("_blank"))
   protected implicit val stateReuse: Reusability[StateXSession[S]] = Reusability.by_==[StateXSession[S]]
 
   protected def trackSessionOn(f: Session => Future[S])(c: ComponentDidMount[P, StateXSession[S], B]): Callback = Callback {

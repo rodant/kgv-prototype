@@ -8,12 +8,12 @@ import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.VdomElement
 import me.spoter.models.{AllotmentGarden, AllotmentOffering, User}
 import me.spoter.services.OfferingService
-import me.spoter.{Session, StateXSession}
+import me.spoter.{Session, SessionTracker, StateXSession}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MyOfferingsBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Backend(bs) {
+class MyOfferingsBackend(bs: BackendScope[Unit, StateXSession[State]]) extends EntityListBackend(bs) {
   override protected val entityUriFragment: String = "offerings"
   override protected val entityRenderName: String = "Gartenangebote"
 
@@ -23,7 +23,7 @@ class MyOfferingsBackend(bs: BackendScope[Unit, StateXSession[State]]) extends B
     AllotmentOffering(offeredBy = User(URI.create("_blank")), garden = AllotmentGarden())
 }
 
-object MyOfferingsPage extends EntityListPage[AllotmentOffering, MyOfferingsBackend] {
+object MyOfferingsPage extends SessionTracker[Unit, State, MyOfferingsBackend] {
   private val componentName: String = "MyOfferingsPage"
 
   private val component = ScalaComponent
