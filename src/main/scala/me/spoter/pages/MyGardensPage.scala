@@ -40,17 +40,31 @@ class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Ent
 
   private def performRDFOps(g: AllotmentGarden): Future[AllotmentGarden] = {
     val gardenIri = IRI(g.uri)
-    val gardenIriS = gardenIri.toString
-    val st = RDFLib.st(
-      subject = RDFLib.sym(gardenIriS),
-      predicate = RDFHelper.RDF("type"),
-      obj = RDFHelper.PROD("Allotment_(gardening)"),
-      doc = RDFLib.sym(gardenIriS + "/.meta").doc())
+    val gardenIriS = gardenIri.toString + "/"
+    val sub = RDFLib.sym(gardenIriS)
+    val doc = RDFLib.sym(gardenIriS + ".meta")
+    val sts = List(
+      RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.PROD("Allotment_(gardening)"), doc),
+      RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.GOOD_REL("Individual"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("name"), RDFLib.literal(g.title, "de"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("description"), RDFLib.literal(g.description, "de"), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("image"), RDFLib.literal("images/"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("width"), RDFLib.literal("1"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("depth"), RDFLib.literal(g.area.a.toString), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("streetAddress"), RDFLib.literal(g.address.streetAndNumber, "de"), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("postalCode"), RDFLib.literal(g.address.zipCode.toString), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("addressRegion"), RDFLib.literal(g.address.region, "de"), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("addressCountry"), RDFLib.literal(g.address.country, "de"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("includes"), RDFLib.literal(g.bungalow.fold("")(_ => "Bungalow"), "de"), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("latitude"), RDFLib.literal(g.location.latitude.toString, typ = RDFHelper.XMLS("float")), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("longitude"), RDFLib.literal(g.location.longitude.toString, typ = RDFHelper.XMLS("float")), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("condition"), RDFLib.literal(g.condition.toString, "de"), doc)
+    )
     val baseIri = gardenIri.baseIRI
     val uuid = gardenIri.lastPathComponent
     for {
       _ <- RDFHelper.createContainerResource(baseIri.innerUri, uuid)
-      _ <- RDFHelper.addStatementToWeb(st)
+      _ <- RDFHelper.addStatementsToWeb(sts)
     } yield g
   }
 }

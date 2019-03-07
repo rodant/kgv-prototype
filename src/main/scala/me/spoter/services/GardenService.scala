@@ -15,9 +15,11 @@ object GardenService {
   def fetchGarden(allotmentUri: URI): Future[AllotmentGarden] =
     RDFHelper.loadEntity[Future[AllotmentGarden]](allotmentUri) {
       val imageDir = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
-      val imageDirUri = new URI(s"${allotmentUri.toString}/${imageDir.toString}")
+      val imageDirUri = URI.create(s"${allotmentUri.toString}/${imageDir.toString}").normalize()
 
-      RDFHelper.listDir(imageDirUri).map[AllotmentGarden](createGarden(allotmentUri))
+      RDFHelper.listDir(imageDirUri)
+        .recover { case _ => Seq() }
+        .map[AllotmentGarden](populateLoadedGarden(allotmentUri))
     }.flatten
 
   def fetchGardensByWebId(webId: URI): Future[Seq[AllotmentGarden]] = {
@@ -39,7 +41,7 @@ object GardenService {
     URI.create(s"${s}spoterme/allotment_gardens/")
   }
 
-  private def createGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
+  private def populateLoadedGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
     val imagesUrisOrPlaceholder = if (imageUris.nonEmpty) imageUris else List(
       new URI("/public/kgv/images/image-1.svg"),
       new URI("/public/kgv/images/image-2.svg"),
@@ -50,7 +52,9 @@ object GardenService {
 
     val latitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("latitude"))
     val longitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("longitude"))
-    val location = Location(latitude.toString.toDouble, longitude.toString.toDouble)
+    val latStr = latitude.toString
+    val lngStr = longitude.toString
+    val location = Location(latStr.toDouble, lngStr.toDouble)
 
     val streetAddress = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("streetAddress"))
     val postalCode = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("postalCode"))

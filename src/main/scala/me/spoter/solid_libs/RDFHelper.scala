@@ -17,6 +17,7 @@ object RDFHelper {
   val GOOD_REL: js.Dynamic = RDFLib.Namespace("http://purl.org/goodrelations/v1#")
   val PROD: js.Dynamic = RDFLib.Namespace("http://www.productontology.org/id/")
   val SCHEMA_ORG: js.Dynamic = RDFLib.Namespace("http://schema.org/")
+  val XMLS: js.Dynamic = RDFLib.Namespace("http://www.w3.org/2001/XMLSchema#")
   val LDP: js.Dynamic = RDFLib.Namespace("http://www.w3.org/ns/ldp#")
   val VCARD: js.Dynamic = RDFLib.Namespace("http://www.w3.org/2006/vcard/ns#")
   val PIM: js.Dynamic = RDFLib.Namespace("http://www.w3.org/ns/pim/space#")
@@ -58,7 +59,9 @@ object RDFHelper {
     fetcher.createContainer(parentUri.toString, containerName, metaString.orUndefined).toFuture
   }
 
-  def addStatementToWeb(st: js.Dynamic): Future[Unit] = {
+  def addStatementToWeb(st: js.Dynamic): Future[Unit] = addStatementsToWeb(Seq(st))
+
+  def addStatementsToWeb(sts: Seq[js.Dynamic]): Future[Unit] = {
     val p = Promise[Unit]()
     val callback = (uri: js.UndefOr[String], success: Boolean, error: js.UndefOr[String]) => {
       if (success) {
@@ -67,7 +70,7 @@ object RDFHelper {
         p.failure(new Exception(error.get))
       }
     }
-    updateManager.update(js.undefined, js.Array(st), callback)
+    updateManager.update(js.undefined, js.Array(sts: _*), callback)
     p.future
   }
 }

@@ -16,6 +16,8 @@ object RDFLib extends js.Object {
   def sym(subject: String): js.Dynamic = js.native
 
   def st(subject: js.Dynamic, predicate: js.Dynamic, obj: js.Dynamic, doc: js.Dynamic): js.Dynamic = js.native
+
+  def literal(value: String, lang: js.UndefOr[String] = js.undefined, typ: js.UndefOr[js.Dynamic] = js.undefined): js.Dynamic = js.native
 }
 
 @js.native
