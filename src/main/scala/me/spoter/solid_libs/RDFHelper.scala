@@ -15,6 +15,7 @@ object RDFHelper {
   val RDF: js.Dynamic = RDFLib.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
   val FOAF: js.Dynamic = RDFLib.Namespace("http://xmlns.com/foaf/0.1/")
   val GOOD_REL: js.Dynamic = RDFLib.Namespace("http://purl.org/goodrelations/v1#")
+  val PROD: js.Dynamic = RDFLib.Namespace("http://www.productontology.org/id/")
   val SCHEMA_ORG: js.Dynamic = RDFLib.Namespace("http://schema.org/")
   val LDP: js.Dynamic = RDFLib.Namespace("http://www.w3.org/ns/ldp#")
   val VCARD: js.Dynamic = RDFLib.Namespace("http://www.w3.org/2006/vcard/ns#")

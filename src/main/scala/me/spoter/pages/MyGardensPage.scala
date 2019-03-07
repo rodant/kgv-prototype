@@ -7,7 +7,7 @@ import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.{Callback, ScalaComponent}
-import me.spoter.models.AllotmentGarden
+import me.spoter.models.{AllotmentGarden, IRI}
 import me.spoter.services.GardenService
 import me.spoter.solid_libs.{RDFHelper, RDFLib}
 import me.spoter.{Session, SessionTracker, StateXSession}
@@ -27,9 +27,9 @@ class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Ent
     val uuid = UUID.randomUUID()
     val createdGardenF = GardenService.fetchGardensDirByWebId(sxs.session.get.webId)
       .flatMap { baseUri =>
-        val gardenUri = URI.create(baseUri.toString + uuid)
+        val gardenUri = URI.create(baseUri.toString + uuid).normalize()
         val garden = sxs.state.addingEntity.get.asInstanceOf[AllotmentGarden].copy(uri = gardenUri)
-        performRDFOps(baseUri, uuid).map(_ => garden)
+        performRDFOps(garden)
       }
     val updatedStateF = createdGardenF.map { garden =>
       bs.modState(old =>
@@ -38,17 +38,20 @@ class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Ent
     updatedStateF
   }
 
-  private def performRDFOps(baseUri: URI, uuid: UUID): Future[Unit] = {
-    val gardenUri = URI.create(s"${baseUri.toString}/${uuid.toString}/").normalize()
+  private def performRDFOps(g: AllotmentGarden): Future[AllotmentGarden] = {
+    val gardenIri = IRI(g.uri)
+    val gardenIriS = gardenIri.toString
     val st = RDFLib.st(
-      subject = RDFLib.sym(gardenUri.toString),
+      subject = RDFLib.sym(gardenIriS),
       predicate = RDFHelper.RDF("type"),
-      `object` = RDFLib.sym("http://www.productontology.org/id/Allotment_(gardening)"),
-      doc = RDFLib.sym(gardenUri.toString + ".meta").doc())
+      obj = RDFHelper.PROD("Allotment_(gardening)"),
+      doc = RDFLib.sym(gardenIriS + "/.meta").doc())
+    val baseIri = gardenIri.baseIRI
+    val uuid = gardenIri.lastPathComponent
     for {
-      _ <- RDFHelper.createContainerResource(baseUri, uuid.toString)
+      _ <- RDFHelper.createContainerResource(baseIri.innerUri, uuid)
       _ <- RDFHelper.addStatementToWeb(st)
-    } yield ()
+    } yield g
   }
 }
 

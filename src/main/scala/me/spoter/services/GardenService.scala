@@ -36,7 +36,7 @@ object GardenService {
   def fetchGardensDirByWebId(webId: URI): Future[URI] = RDFHelper.loadEntity(webId) {
     RDFHelper.get(webId, RDFHelper.PIM("storage")).value.toString
   }.map { s =>
-    URI.create(s"$s/spoterme/allotment_gardens/").normalize()
+    URI.create(s"${s}spoterme/allotment_gardens/")
   }
 
   private def createGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {

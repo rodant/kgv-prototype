@@ -7,7 +7,7 @@ import scala.scalajs.js
 /**
   * A garden offering.
   */
-case class AllotmentOffering(uri: URI = new URI(""),
+case class AllotmentOffering(uri: URI = URI.create(""),
                              title: String = "",
                              description: String = "",
                              price: Money = Money(0),

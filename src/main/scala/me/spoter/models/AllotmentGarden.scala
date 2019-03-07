@@ -8,7 +8,7 @@ import me.spoter.models.AllotmentCondition.Good
   * AllotmentGarden entity.
   *
   */
-case class AllotmentGarden(uri: URI = new URI(""),
+case class AllotmentGarden(uri: URI = URI.create(""),
                            title: String = "",
                            address: Address = Address("", 0, "", ""),
                            location: Location = Location(0, 0),
