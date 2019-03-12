@@ -2,6 +2,8 @@ package me.spoter.solid_libs
 
 import java.net.URI
 
+import me.spoter.models.IRI
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
@@ -27,6 +29,22 @@ object RDFHelper {
   private val updateManager = new RDFUpdateManager(store)
 
   private def load(sub: URI): Future[js.Object] = fetcher.load(sub.toString).toFuture
+
+  def loadResource(iri: IRI): Future[Either[Throwable, js.Dynamic]] =
+    load(iri.innerUri).map { res =>
+      val dynResult = res.asInstanceOf[js.Dynamic]
+      if (res.hasOwnProperty("error")) {
+        Left(new Exception(dynResult.status.toString))
+      } else {
+        Right(dynResult)
+      }
+    }.recover { case e => Left[Throwable, js.Dynamic](e) }
+
+  def ensureContainerExists(iri: IRI): Future[Unit] =
+    for {
+      res <- loadResource(iri)
+      _ <- res.fold(_ => createContainerResource(iri.baseIRI.innerUri, iri.lastPathComponent), Future(_))
+    } yield ()
 
   def loadEntity[A](sub: URI)(b: => A): Future[A] = load(sub).map(_ => b)
 
