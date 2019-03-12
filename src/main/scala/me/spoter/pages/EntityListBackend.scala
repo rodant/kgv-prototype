@@ -39,22 +39,24 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
       renderWhen(es.isEmpty && sxs.session.getOrElse(initialSession) != initialSession) {
         <.h2(s"Keine $entityRenderName gefunden.")
       },
-      sxs.state.addingEntity.map { e =>
-        Row()(
-          FormControl(value = e.title, onChange = onChangeName(_))(^.placeholder := "Name"),
-          <.div(^.marginTop := 10.px,
-            <.i(^.className := "fas fa-check fa-lg",
-              ^.title := "Bestätigen",
-              ^.color := "darkseagreen",
-              ^.marginLeft := 10.px,
-              ^.onClick --> bs.state.flatMap[Unit](onCreateGarden)),
-            <.i(^.className := "fas fa-times fa-lg",
-              ^.title := "Abbrechen",
-              ^.color := "red",
-              ^.marginLeft := 10.px,
-              ^.onClick --> bs.modState(old => old.copy(state = old.state.copy(addingEntity = None))))
+      sxs.session.flatMap { _ =>
+        sxs.state.addingEntity.map { e =>
+          Row()(
+            FormControl(value = e.title, onChange = onChangeName(_))(^.placeholder := "Name"),
+            <.div(^.marginTop := 10.px,
+              <.i(^.className := "fas fa-check fa-lg",
+                ^.title := "Bestätigen",
+                ^.color := "darkseagreen",
+                ^.marginLeft := 10.px,
+                ^.onClick --> bs.state.flatMap[Unit](onCreateGarden)),
+              <.i(^.className := "fas fa-times fa-lg",
+                ^.title := "Abbrechen",
+                ^.color := "red",
+                ^.marginLeft := 10.px,
+                ^.onClick --> bs.modState(old => old.copy(state = old.state.copy(addingEntity = None))))
+            )
           )
-        )
+        }
       },
       renderWhen(sxs.session.isDefined) {
         EntityList(entityUriFragment, es)
