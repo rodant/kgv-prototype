@@ -38,6 +38,7 @@ class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Ent
     updatedStateF
   }
 
+  //TODO: move this to the GardenService
   private def performRDFOps(g: AllotmentGarden): Future[AllotmentGarden] = {
     val gardenIri = IRI(g.uri)
     val gardenIriS = gardenIri.toString + "/"

@@ -51,7 +51,8 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
             <.i(^.className := "fas fa-times fa-lg",
               ^.title := "Abbrechen",
               ^.color := "red",
-              ^.marginLeft := 10.px)
+              ^.marginLeft := 10.px,
+              ^.onClick --> bs.modState(old => old.copy(state = old.state.copy(addingEntity = None))))
           )
         )
       },
