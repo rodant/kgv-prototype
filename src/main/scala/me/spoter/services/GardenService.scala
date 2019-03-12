@@ -3,7 +3,7 @@ package me.spoter.services
 import java.net.URI
 
 import me.spoter.models._
-import me.spoter.solid_libs.RDFHelper
+import me.spoter.solid_libs.{RDFHelper, RDFLib}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -12,6 +12,9 @@ import scala.concurrent.Future
   * RDF implementation of the garden service.
   */
 object GardenService {
+  private val spotermeDirName = "spoterme"
+  private val gardensDirName = "allotment_gardens"
+
   def fetchGarden(allotmentUri: URI): Future[AllotmentGarden] =
     RDFHelper.loadEntity[Future[AllotmentGarden]](allotmentUri) {
       val imageDir = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
@@ -38,7 +41,37 @@ object GardenService {
   def fetchGardensDirByWebId(webId: URI): Future[URI] = RDFHelper.loadEntity(webId) {
     RDFHelper.get(webId, RDFHelper.PIM("storage")).value.toString
   }.map { s =>
-    URI.create(s"${s}spoterme/allotment_gardens/")
+    URI.create(s"$s$spotermeDirName/$gardensDirName/")
+  }
+
+  def create(g: AllotmentGarden): Future[AllotmentGarden] = {
+    val gardenIri = IRI(g.uri)
+    val gardenIriS = gardenIri.toString + "/"
+    val sub = RDFLib.sym(gardenIriS)
+    val doc = RDFLib.sym(gardenIriS + ".meta")
+    val sts = List(
+      RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.PROD("Allotment_(gardening)"), doc),
+      RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.GOOD_REL("Individual"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("name"), RDFLib.literal(g.title, "de"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("description"), RDFLib.literal(g.description, "de"), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("image"), RDFLib.literal("images/"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("width"), RDFLib.literal("1"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("depth"), RDFLib.literal(g.area.a.toString), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("streetAddress"), RDFLib.literal(g.address.streetAndNumber, "de"), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("postalCode"), RDFLib.literal(g.address.zipCode.toString), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("addressRegion"), RDFLib.literal(g.address.region, "de"), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("addressCountry"), RDFLib.literal(g.address.country, "de"), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("includes"), RDFLib.literal(g.bungalow.fold("")(_ => "Bungalow"), "de"), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("latitude"), RDFLib.literal(g.location.latitude.toString, typ = RDFHelper.XMLS("float")), doc),
+      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("longitude"), RDFLib.literal(g.location.longitude.toString, typ = RDFHelper.XMLS("float")), doc),
+      RDFLib.st(sub, RDFHelper.GOOD_REL("condition"), RDFLib.literal(g.condition.toString, "de"), doc)
+    )
+    val baseIri = gardenIri.baseIRI
+    val uuid = gardenIri.lastPathComponent
+    for {
+      _ <- RDFHelper.createContainerResource(baseIri.innerUri, uuid)
+      _ <- RDFHelper.addStatementsToWeb(sts)
+    } yield g
   }
 
   private def populateLoadedGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
