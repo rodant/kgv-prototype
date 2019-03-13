@@ -89,11 +89,6 @@ object GardenService {
   }
 
   private def populateLoadedGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
-    val imagesUrisOrPlaceholder = if (imageUris.nonEmpty) imageUris else List(
-      new URI("/public/kgv/images/image-1.svg"),
-      new URI("/public/kgv/images/image-2.svg"),
-      new URI("/public/kgv/images/image-3.svg"))
-
     val allotmentTitle = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("name"))
     val allotmentDesc = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("description"))
 
@@ -115,10 +110,9 @@ object GardenService {
     val width = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("width"))
     val depth = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("depth"))
 
-    AllotmentGarden(
+    val garden = AllotmentGarden(
       uri = allotmentUri,
       title = allotmentTitle.toString,
-      images = imagesUrisOrPlaceholder,
       description = allotmentDesc.toString,
       location = location,
       address = address,
@@ -126,6 +120,7 @@ object GardenService {
       area = Area(width.toString.toDouble * depth.toString.toDouble),
       condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
     )
+    if (imageUris.nonEmpty) garden.copy(images = imageUris) else garden
   }
 
 }
