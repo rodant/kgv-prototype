@@ -19,12 +19,12 @@ object GardenPage {
 
   case class Props(uri: URI)
 
-  case class State(g: AllotmentGarden = AllotmentGarden(), editing: Boolean = false)
+  case class State(g: AllotmentGarden = AllotmentGarden(), editing: Boolean = false, workingCopy: AllotmentGarden = AllotmentGarden())
 
   class Backend(bs: BackendScope[Props, State]) {
 
     def render(state: State): VdomElement = {
-      val garden = state.g
+      val garden = if (state.editing) state.workingCopy else state.g
       Container(
         renderWhen(!state.editing)(
           <.h1(garden.title, ^.onClick --> bs.modState(_.copy(editing = true)))),
@@ -44,7 +44,7 @@ object GardenPage {
                 ^.title := "Abbrechen",
                 ^.color := "red",
                 ^.marginLeft := 10.px,
-                ^.onClick --> bs.modState(_.copy(editing = false)))
+                ^.onClick --> bs.modState(s => s.copy(editing = false, workingCopy = s.g)))
             )
           )
         },
@@ -140,15 +140,16 @@ object GardenPage {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     def fetchData(props: Props): Callback =
-      Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(s => s.copy(g = g))))
+      Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(s => s.copy(g = g, workingCopy = g))))
 
-    private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])(transform: AllotmentGarden => AllotmentGarden): Callback = {
+    private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])
+                             (transform: AllotmentGarden => AllotmentGarden): Callback = {
       e.persist()
-      bs.modState(old => old.copy(g = transform(old.g)))
+      bs.modState(old => old.copy(workingCopy = transform(old.g)))
     }
 
-    def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = _ => {
-      bs.modState(_.copy(editing = false))
+    def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state => {
+      bs.modState(_.copy(g = state.workingCopy, editing = false))
     }
 
     def save(e: ReactEventFromInput): Callback = {
