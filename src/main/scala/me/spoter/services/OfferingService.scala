@@ -28,7 +28,7 @@ object OfferingService {
   def fetchOfferingsByWebId(webId: URI): Future[Seq[AllotmentOffering]] = {
     for {
       storageUriStr <- RDFHelper.loadEntity(webId)(RDFHelper.get(webId, RDFHelper.PIM("storage")).value.toString)
-      offerUris <- RDFHelper.listDir(new URI(s"$storageUriStr/spoterme/offers/").normalize())
+      offerUris <- RDFHelper.listDir(new URI(s"$storageUriStr/spoterme/offers/"))
         .recover[Seq[URI]] {
         case e if e.getMessage.contains("Not Found") || e.getMessage.contains("404") => Seq()
         case e =>

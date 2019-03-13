@@ -13,6 +13,7 @@ lazy val root = (project in file(".")).
     )),
     name := "KGV Prototype",
     scalacOptions += "-feature",
+    scalacOptions += "-language:higherKinds",
     scalacOptions += "-Ypartial-unification",
     scalaJSUseMainModuleInitializer := true,
     // creates single js resource file for easy integration in html page
