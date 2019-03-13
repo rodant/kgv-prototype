@@ -22,15 +22,31 @@ object GardenPage {
   case class State(g: AllotmentGarden = AllotmentGarden(), editing: Boolean = false)
 
   class Backend(bs: BackendScope[Props, State]) {
+
     def render(state: State): VdomElement = {
       val garden = state.g
       Container(
-        renderWhen(!state.editing)(<.h1(garden.title)),
+        renderWhen(!state.editing)(
+          <.h1(garden.title, ^.onClick --> bs.modState(_.copy(editing = true)))),
         renderWhen(state.editing) {
-          FormControl(
-            value = s"${garden.title}",
-            onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(title = e.target.value)))(
-            ^.placeholder := "Name des Gartens")()
+          <.div(
+            FormControl(
+              value = s"${garden.title}",
+              onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(title = e.target.value)))(
+              ^.placeholder := "Name des Gartens")(),
+            <.div(^.marginTop := 10.px,
+              <.i(^.className := "fas fa-check fa-lg",
+                ^.title := "Bestätigen",
+                ^.color := "darkseagreen",
+                ^.marginLeft := 10.px,
+                ^.onClick --> bs.state.flatMap[Unit](onUpdateTitle(bs))),
+              <.i(^.className := "fas fa-times fa-lg",
+                ^.title := "Abbrechen",
+                ^.color := "red",
+                ^.marginLeft := 10.px,
+                ^.onClick --> bs.modState(_.copy(editing = false)))
+            )
+          )
         },
         Form()(
           Row()(^.height := 280.px)(
@@ -129,6 +145,10 @@ object GardenPage {
     private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])(transform: AllotmentGarden => AllotmentGarden): Callback = {
       e.persist()
       bs.modState(old => old.copy(g = transform(old.g)))
+    }
+
+    def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = _ => {
+      bs.modState(_.copy(editing = false))
     }
 
     def save(e: ReactEventFromInput): Callback = {
