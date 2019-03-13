@@ -1,7 +1,6 @@
 package me.spoter.pages
 
 import java.net.URI
-import java.util.UUID
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^.{VdomElement, _}
@@ -10,10 +9,8 @@ import me.spoter.components.bootstrap._
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
 import me.spoter.services.GardenService
-import me.spoter.solid_libs.{RDFHelper, RDFLib}
 
 import scala.concurrent.Future
-import scala.scalajs.js
 
 /**
   * A page showing the data of an allotment garden.
@@ -126,9 +123,8 @@ object GardenPage {
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    def fetchDataIfNotEditing(props: Props): Callback =
-      if (props.uri.toString == "_blank") Callback()
-      else Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(s => s.copy(g = g))))
+    def fetchData(props: Props): Callback =
+      Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(s => s.copy(g = g))))
 
     private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])(transform: AllotmentGarden => AllotmentGarden): Callback = {
       e.persist()
@@ -139,31 +135,17 @@ object GardenPage {
       for {
         props <- bs.props
         _ <- Callback.future {
-          if (props.uri.toString == "_blank") {
-            createGardenContainer()
-              .map(uri => bs.modState(old => old.copy(g = old.g.copy(uri = uri))))
-          } else Future(Callback())
+          Future(Callback())
         }
       } yield ()
-    }
-
-    private def createGardenContainer() = {
-      val gardenBaseUriStr = "https://orisha2.solid.community/spoterme/allotment_gardens/"
-      val uri = new URI(s"$gardenBaseUriStr")
-      val uuid = UUID.randomUUID()
-      val st = js.Dynamic.literal(
-        subject = RDFLib.sym(uri.toString),
-        predicate = RDFHelper.RDF("type"),
-        `object` = RDFLib.sym("http://www.productontology.org/id/Allotment_(gardening)"))
-      RDFHelper.createContainerResource(uri, uuid.toString).map(_ => uri)
     }
   }
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
-    .initialStateFromProps(props => State().copy(editing = props.uri.toString == "_blank"))
+    .initialState(State())
     .renderBackend[Backend]
-    .componentDidMount(c => c.backend.fetchDataIfNotEditing(c.props))
+    .componentDidMount(c => c.backend.fetchData(c.props))
     .build
 
   def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
