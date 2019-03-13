@@ -17,26 +17,26 @@ object GardenService {
   private val gardensDirName = "allotment_gardens"
   private val imagesDirName = "images"
 
-  def fetchGarden(allotmentUri: URI): Future[AllotmentGarden] =
-    RDFHelper.loadEntity[Future[AllotmentGarden]](allotmentUri) {
+  def fetchGarden(allotmentUri: URI, forceLoad: Boolean = false): Future[AllotmentGarden] =
+    RDFHelper.loadEntity[Future[AllotmentGarden]](allotmentUri, forceLoad) {
       val imageDir = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("image"))
       val imageDirUri = URI.create(s"${allotmentUri.toString}/${imageDir.toString}").normalize()
 
-      RDFHelper.listDir(imageDirUri)
+      RDFHelper.listDir(imageDirUri, forceLoad)
         .recover { case _ => Seq() }
         .map[AllotmentGarden](populateLoadedGarden(allotmentUri))
     }.flatten
 
-  def fetchGardensByWebId(webId: URI): Future[Seq[AllotmentGarden]] = {
+  def fetchGardensByWebId(webId: URI, forceLoad: Boolean = false): Future[Seq[AllotmentGarden]] = {
     for {
       gardensDirUri <- fetchGardensDirByWebId(webId)
-      gardenUris <- RDFHelper.listDir(gardensDirUri).recover[Seq[URI]] {
+      gardenUris <- RDFHelper.listDir(gardensDirUri, forceLoad).recover[Seq[URI]] {
         case e if e.getMessage.contains("Not Found") || e.getMessage.contains("404") => Seq()
         case e =>
           println(s"Got unexpected server error ${e.getMessage},\n when fetching the gardens dir for user $webId")
           Seq()
       }
-      gardens <- Future.sequence(gardenUris.map(GardenService.fetchGarden))
+      gardens <- Future.sequence(gardenUris.map(uri => GardenService.fetchGarden(uri)))
     } yield gardens
   }
 

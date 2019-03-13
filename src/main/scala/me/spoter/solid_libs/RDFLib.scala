@@ -23,7 +23,7 @@ object RDFLib extends js.Object {
 @js.native
 @JSImport("rdflib", "Fetcher")
 class RDFFetcher(store: js.Dynamic) extends js.Object {
-  def load(subject: String): js.Promise[js.Object] = js.native
+  def load(subject: String, options: js.UndefOr[js.Dynamic]): js.Promise[js.Object] = js.native
 
   def createContainer(parentURI: String, folderName: String, data: js.UndefOr[String]): js.Promise[js.Object] = js.native
 }

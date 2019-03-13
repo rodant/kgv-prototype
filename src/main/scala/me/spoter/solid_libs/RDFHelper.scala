@@ -8,6 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.UndefOr
 
 /**
   * First draft of an abstraction over the RDFLib.
@@ -28,10 +29,12 @@ object RDFHelper {
   private val fetcher = new RDFFetcher(store)
   private val updateManager = new RDFUpdateManager(store)
 
-  private def load(sub: URI): Future[js.Object] = fetcher.load(sub.toString).toFuture
+  private def load(sub: URI, options: js.UndefOr[js.Dynamic] = js.undefined): Future[js.Object] =
+    fetcher.load(sub.toString, options).toFuture
 
-  def loadResource(iri: IRI): Future[Either[Throwable, js.Dynamic]] =
-    load(iri.innerUri).map { res =>
+  def loadResource(iri: IRI, forceLoad: Boolean = false): Future[Either[Throwable, js.Dynamic]] = {
+    val options: UndefOr[js.Dynamic] = if (forceLoad) js.Dynamic.literal(force = forceLoad) else js.undefined
+    load(iri.innerUri, options).map { res =>
       val dynResult = res.asInstanceOf[js.Dynamic]
       if (res.hasOwnProperty("error")) {
         Left(new Exception(dynResult.status.toString))
@@ -39,6 +42,7 @@ object RDFHelper {
         Right(dynResult)
       }
     }.recover { case e => Left[Throwable, js.Dynamic](e) }
+  }
 
   def ensureContainerExists(iri: IRI): Future[Unit] =
     for {
@@ -46,9 +50,12 @@ object RDFHelper {
       _ <- res.fold(_ => createContainerResource(iri.baseIRI.innerUri, iri.lastPathComponent), Future(_))
     } yield ()
 
-  def loadEntity[A](sub: URI)(b: => A): Future[A] = load(sub).map(_ => b)
+  def loadEntity[A](sub: URI, forceLoad: Boolean = false)(b: => A): Future[A] = {
+    val options: UndefOr[js.Dynamic] = if (forceLoad) js.Dynamic.literal(force = forceLoad) else js.undefined
+    load(sub, options).map(_ => b)
+  }
 
-  def listDir(dirUri: URI): Future[Seq[URI]] = RDFHelper.loadEntity[Seq[URI]](dirUri) {
+  def listDir(dirUri: URI, forceLoad: Boolean = false): Future[Seq[URI]] = RDFHelper.loadEntity[Seq[URI]](dirUri, forceLoad) {
     val filesNodes = RDFHelper.getAll(dirUri, RDFHelper.LDP("contains")).asInstanceOf[js.Array[js.Dynamic]]
     filesNodes.map(f => new URI(f.value.toString))
   }

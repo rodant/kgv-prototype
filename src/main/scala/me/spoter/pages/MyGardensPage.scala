@@ -31,12 +31,13 @@ class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Ent
         val garden = sxs.state.addingEntity.get.asInstanceOf[AllotmentGarden].copy(uri = gardenUri)
         GardenService.create(garden)
       }
-    val updatedStateF = createdGardenF.map { garden =>
-      bs.modState(old =>
-        old.copy(state = old.state.copy(es = garden :: old.state.es.toList, addingEntity = None)))
+    createdGardenF.flatMap { _ =>
+      fetchEntities(sxs.session.get, forceLoad = true).map(s => bs.modState(_.copy(state = s)))
     }
-    updatedStateF
   }
+
+  private[pages] def fetchEntities(s: Session, forceLoad: Boolean = false): Future[State] =
+    GardenService.fetchGardensByWebId(s.webId, forceLoad).map(State(_))
 }
 
 object MyGardensPage extends SessionTracker[Unit, State, MyGardensBackend] {
@@ -46,12 +47,10 @@ object MyGardensPage extends SessionTracker[Unit, State, MyGardensBackend] {
     .builder[Unit](componentName)
     .initialState(StateXSession[State](State(Seq()), Some(initialSession)))
     .renderBackend[MyGardensBackend]
-    .componentDidMount(trackSessionOn(s => fetchEntities(s)))
+    .componentDidMount(c => trackSessionOn(s => c.backend.fetchEntities(s))(c))
     .componentWillUnmountConst(trackSessionOff())
     .configure(Reusability.shouldComponentUpdate)
     .build
 
   def apply(): VdomElement = component().vdomElement
-
-  private def fetchEntities(s: Session): Future[State] = GardenService.fetchGardensByWebId(s.webId).map(State(_))
 }
