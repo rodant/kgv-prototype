@@ -128,9 +128,7 @@ object GardenPage {
                       readOnly = true,
                       plaintext = true)()
                   })
-              },
-              renderWhen(state.editing)(
-                Button(disabled = state.g.title.isEmpty, onClick = save(_))("Speichern"))
+              }
             )
           )
         )
@@ -150,15 +148,6 @@ object GardenPage {
 
     def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state => {
       bs.modState(_.copy(g = state.workingCopy, editing = false))
-    }
-
-    def save(e: ReactEventFromInput): Callback = {
-      for {
-        props <- bs.props
-        _ <- Callback.future {
-          Future(Callback())
-        }
-      } yield ()
     }
   }
 
