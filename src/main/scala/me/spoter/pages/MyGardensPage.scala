@@ -26,9 +26,9 @@ class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Ent
     val uuid = UUID.randomUUID()
     val createdGardenF = GardenService.fetchGardensDirByWebId(sxs.session.get.webId)
       .flatMap { baseUri =>
-        val gardenUri = URI.create(baseUri.toString + uuid).normalize()
+        val gardenUri = URI.create(s"$baseUri$uuid/").normalize()
         //TODO: get ride of the cast bellow
-        val garden = sxs.state.addingEntity.get.asInstanceOf[AllotmentGarden].copy(uri = gardenUri)
+        val garden = sxs.state.newEntity.get.asInstanceOf[AllotmentGarden].copy(uri = gardenUri)
         GardenService.create(garden)
       }
     createdGardenF.flatMap { _ =>

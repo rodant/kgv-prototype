@@ -2,9 +2,11 @@ package me.spoter.models
 
 import java.net.URI
 
+import me.spoter.services.GardenService.RdfLiteral
+
 trait KGVEntity {
   val uri: URI
-  val title: String
+  val title: RdfLiteral
 
-  def withNewTitle(t: String): KGVEntity
+  def withNewTitle(t: RdfLiteral): KGVEntity
 }

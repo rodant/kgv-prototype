@@ -3,6 +3,7 @@ package me.spoter.solid_libs
 import java.net.URI
 
 import me.spoter.models.IRI
+import me.spoter.services.GardenService.RdfLiteral
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
@@ -56,11 +57,12 @@ object RDFHelper {
   }
 
   def listDir(dirUri: URI, forceLoad: Boolean = false): Future[Seq[URI]] = RDFHelper.loadEntity[Seq[URI]](dirUri, forceLoad) {
-    val filesNodes = RDFHelper.getAll(dirUri, RDFHelper.LDP("contains")).asInstanceOf[js.Array[js.Dynamic]]
+    val filesNodes = RDFHelper.getAll(dirUri, RDFHelper.LDP("contains"))
     filesNodes.map(f => new URI(f.value.toString))
   }
 
-  private def getAll(sub: URI, prop: js.Dynamic): js.Dynamic = store.each(RDFLib.sym(sub.toString), prop)
+  private def getAll(sub: URI, prop: js.Dynamic): js.Array[js.Dynamic] =
+    store.each(RDFLib.sym(sub.toString), prop).asInstanceOf[js.Array[js.Dynamic]]
 
   def get(sub: URI, prop: js.Dynamic): js.Dynamic = store.any(RDFLib.sym(sub.toString), prop)
 
@@ -86,16 +88,28 @@ object RDFHelper {
 
   def addStatementToWeb(st: js.Dynamic): Future[Unit] = addStatementsToWeb(Seq(st))
 
-  def addStatementsToWeb(sts: Seq[js.Dynamic]): Future[Unit] = {
+  def updateStatement(previous: RdfLiteral, st: js.Dynamic): Future[Unit] = {
+    val existingSts = statementsMatching(
+      Some(URI.create(st.subject.value.toString)),
+      Some(st.predicate),
+      None,
+      None)
+    val delSts = Seq(RDFLib.st(st.subject, st.predicate, previous.toJSRdfLiteral, st.why))
+    doUpdate(delSts, Seq(st))
+  }
+
+  def addStatementsToWeb(sts: Seq[js.Dynamic]): Future[Unit] = doUpdate(Seq(), sts)
+
+  private def doUpdate(delSts: Seq[js.Dynamic], st: Seq[js.Dynamic]): Future[Unit] = {
     val p = Promise[Unit]()
-    val callback = (uri: js.UndefOr[String], success: Boolean, error: js.UndefOr[String]) => {
+    val callback = (uri: UndefOr[String], success: Boolean, error: UndefOr[String]) => {
       if (success) {
         p.success()
       } else {
         p.failure(new Exception(error.get))
       }
     }
-    updateManager.update(js.undefined, js.Array(sts: _*), callback)
+    updateManager.update(js.Array(delSts: _*), js.Array(st: _*), callback)
     p.future
   }
 }

@@ -3,6 +3,7 @@ package me.spoter.services
 import java.net.URI
 
 import me.spoter.models.{AllotmentGarden, AllotmentOffering, Money, User}
+import me.spoter.services.GardenService.RdfLiteral
 import me.spoter.solid_libs.RDFHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,7 +22,7 @@ object OfferingService {
 
       GardenService.fetchGarden(gardenUri).zip(UserService.fetchUser(offerorUri))
         .map[AllotmentOffering] { case (g, u) =>
-        createOffering(offeringUri, g, u)
+        populateOffering(offeringUri, g, u)
       }
     }.flatten
 
@@ -39,7 +40,7 @@ object OfferingService {
     } yield offers
   }
 
-  private def createOffering(offeringUri: URI, g: AllotmentGarden, offeror: User): AllotmentOffering = {
+  private def populateOffering(offeringUri: URI, g: AllotmentGarden, offeror: User): AllotmentOffering = {
     val title = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("name"))
     val desc = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("description"))
     val price = RDFHelper.get(offeringUri, RDFHelper.SCHEMA_ORG("price"))
@@ -47,7 +48,7 @@ object OfferingService {
 
     AllotmentOffering(
       offeringUri,
-      title.toString,
+      RdfLiteral.fromJSRflLiteral(title),
       desc.toString,
       Money(price.toString.toLong),
       offeredBy = offeror,

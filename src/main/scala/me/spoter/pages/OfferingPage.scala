@@ -32,7 +32,7 @@ object OfferingPage {
     def render(offering: AllotmentOffering): VdomElement = {
       val garden = offering.garden
       Container(
-        <.h1(offering.title),
+        <.h1(offering.title.value),
         Form()(
           Row()(^.height := 280.px)(
             Col() {

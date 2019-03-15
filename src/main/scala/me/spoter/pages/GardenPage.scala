@@ -9,8 +9,7 @@ import me.spoter.components.bootstrap._
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
 import me.spoter.services.GardenService
-
-import scala.concurrent.Future
+import me.spoter.services.GardenService.Name
 
 /**
   * A page showing the data of an allotment garden.
@@ -27,13 +26,13 @@ object GardenPage {
       val garden = if (state.editing) state.workingCopy else state.g
       Container(
         renderWhen(!state.editing)(
-          <.h1(garden.title, ^.onClick --> bs.modState(_.copy(editing = true)))),
+          <.h1(garden.title.value, ^.onClick --> bs.modState(_.copy(editing = true)))),
         renderWhen(state.editing) {
           <.div(
             FormControl(
-              value = s"${garden.title}",
-              onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(title = e.target.value)))(
-              ^.placeholder := "Name des Gartens")(),
+              value = s"${garden.title.value}",
+              onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(title = g.title.copy(value = e.target.value))))(
+              ^.placeholder := "Name des Gartens", ^.autoFocus := true)(),
             <.div(^.marginTop := 10.px,
               <.i(^.className := "fas fa-check fa-lg",
                 ^.title := "Bestätigen",
@@ -137,8 +136,10 @@ object GardenPage {
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    def fetchData(props: Props): Callback =
-      Callback.future(GardenService.fetchGarden(props.uri).map(g => bs.modState(s => s.copy(g = g, workingCopy = g))))
+    def fetchData(uri: URI, force: Boolean = false): Callback = Callback.future {
+      GardenService.fetchGarden(uri, force)
+        .map(g => bs.modState(s => s.copy(g = g, workingCopy = g, editing = false)))
+    }
 
     private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])
                              (transform: AllotmentGarden => AllotmentGarden): Callback = {
@@ -147,7 +148,13 @@ object GardenPage {
     }
 
     def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state => {
-      bs.modState(_.copy(g = state.workingCopy, editing = false))
+      if (state.workingCopy.title.value.isEmpty) Callback()
+      else
+        Callback.future {
+          val workingCopy = state.workingCopy
+          val updateF = GardenService.update(IRI(workingCopy.uri), Name, state.g.title, workingCopy.title)
+          updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
+        }
     }
   }
 
@@ -155,7 +162,7 @@ object GardenPage {
     .builder[Props]("GardenPage")
     .initialState(State())
     .renderBackend[Backend]
-    .componentDidMount(c => c.backend.fetchData(c.props))
+    .componentDidMount(c => c.backend.fetchData(c.props.uri))
     .build
 
   def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
