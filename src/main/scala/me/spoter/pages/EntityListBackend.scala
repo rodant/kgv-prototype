@@ -42,7 +42,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
       sxs.session.flatMap { _ =>
         sxs.state.addingEntity.map { e =>
           Row()(
-            FormControl(value = e.title, onChange = onChangeName(_))  (^.placeholder := "Name"),
+            FormControl(value = e.title, onChange = onChangeName(_))(^.placeholder := "Name", ^.autoFocus := true),
             <.div(^.marginTop := 10.px,
               <.i(^.className := "fas fa-check fa-lg",
                 ^.title := "Bestätigen",
