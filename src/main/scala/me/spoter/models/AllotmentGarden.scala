@@ -4,8 +4,7 @@ import java.net.URI
 
 import me.spoter.models.AllotmentCondition.Good
 import me.spoter.rdf.RdfLiteral
-
-import scala.scalajs.js.UndefOr
+import me.spoter.services.GardenService.{Description, Name}
 
 /**
   * AllotmentGarden entity.
@@ -16,7 +15,7 @@ case class AllotmentGarden private(uri: URI,
                                    address: Address,
                                    location: Location,
                                    images: Seq[URI],
-                                   description: String,
+                                   description: RdfLiteral,
                                    area: Area,
                                    bungalow: Option[Bungalow],
                                    condition: AllotmentCondition) extends KGVEntity {
@@ -26,11 +25,11 @@ case class AllotmentGarden private(uri: URI,
 
 object AllotmentGarden {
   def apply(uri: URI = URI.create(""),
-            title: RdfLiteral = RdfLiteral("", UndefOr.any2undefOrA("de")),
+            title: RdfLiteral = Name.default,
             address: Address = Address("", 0, "", ""),
             location: Location = Location(0, 0),
             images: Seq[URI] = List(URI.create("public/kgv/images/image-1.svg")),
-            description: String = "",
+            description: RdfLiteral = Description.default,
             area: Area = Area(),
             bungalow: Option[Bungalow] = None,
             condition: AllotmentCondition = Good): AllotmentGarden = {

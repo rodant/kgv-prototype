@@ -9,12 +9,23 @@ import me.spoter.components.bootstrap._
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
 import me.spoter.services.GardenService
-import me.spoter.services.GardenService.Name
+import me.spoter.services.GardenService.{Description, Name}
 
 /**
   * A page showing the data of an allotment garden.
   */
 object GardenPage {
+
+  private val component = ScalaComponent
+    .builder[Props]("GardenPage")
+    .initialState(State())
+    .renderBackend[Backend]
+    .componentDidMount(c => c.backend.fetchData(c.props.uri))
+    .build
+
+  def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
+
+  private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
 
   case class Props(uri: URI)
 
@@ -26,7 +37,7 @@ object GardenPage {
       val garden = if (state.editing) state.workingCopy else state.g
       Container(
         renderWhen(!state.editing)(
-          <.h1(garden.title.value, ^.onClick --> bs.modState(_.copy(editing = true)))),
+          <.h1(garden.title.value, ^.onClick --> switchToEditing())),
         renderWhen(state.editing) {
           <.div(
             FormControl(
@@ -90,16 +101,31 @@ object GardenPage {
           ),
           Row()(
             Col(xl = 8, lg = 8, md = 8) {
-              FormGroup(controlId = "description") {
+              FormGroup(controlId = "description")(
                 FormControl(
                   as = "textarea",
-                  value = garden.description,
-                  rows = 20,
+                  value = garden.description.value,
+                  rows = 18,
                   readOnly = !state.editing,
                   plaintext = !state.editing,
-                  onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(description = e.target.value)))(
-                  ^.placeholder := "Beschreibung")()
-              }
+                  onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
+                    g.copy(description = g.description.copy(value = e.target.value))))(
+                  ^.placeholder := "Beschreibung", ^.onClick --> switchToEditing())(),
+                renderWhen(state.editing) {
+                  <.div(^.marginTop := 10.px,
+                    <.i(^.className := "fas fa-check fa-lg",
+                      ^.title := "Bestätigen",
+                      ^.color := "darkseagreen",
+                      ^.marginLeft := 10.px,
+                      ^.onClick --> bs.state.flatMap[Unit](onUpdateDesc(bs))),
+                    <.i(^.className := "fas fa-times fa-lg",
+                      ^.title := "Abbrechen",
+                      ^.color := "red",
+                      ^.marginLeft := 10.px,
+                      ^.onClick --> bs.modState(s => s.copy(editing = false, workingCopy = s.g)))
+                  )
+                }
+              )
             },
             Col()(
               FormGroup(controlId = "bungalow") {
@@ -136,10 +162,7 @@ object GardenPage {
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    def fetchData(uri: URI, force: Boolean = false): Callback = Callback.future {
-      GardenService.fetchGarden(uri, force)
-        .map(g => bs.modState(s => s.copy(g = g, workingCopy = g, editing = false)))
-    }
+    private def switchToEditing(): Callback = bs.modState(_.copy(editing = true))
 
     private def changeHandler(e: ReactEventFromInput, bs: BackendScope[Props, State])
                              (transform: AllotmentGarden => AllotmentGarden): Callback = {
@@ -147,7 +170,7 @@ object GardenPage {
       bs.modState(old => old.copy(workingCopy = transform(old.g)))
     }
 
-    def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state => {
+    private def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state => {
       if (state.workingCopy.title.value.isEmpty) Callback()
       else
         Callback.future {
@@ -156,16 +179,17 @@ object GardenPage {
           updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
         }
     }
+
+    private def onUpdateDesc(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state =>
+      Callback.future {
+        val workingCopy = state.workingCopy
+        val updateF = GardenService.update(IRI(workingCopy.uri), Description, state.g.description, workingCopy.description)
+        updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
+      }
+
+    def fetchData(uri: URI, force: Boolean = false): Callback = Callback.future {
+      GardenService.fetchGarden(uri, force)
+        .map(g => bs.modState(s => s.copy(g = g, workingCopy = g, editing = false)))
+    }
   }
-
-  private val component = ScalaComponent
-    .builder[Props]("GardenPage")
-    .initialState(State())
-    .renderBackend[Backend]
-    .componentDidMount(c => c.backend.fetchData(c.props.uri))
-    .build
-
-  def apply(uri: String): VdomElement = component(Props(new URI(uri))).vdomElement
-
-  private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
 }

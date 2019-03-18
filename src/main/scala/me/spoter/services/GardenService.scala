@@ -9,6 +9,7 @@ import me.spoter.solid_libs.{RDFHelper, RDFLib}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.UndefOr
 
 /**
   * RDF implementation of the garden service.
@@ -44,10 +45,10 @@ object GardenService {
   }
 
   private def populateLoadedGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
-    val allotmentTitleOpt = bestChoiceFor(allotmentUri, RDFHelper.GOOD_REL("name"))
+    val allotmentTitleOpt = bestChoiceFor(allotmentUri, Name.predicate)
     allotmentTitleOpt
       .fold(AllotmentGarden(uri = allotmentUri, title = RdfLiteral(s"Dieser Garten ist fehlerhaft, id: $allotmentUri"))) { title =>
-        val allotmentDesc = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("description"))
+        val allotmentDesc = bestChoiceFor(allotmentUri, Description.predicate).getOrElse(Description.default)
 
         val latitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("latitude"))
         val longitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("longitude"))
@@ -70,7 +71,7 @@ object GardenService {
         val garden = AllotmentGarden(
           uri = allotmentUri,
           title = title,
-          description = allotmentDesc.toString,
+          description = allotmentDesc,
           location = location,
           address = address,
           bungalow = if (!includes.toString.isEmpty) Some(Bungalow()) else None,
@@ -123,7 +124,7 @@ object GardenService {
       RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.PROD("Allotment_(gardening)"), doc),
       RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.GOOD_REL("Individual"), doc),
       Name.st(sub, g.title, doc),
-      RDFLib.st(sub, RDFHelper.GOOD_REL("description"), RDFLib.literal(g.description, "de"), doc),
+      Description.st(sub, g.description, doc),
       RDFLib.st(sub, RDFHelper.SCHEMA_ORG("image"), RDFLib.literal(s"$imagesDirName/"), doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("width"), RDFLib.literal("1"), doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("depth"), RDFLib.literal(g.area.a.toString), doc),
@@ -148,8 +149,13 @@ object GardenService {
   case object Name extends RdfField {
     override val predicate: js.Dynamic = RDFHelper.GOOD_REL("name")
 
-    override def st(sub: js.Dynamic, literal: RdfLiteral, doc: js.Dynamic): js.Dynamic =
-      RDFLib.st(sub, predicate, literal.toJSRdfLiteral, doc)
+    override val default: RdfLiteral = RdfLiteral("", UndefOr.any2undefOrA("de"))
+  }
+
+  case object Description extends RdfField {
+    override val predicate: js.Dynamic = RDFHelper.GOOD_REL("description")
+
+    override val default: RdfLiteral = RdfLiteral("", UndefOr.any2undefOrA("de"))
   }
 
 }
