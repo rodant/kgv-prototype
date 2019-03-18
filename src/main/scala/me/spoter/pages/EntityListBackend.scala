@@ -9,7 +9,7 @@ import me.spoter.components.bootstrap.{Container, FormControl, Row}
 import me.spoter.models.KGVEntity
 import me.spoter.{Session, StateXSession}
 
-case class State(es: Iterable[KGVEntity], addingEntity: Option[KGVEntity] = None)
+case class State(es: Iterable[KGVEntity], newEntity: Option[KGVEntity] = None)
 
 abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
   private val initialSession = Session(URI.create("_blank"))
@@ -30,7 +30,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
             ^.title := "Neu Anlegen",
             ^.color := "darkseagreen",
             ^.marginLeft := 30.px,
-            ^.onClick --> bs.modState(old => old.copy(state = old.state.copy(addingEntity = Option(newEntity())))))
+            ^.onClick --> bs.modState(old => old.copy(state = old.state.copy(newEntity = Option(newEntity())))))
         }
       ),
       renderWhen(sxs.session.isEmpty) {
@@ -40,9 +40,9 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
         <.h2(s"Keine $entityRenderName gefunden.")
       },
       sxs.session.flatMap { _ =>
-        sxs.state.addingEntity.map { e =>
+        sxs.state.newEntity.map { e =>
           Row()(
-            FormControl(value = e.title, onChange = onChangeName(_))(^.placeholder := "Name"),
+            FormControl(value = e.title.value, onChange = onChangeName(_))(^.placeholder := "Name", ^.autoFocus := true),
             <.div(^.marginTop := 10.px,
               <.i(^.className := "fas fa-check fa-lg",
                 ^.title := "Bestätigen",
@@ -53,7 +53,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
                 ^.title := "Abbrechen",
                 ^.color := "red",
                 ^.marginLeft := 10.px,
-                ^.onClick --> bs.modState(old => old.copy(state = old.state.copy(addingEntity = None))))
+                ^.onClick --> bs.modState(old => old.copy(state = old.state.copy(newEntity = None))))
             )
           )
         }
@@ -65,7 +65,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
   }
 
   private def onCreateGarden(sxs: StateXSession[State]): Callback =
-    if (sxs.state.addingEntity.get.title.isEmpty) Callback()
+    if (sxs.state.newEntity.get.title.value.isEmpty) Callback()
     else createEntity(sxs)
 
   private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
@@ -74,7 +74,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
     e.persist()
     bs.modState(old =>
       old.copy(state =
-        old.state.copy(addingEntity =
-          old.state.addingEntity.map(_.withNewTitle(e.target.value)))))
+        old.state.copy(newEntity =
+          old.state.newEntity.map(g => g.withNewTitle(g.title.copy(value = e.target.value))))))
   }
 }

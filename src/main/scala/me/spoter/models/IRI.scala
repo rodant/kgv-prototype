@@ -16,7 +16,10 @@ case class IRI(private val sourceUri: URI) {
 
   def concatPath(path: String): IRI = IRI(s"$uriStr/$path")
 
-  def +(path: String): IRI = concatPath(path)
+  def removeTailingSlash: IRI = IRI {
+    if (endOfBaseUri == uriStr.length - 1) uriStr.substring(0, endOfBaseUri)
+    else uriStr
+  }
 
   override def toString: String = innerUri.toString
 }

@@ -21,7 +21,11 @@ object AppRouter {
 
   case object Gardens extends AppPage
 
-  case class Garden(uri: String) extends AppPage
+  case class Garden private(uri: String) extends AppPage
+
+  object Garden {
+    def apply(uri: String): Garden = new Garden(if (uri.endsWith("/")) uri else s"$uri/")
+  }
 
   private val config = RouterConfigDsl[AppPage].buildConfig { dsl =>
     import dsl._
