@@ -3,7 +3,7 @@ package me.spoter.services
 import java.net.URI
 
 import me.spoter.models.{AllotmentGarden, AllotmentOffering, Money, User}
-import me.spoter.services.GardenService.RdfLiteral
+import me.spoter.rdf.RdfLiteral
 import me.spoter.solid_libs.RDFHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,17 +14,6 @@ import scala.scalajs.js
   * RDF implementation of the offering service.
   */
 object OfferingService {
-
-  def fetchOffering(offeringUri: URI): Future[AllotmentOffering] =
-    RDFHelper.loadEntity(offeringUri) {
-      val gardenUri = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("includes")).value.toString)
-      val offerorUri = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("offeredBy")).value.toString)
-
-      GardenService.fetchGarden(gardenUri).zip(UserService.fetchUser(offerorUri))
-        .map[AllotmentOffering] { case (g, u) =>
-        populateOffering(offeringUri, g, u)
-      }
-    }.flatten
 
   def fetchOfferingsByWebId(webId: URI): Future[Seq[AllotmentOffering]] = {
     for {
@@ -39,6 +28,17 @@ object OfferingService {
       offers <- Future.sequence(offerUris.map(OfferingService.fetchOffering))
     } yield offers
   }
+
+  def fetchOffering(offeringUri: URI): Future[AllotmentOffering] =
+    RDFHelper.loadEntity(offeringUri) {
+      val gardenUri = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("includes")).value.toString)
+      val offerorUri = new URI(RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("offeredBy")).value.toString)
+
+      GardenService.fetchGarden(gardenUri).zip(UserService.fetchUser(offerorUri))
+        .map[AllotmentOffering] { case (g, u) =>
+        populateOffering(offeringUri, g, u)
+      }
+    }.flatten
 
   private def populateOffering(offeringUri: URI, g: AllotmentGarden, offeror: User): AllotmentOffering = {
     val title = RDFHelper.get(offeringUri, RDFHelper.GOOD_REL("name"))

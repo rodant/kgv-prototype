@@ -3,7 +3,7 @@ package me.spoter.models
 import java.net.URI
 
 import me.spoter.models.AllotmentCondition.Good
-import me.spoter.services.GardenService.RdfLiteral
+import me.spoter.rdf.RdfLiteral
 
 import scala.scalajs.js.UndefOr
 
