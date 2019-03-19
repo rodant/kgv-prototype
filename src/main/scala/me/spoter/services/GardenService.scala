@@ -4,12 +4,13 @@ import java.net.URI
 
 import me.spoter.models._
 import me.spoter.rdf.RdfLiteral
+import me.spoter.services.rdf_mapping.BasicField._
+import me.spoter.services.rdf_mapping.RdfField
 import me.spoter.solid_libs.{RDFHelper, RDFLib}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
-import scala.scalajs.js.UndefOr
 
 /**
   * RDF implementation of the garden service.
@@ -45,22 +46,22 @@ object GardenService {
   }
 
   private def populateLoadedGarden(allotmentUri: URI)(imageUris: Seq[URI]): AllotmentGarden = {
-    val allotmentTitleOpt = bestChoiceFor(allotmentUri, Name.predicate)
-    allotmentTitleOpt
-      .fold(AllotmentGarden(uri = allotmentUri, title = RdfLiteral(s"Dieser Garten ist fehlerhaft, id: $allotmentUri"))) { title =>
-        val allotmentDesc = bestChoiceFor(allotmentUri, Description.predicate).getOrElse(Description.default)
+    bestChoiceFor(allotmentUri, Name) match {
+      case Name.default => AllotmentGarden(uri = allotmentUri, name = RdfLiteral(s"Dieser Garten ist fehlerhaft, id: $allotmentUri"))
 
+      case name =>
+        val allotmentDesc = bestChoiceFor(allotmentUri, Description)
         val latitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("latitude"))
         val longitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("longitude"))
         val latStr = latitude.toString
         val lngStr = longitude.toString
         val location = Location(latStr.toDouble, lngStr.toDouble)
 
-        val streetAddress = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("streetAddress"))
-        val postalCode = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("postalCode"))
-        val addressRegion = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("addressRegion"))
-        val addressCountry = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("addressCountry"))
-        val address = Address(streetAddress.toString, postalCode.toString.toInt, addressRegion.toString, addressCountry.toString)
+        val streetAddress = bestChoiceFor(allotmentUri, StreetAndNumber)
+        val postalCode = bestChoiceFor(allotmentUri, PostalCode)
+        val addressRegion = bestChoiceFor(allotmentUri, AddressRegion)
+        val addressCountry = bestChoiceFor(allotmentUri, AddressCountry)
+        val address = Address(streetAddress, postalCode, addressRegion, addressCountry)
 
         val includes = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("includes"))
         val condition = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("condition"))
@@ -70,7 +71,7 @@ object GardenService {
 
         val garden = AllotmentGarden(
           uri = allotmentUri,
-          title = title,
+          name = name,
           description = allotmentDesc,
           location = location,
           address = address,
@@ -79,14 +80,14 @@ object GardenService {
           condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
         )
         if (imageUris.nonEmpty) garden.copy(images = imageUris) else garden
-      }
+    }
   }
 
-  private def bestChoiceFor(sub: URI, prop: js.Dynamic): Option[RdfLiteral] = {
-    val sts = RDFHelper.statementsMatching(Some(sub), Some(prop), None, None)
+  private def bestChoiceFor(sub: URI, field: RdfField): RdfLiteral = {
+    val sts = RDFHelper.statementsMatching(Some(sub), Some(field.predicate), None, None)
     sts.find(_.why.value.toString.endsWith("/.meta"))
       .orElse(sts.headOption)
-      .map(st => RdfLiteral.fromJSRflLiteral(st.`object`))
+      .map(st => RdfLiteral.fromJSRflLiteral(st.`object`)).getOrElse(field.default)
   }
 
   def fetchGardensDirByWebId(webId: URI): Future[URI] = RDFHelper.loadEntity(webId) {
@@ -123,15 +124,15 @@ object GardenService {
     List(
       RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.PROD("Allotment_(gardening)"), doc),
       RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.GOOD_REL("Individual"), doc),
-      Name.st(sub, g.title, doc),
+      Name.st(sub, g.name, doc),
       Description.st(sub, g.description, doc),
       RDFLib.st(sub, RDFHelper.SCHEMA_ORG("image"), RDFLib.literal(s"$imagesDirName/"), doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("width"), RDFLib.literal("1"), doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("depth"), RDFLib.literal(g.area.a.toString), doc),
-      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("streetAddress"), RDFLib.literal(g.address.streetAndNumber, "de"), doc),
-      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("postalCode"), RDFLib.literal(g.address.zipCode.toString), doc),
-      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("addressRegion"), RDFLib.literal(g.address.region, "de"), doc),
-      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("addressCountry"), RDFLib.literal(g.address.country, "de"), doc),
+      StreetAndNumber.st(sub, g.address.streetAndNumber, doc),
+      PostalCode.st(sub, g.address.postalCode, doc),
+      AddressRegion.st(sub, g.address.region, doc),
+      AddressCountry.st(sub, g.address.country, doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("includes"), RDFLib.literal(g.bungalow.fold("")(_ => "Bungalow"), "de"), doc),
       RDFLib.st(sub, RDFHelper.SCHEMA_ORG("latitude"), RDFLib.literal(g.location.latitude.toString, typ = RDFHelper.XMLS("float")), doc),
       RDFLib.st(sub, RDFHelper.SCHEMA_ORG("longitude"), RDFLib.literal(g.location.longitude.toString, typ = RDFHelper.XMLS("float")), doc),
@@ -145,17 +146,4 @@ object GardenService {
     val docSym = RDFLib.sym(subIriS + ".meta")
     RDFHelper.updateStatement(previous, field.st(subSym, next, docSym))
   }
-
-  case object Name extends RdfField {
-    override val predicate: js.Dynamic = RDFHelper.GOOD_REL("name")
-
-    override val default: RdfLiteral = RdfLiteral("", UndefOr.any2undefOrA("de"))
-  }
-
-  case object Description extends RdfField {
-    override val predicate: js.Dynamic = RDFHelper.GOOD_REL("description")
-
-    override val default: RdfLiteral = RdfLiteral("", UndefOr.any2undefOrA("de"))
-  }
-
 }

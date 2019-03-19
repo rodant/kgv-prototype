@@ -4,7 +4,7 @@ import java.net.URI
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
-import me.spoter.components.SpoterMap
+import me.spoter.components.{AddressComponent, SpoterMap}
 import me.spoter.components.bootstrap._
 import me.spoter.models.AllotmentCondition._
 import me.spoter.models._
@@ -32,7 +32,7 @@ object OfferingPage {
     def render(offering: AllotmentOffering): VdomElement = {
       val garden = offering.garden
       Container(
-        <.h1(offering.title.value),
+        <.h1(offering.name.value),
         Form()(
           Row()(^.height := 280.px)(
             Col() {
@@ -62,15 +62,7 @@ object OfferingPage {
                 )
               },
               FormGroup(controlId = "address") {
-                Row()(
-                  FormLabel(column = true)("Adresse:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = s"${garden.address.streetAndNumber}, ${garden.address.zipCode} ${garden.address.region}",
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
+                AddressComponent(garden.address)
               },
               FormGroup(controlId = "price") {
                 Row()(

@@ -1,4 +1,4 @@
-package me.spoter.services
+package me.spoter.services.rdf_mapping
 
 import me.spoter.rdf.RdfLiteral
 import me.spoter.solid_libs.RDFLib
