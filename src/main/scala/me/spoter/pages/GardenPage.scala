@@ -9,7 +9,7 @@ import me.spoter.components.{AddressComponent, SpoterMap}
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
 import me.spoter.services.GardenService
-import me.spoter.services.rdf_mapping.BasicField.{Description, Name}
+import me.spoter.services.rdf_mapping.BasicField._
 
 /**
   * A page showing the data of an allotment garden.
@@ -33,7 +33,7 @@ object GardenPage {
 
   class Backend(bs: BackendScope[Props, State]) {
 
-    def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
+    private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
 
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
@@ -88,8 +88,8 @@ object GardenPage {
                   }
                 )
               },
-              FormGroup(controlId = "address") {
-                AddressComponent(garden.address)
+              FormGroup(controlId = "newAddress") {
+                AddressComponent(garden.address, addressChangeHandler)
               }
             )
           ),
@@ -180,6 +180,19 @@ object GardenPage {
         val updateF = GardenService.update(IRI(workingCopy.uri), Description, state.g.description, workingCopy.description)
         updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
       }
+
+    private def addressChangeHandler(newAddress: Address): Callback = {
+      bs.state.flatMap { state =>
+        val garden = state.g
+        Callback.future {
+          for {
+            _ <- GardenService.update(IRI(garden.uri), StreetAndNumber, garden.address.streetAndNumber, newAddress.streetAndNumber)
+            _ <- GardenService.update(IRI(garden.uri), PostalCode, garden.address.postalCode, newAddress.postalCode)
+            _ <- GardenService.update(IRI(garden.uri), AddressRegion, garden.address.region, newAddress.region)
+          } yield bs.setState(state.copy(g = garden.copy(address = newAddress), editing = false))
+        }
+      }
+    }
 
     def fetchData(uri: URI, force: Boolean = false): Callback = Callback.future {
       GardenService.fetchGarden(uri, force)

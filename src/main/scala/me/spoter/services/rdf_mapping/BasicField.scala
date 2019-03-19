@@ -38,7 +38,7 @@ object BasicField {
 
   case object AddressCountry extends RdfField {
     override val predicate: js.Dynamic = RDFHelper.SCHEMA_ORG("addressCountry")
-    override val default: RdfLiteral = RdfLiteral("", Some(DEFAULT_LANG_ANNO))
+    override val default: RdfLiteral = RdfLiteral("Deutschland", Some(DEFAULT_LANG_ANNO))
   }
 
 }
