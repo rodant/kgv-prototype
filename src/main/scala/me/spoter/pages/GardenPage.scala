@@ -56,7 +56,7 @@ object GardenPage {
                 ^.title := "Abbrechen",
                 ^.color := "red",
                 ^.marginLeft := 10.px,
-                ^.onClick --> bs.modState(s => s.copy(editing = false, workingCopy = s.g)))
+                ^.onClick --> onCancel())
             )
           )
         },
