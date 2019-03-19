@@ -33,6 +33,8 @@ object GardenPage {
 
   class Backend(bs: BackendScope[Props, State]) {
 
+    def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
+
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
       Container(
@@ -114,7 +116,7 @@ object GardenPage {
                       ^.title := "Abbrechen",
                       ^.color := "red",
                       ^.marginLeft := 10.px,
-                      ^.onClick --> bs.modState(s => s.copy(editing = false, workingCopy = s.g)))
+                      ^.onClick --> onCancel())
                   )
                 }
               )
