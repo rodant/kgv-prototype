@@ -2,7 +2,7 @@ package me.spoter.components
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import me.spoter.components.bootstrap.{Col, FormControl, FormLabel, Row}
+import me.spoter.components.bootstrap._
 import me.spoter.models.Address
 import me.spoter.services.rdf_mapping.BasicField.StreetAndNumber
 
@@ -50,7 +50,8 @@ object AddressComponent {
                 FormControl(
                   value = address.postalCode.value,
                   onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(postalCode = a.postalCode.copy(value = e.target.value)))
-                )(^.required := true, ^.`type` := "number", ^.max := 99999)),
+                )(^.required := true, ^.`type` := "number", ^.max := 99999),
+              ),
               Col(xl = 7, lg = 7, md = 7)(
                 FormControl(
                   value = address.region.value,
