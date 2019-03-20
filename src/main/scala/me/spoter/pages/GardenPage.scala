@@ -38,29 +38,31 @@ object GardenPage {
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
       Container(
-        renderWhen(!state.editing)(
-          <.h1(garden.name.value, ^.onClick --> switchToEditing())),
-        renderWhen(state.editing) {
-          <.div(
-            FormControl(
-              value = s"${garden.name.value}",
-              onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
-              ^.placeholder := "Name des Gartens", ^.autoFocus := true)(),
-            <.div(^.marginTop := 10.px,
-              <.i(^.className := "fas fa-check fa-lg",
-                ^.title := "Bestätigen",
-                ^.color := "darkseagreen",
-                ^.marginLeft := 10.px,
-                ^.onClick --> bs.state.flatMap[Unit](onUpdateTitle(bs))),
-              <.i(^.className := "fas fa-times fa-lg",
-                ^.title := "Abbrechen",
-                ^.color := "red",
-                ^.marginLeft := 10.px,
-                ^.onClick --> onCancel())
-            )
-          )
-        },
-        Form()(
+        Form(validated = true)(^.noValidate := true)(
+          Row()(
+            renderWhen(!state.editing)(
+              <.h1(garden.name.value, ^.onClick --> switchToEditing())),
+            renderWhen(state.editing) {
+              <.div(^.width := "100%",
+                FormControl(
+                  value = s"${garden.name.value}",
+                  onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
+                  ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40)(),
+                <.div(^.marginTop := 10.px,
+                  <.i(^.className := "fas fa-check fa-lg",
+                    ^.title := "Bestätigen",
+                    ^.color := "darkseagreen",
+                    ^.marginLeft := 10.px,
+                    ^.onClick --> bs.state.flatMap[Unit](onUpdateTitle(bs))),
+                  <.i(^.className := "fas fa-times fa-lg",
+                    ^.title := "Abbrechen",
+                    ^.color := "red",
+                    ^.marginLeft := 10.px,
+                    ^.onClick --> onCancel())
+                )
+              )
+            }
+          ),
           Row()(^.height := 280.px)(
             Col() {
               Carousel(
@@ -104,7 +106,7 @@ object GardenPage {
                   plaintext = !state.editing,
                   onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
                     g.copy(description = g.description.copy(value = e.target.value))))(
-                  ^.placeholder := "Beschreibung", ^.onClick --> switchToEditing())(),
+                  ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing())(),
                 renderWhen(state.editing) {
                   <.div(^.marginTop := 10.px,
                     <.i(^.className := "fas fa-check fa-lg",

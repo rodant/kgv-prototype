@@ -43,19 +43,19 @@ object AddressComponent {
               FormControl(
                 value = address.streetAndNumber.value,
                 onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(streetAndNumber = a.streetAndNumber.copy(value = e.target.value)))
-              )(^.autoFocus := true)
+              )(^.autoFocus := true, ^.required := true)
             ),
             Row()(^.className := "address-2nd-line",
               Col(xl = 5, lg = 5, md = 5)(
                 FormControl(
                   value = address.postalCode.value,
                   onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(postalCode = a.postalCode.copy(value = e.target.value)))
-                )()),
+                )(^.required := true, ^.`type` := "number", ^.max := 99999)),
               Col(xl = 7, lg = 7, md = 7)(
                 FormControl(
                   value = address.region.value,
                   onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(region = a.region.copy(value = e.target.value)))
-                )())
+                )(^.required := true))
             ),
             Row()(
               <.div(^.marginTop := 10.px,
