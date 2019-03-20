@@ -8,13 +8,16 @@ import scala.scalajs.js.UndefOr
 /**
   *
   */
-case class RdfLiteral(value: String, lang: js.UndefOr[String] = js.undefined, typ: js.UndefOr[js.Dynamic] = js.undefined) {
-  def toJSRdfLiteral: js.Dynamic = RDFLib.literal(value, lang, typ)
+case class RdfLiteral(value: String, lang: Option[LangAnnotation] = None, typ: js.UndefOr[js.Dynamic] = js.undefined) {
+  def toJSRdfLiteral: js.Dynamic = RDFLib.literal(
+    value,
+    lang.fold[UndefOr[String]](js.undefined)(l => UndefOr.any2undefOrA(l.value)),
+    typ)
 }
 
 object RdfLiteral {
   def fromJSRflLiteral(literal: js.Dynamic): RdfLiteral = {
-    val lang = if (literal.lang.asInstanceOf[UndefOr[_]] != js.undefined) UndefOr.any2undefOrA(literal.lang.toString) else js.undefined
+    val lang = if (literal.lang.asInstanceOf[UndefOr[_]] != js.undefined) Some(LangAnnotation(literal.lang.toString)) else None
     RdfLiteral(literal.value.toString, lang)
   }
 }

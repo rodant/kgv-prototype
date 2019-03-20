@@ -17,6 +17,6 @@ object EntityList {
   def apply(entityUriFragment: String, es: Iterable[KGVEntity]): VdomElement = component(Props(entityUriFragment, es)).vdomElement
 
   private def renderEntity(uriFragment: String)(e: KGVEntity): VdomElement = {
-    NavLink(href = s"#$uriFragment?uri=${e.uri}")(e.title.value)
+    NavLink(href = s"#$uriFragment?uri=${e.uri}")(e.name.value)
   }
 }

@@ -20,6 +20,8 @@ case class Area(a: Double = 0) extends AnyVal
 case class Money(amount: Long) extends AnyVal
 
 import enumeratum._
+import me.spoter.rdf.RdfLiteral
+import me.spoter.services.rdf_mapping.BasicField.{AddressCountry, AddressRegion, PostalCode, StreetAndNumber}
 
 import scala.collection.immutable
 
@@ -45,8 +47,11 @@ object AllotmentCondition extends Enum[AllotmentCondition] {
 /**
   *
   * @param streetAndNumber street and address string
-  * @param zipCode the zip code
-  * @param region something like city or state
-  * @param country the country
+  * @param postalCode      the zip code
+  * @param region          something like city or state
+  * @param country         the country
   */
-case class Address(streetAndNumber: String, zipCode: Int, region: String, country: String)
+case class Address(streetAndNumber: RdfLiteral = StreetAndNumber.default,
+                   postalCode: RdfLiteral = PostalCode.default,
+                   region: RdfLiteral = AddressRegion.default,
+                   country: RdfLiteral = AddressCountry.default)

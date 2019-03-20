@@ -6,7 +6,7 @@ import me.spoter.rdf.RdfLiteral
 
 trait KGVEntity {
   val uri: URI
-  val title: RdfLiteral
+  val name: RdfLiteral
 
   def withNewTitle(t: RdfLiteral): KGVEntity
 }

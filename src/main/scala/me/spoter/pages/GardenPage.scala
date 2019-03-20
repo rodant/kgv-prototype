@@ -4,12 +4,12 @@ import java.net.URI
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^.{VdomElement, _}
-import me.spoter.components.SpoterMap
 import me.spoter.components.bootstrap._
+import me.spoter.components.{AddressComponent, SpoterMap}
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
 import me.spoter.services.GardenService
-import me.spoter.services.GardenService.{Description, Name}
+import me.spoter.services.rdf_mapping.BasicField._
 
 /**
   * A page showing the data of an allotment garden.
@@ -33,16 +33,18 @@ object GardenPage {
 
   class Backend(bs: BackendScope[Props, State]) {
 
+    private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
+
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
       Container(
         renderWhen(!state.editing)(
-          <.h1(garden.title.value, ^.onClick --> switchToEditing())),
+          <.h1(garden.name.value, ^.onClick --> switchToEditing())),
         renderWhen(state.editing) {
           <.div(
             FormControl(
-              value = s"${garden.title.value}",
-              onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(title = g.title.copy(value = e.target.value))))(
+              value = s"${garden.name.value}",
+              onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
               ^.placeholder := "Name des Gartens", ^.autoFocus := true)(),
             <.div(^.marginTop := 10.px,
               <.i(^.className := "fas fa-check fa-lg",
@@ -54,7 +56,7 @@ object GardenPage {
                 ^.title := "Abbrechen",
                 ^.color := "red",
                 ^.marginLeft := 10.px,
-                ^.onClick --> bs.modState(s => s.copy(editing = false, workingCopy = s.g)))
+                ^.onClick --> onCancel())
             )
           )
         },
@@ -86,16 +88,8 @@ object GardenPage {
                   }
                 )
               },
-              FormGroup(controlId = "address") {
-                Row()(
-                  FormLabel(column = true)("Adresse:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = s"${garden.address.streetAndNumber}, ${garden.address.zipCode} ${garden.address.region}",
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
+              FormGroup(controlId = "newAddress") {
+                AddressComponent(garden.address, addressChangeHandler)
               }
             )
           ),
@@ -122,7 +116,7 @@ object GardenPage {
                       ^.title := "Abbrechen",
                       ^.color := "red",
                       ^.marginLeft := 10.px,
-                      ^.onClick --> bs.modState(s => s.copy(editing = false, workingCopy = s.g)))
+                      ^.onClick --> onCancel())
                   )
                 }
               )
@@ -171,11 +165,11 @@ object GardenPage {
     }
 
     private def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state => {
-      if (state.workingCopy.title.value.isEmpty) Callback()
+      if (state.workingCopy.name.value.isEmpty) Callback()
       else
         Callback.future {
           val workingCopy = state.workingCopy
-          val updateF = GardenService.update(IRI(workingCopy.uri), Name, state.g.title, workingCopy.title)
+          val updateF = GardenService.update(IRI(workingCopy.uri), Name, state.g.name, workingCopy.name)
           updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
         }
     }
@@ -187,9 +181,23 @@ object GardenPage {
         updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
       }
 
+    private def addressChangeHandler(newAddress: Address): Callback = {
+      bs.state.flatMap { state =>
+        val garden = state.g
+        Callback.future {
+          for {
+            _ <- GardenService.update(IRI(garden.uri), StreetAndNumber, garden.address.streetAndNumber, newAddress.streetAndNumber)
+            _ <- GardenService.update(IRI(garden.uri), PostalCode, garden.address.postalCode, newAddress.postalCode)
+            _ <- GardenService.update(IRI(garden.uri), AddressRegion, garden.address.region, newAddress.region)
+          } yield bs.setState(state.copy(g = garden.copy(address = newAddress), editing = false))
+        }
+      }
+    }
+
     def fetchData(uri: URI, force: Boolean = false): Callback = Callback.future {
       GardenService.fetchGarden(uri, force)
         .map(g => bs.modState(s => s.copy(g = g, workingCopy = g, editing = false)))
     }
   }
+
 }

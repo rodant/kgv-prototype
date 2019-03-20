@@ -42,7 +42,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
       sxs.session.flatMap { _ =>
         sxs.state.newEntity.map { e =>
           Row()(
-            FormControl(value = e.title.value, onChange = onChangeName(_))(^.placeholder := "Name", ^.autoFocus := true),
+            FormControl(value = e.name.value, onChange = onChangeName(_))(^.placeholder := "Name", ^.autoFocus := true),
             <.div(^.marginTop := 10.px,
               <.i(^.className := "fas fa-check fa-lg",
                 ^.title := "Bestätigen",
@@ -65,7 +65,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
   }
 
   private def onCreateGarden(sxs: StateXSession[State]): Callback =
-    if (sxs.state.newEntity.get.title.value.isEmpty) Callback()
+    if (sxs.state.newEntity.get.name.value.isEmpty) Callback()
     else createEntity(sxs)
 
   private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
@@ -75,6 +75,6 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
     bs.modState(old =>
       old.copy(state =
         old.state.copy(newEntity =
-          old.state.newEntity.map(g => g.withNewTitle(g.title.copy(value = e.target.value))))))
+          old.state.newEntity.map(g => g.withNewTitle(g.name.copy(value = e.target.value))))))
   }
 }
