@@ -8,8 +8,8 @@ import me.spoter.components.bootstrap._
 import me.spoter.components.{AddressComponent, SpoterMap}
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
-import me.spoter.services.GardenService
 import me.spoter.services.rdf_mapping.BasicField._
+import me.spoter.services.{GardenService, GeoCodingService}
 
 /**
   * A page showing the data of an allotment garden.
@@ -76,7 +76,7 @@ object GardenPage {
               )
             },
             Col() {
-              SpoterMap(garden.location.latitude, garden.location.longitude)
+              SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
             },
             Col()(
               FormGroup(controlId = "size") {
@@ -183,16 +183,17 @@ object GardenPage {
         updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
       }
 
-    private def addressChangeHandler(newAddress: Address): Callback = {
-      bs.state.flatMap { state =>
-        val garden = state.g
-        Callback.future {
-          for {
-            _ <- GardenService.update(IRI(garden.uri), StreetAndNumber, garden.address.streetAndNumber, newAddress.streetAndNumber)
-            _ <- GardenService.update(IRI(garden.uri), PostalCode, garden.address.postalCode, newAddress.postalCode)
-            _ <- GardenService.update(IRI(garden.uri), AddressRegion, garden.address.region, newAddress.region)
-          } yield bs.setState(state.copy(g = garden.copy(address = newAddress), editing = false))
-        }
+    private def addressChangeHandler(newAddress: Address): Callback = bs.state.flatMap { state =>
+      val garden = state.g
+      Callback.future {
+        for {
+          _ <- GardenService.update(IRI(garden.uri), StreetAndNumber, garden.address.streetAndNumber, newAddress.streetAndNumber)
+          _ <- GardenService.update(IRI(garden.uri), PostalCode, garden.address.postalCode, newAddress.postalCode)
+          _ <- GardenService.update(IRI(garden.uri), AddressRegion, garden.address.region, newAddress.region)
+          loc <- GeoCodingService.locationFrom(newAddress).recover { case _ => Location() }
+          _ <- GardenService.update(IRI(garden.uri), Latitude, garden.location.latitude, loc.latitude)
+          _ <- GardenService.update(IRI(garden.uri), Longitude, garden.location.longitude, loc.longitude)
+        } yield bs.setState(state.copy(g = garden.copy(address = newAddress, location = loc), editing = false))
       }
     }
 

@@ -41,4 +41,13 @@ object BasicField {
     override val default: RdfLiteral = RdfLiteral("Deutschland", Some(DEFAULT_LANG_ANNO))
   }
 
+  case object Latitude extends RdfField {
+    override val predicate: js.Dynamic = RDFHelper.SCHEMA_ORG("latitude")
+    override val default: RdfLiteral = RdfLiteral("0")
+  }
+
+  case object Longitude extends RdfField {
+    override val predicate: js.Dynamic = RDFHelper.SCHEMA_ORG("longitude")
+    override val default: RdfLiteral = RdfLiteral("0")
+  }
 }
