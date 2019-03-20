@@ -74,7 +74,7 @@ object GardenPage {
               )
             },
             Col() {
-              renderWhen(!state.editing)(SpoterMap(garden.location.latitude, garden.location.longitude))
+              SpoterMap(garden.location.latitude, garden.location.longitude)
             },
             Col()(
               FormGroup(controlId = "size") {
