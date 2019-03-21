@@ -15,11 +15,12 @@ object SpoterMap {
 
   class Backend($: BackendScope[Props, Unit]) {
     private lazy val map = Leaflet.map("map")
+    private lazy val marker = Leaflet.marker(Leaflet.latLng(0, 0)).addTo(map)
 
     def centerMap(props: Props): Callback = Callback {
       val center = Leaflet.latLng(props.lat, props.lng)
       map.setView(center, 16)
-      Leaflet.marker(center).addTo(map)
+      marker.setLatLng(center)
     }
 
     def render(props: Props): VdomElement = {
