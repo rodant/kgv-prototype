@@ -10,6 +10,7 @@ import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
 import me.spoter.services.rdf_mapping.BasicField._
 import me.spoter.services.{GardenService, GeoCodingService}
+import org.scalajs.dom.ext.KeyCode
 
 /**
   * A page showing the data of an allotment garden.
@@ -35,6 +36,22 @@ object GardenPage {
 
     private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
 
+    private def handleKeyForName(e: ReactKeyboardEvent): Callback = handleExc.orElse(handleEnter).orElse(ignoreKey)(e.keyCode)
+
+    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleExc.orElse(ignoreKey)(e.keyCode)
+
+    private val handleExc: PartialFunction[Int, Callback] = {
+      case KeyCode.Escape => onCancel()
+    }
+
+    private val handleEnter: PartialFunction[Int, Callback] = {
+      case KeyCode.Enter => onUpdateName()
+    }
+
+    private val ignoreKey: PartialFunction[Int, Callback] = {
+      case _ => Callback()
+    }
+
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
       Container(
@@ -48,13 +65,14 @@ object GardenPage {
                   size = "lg",
                   value = s"${garden.name.value}",
                   onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
-                  ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40)(),
+                  ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
+                  ^.onKeyUp ==> handleKeyForName)(),
                 <.div(^.marginTop := 10.px,
                   <.i(^.className := "fas fa-check fa-lg",
                     ^.title := "Bestätigen",
                     ^.color := "darkseagreen",
                     ^.marginLeft := 10.px,
-                    ^.onClick --> bs.state.flatMap[Unit](onUpdateTitle(bs))),
+                    ^.onClick --> onUpdateName()),
                   <.i(^.className := "fas fa-times fa-lg",
                     ^.title := "Abbrechen",
                     ^.color := "red",
@@ -107,14 +125,15 @@ object GardenPage {
                   plaintext = !state.editing,
                   onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
                     g.copy(description = g.description.copy(value = e.target.value))))(
-                  ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing())(),
+                  ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing(),
+                  ^.onKeyUp ==> handleKeyForDesc)(),
                 renderWhen(state.editing) {
                   <.div(^.marginTop := 10.px,
                     <.i(^.className := "fas fa-check fa-lg",
                       ^.title := "Bestätigen",
                       ^.color := "darkseagreen",
                       ^.marginLeft := 10.px,
-                      ^.onClick --> bs.state.flatMap[Unit](onUpdateDesc(bs))),
+                      ^.onClick --> onUpdateDesc()),
                     <.i(^.className := "fas fa-times fa-lg",
                       ^.title := "Abbrechen",
                       ^.color := "red",
@@ -167,21 +186,25 @@ object GardenPage {
       bs.modState(old => old.copy(workingCopy = transform(old.g)))
     }
 
-    private def onUpdateTitle(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state => {
-      if (state.workingCopy.name.value.isEmpty) Callback()
-      else
-        Callback.future {
-          val workingCopy = state.workingCopy
-          val updateF = GardenService.update(IRI(workingCopy.uri), Name, state.g.name, workingCopy.name)
-          updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
-        }
+    private def onUpdateName(): Callback = {
+      bs.state.flatMap { state =>
+        if (state.workingCopy.name.value.isEmpty) Callback()
+        else
+          Callback.future {
+            val workingCopy = state.workingCopy
+            val updateF = GardenService.update(IRI(workingCopy.uri), Name, state.g.name, workingCopy.name)
+            updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
+          }
+      }
     }
 
-    private def onUpdateDesc(bs: BackendScope[Props, State]): State => CallbackTo[Unit] = state =>
-      Callback.future {
-        val workingCopy = state.workingCopy
-        val updateF = GardenService.update(IRI(workingCopy.uri), Description, state.g.description, workingCopy.description)
-        updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
+    private def onUpdateDesc(): CallbackTo[Unit] =
+      bs.state.flatMap { state =>
+        Callback.future {
+          val workingCopy = state.workingCopy
+          val updateF = GardenService.update(IRI(workingCopy.uri), Description, state.g.description, workingCopy.description)
+          updateF.map(_ => bs.setState(state.copy(g = workingCopy, editing = false)))
+        }
       }
 
     private def addressChangeHandler(newAddress: Address): Callback = bs.state.flatMap { state =>
