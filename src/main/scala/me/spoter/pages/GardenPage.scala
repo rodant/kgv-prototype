@@ -5,12 +5,11 @@ import java.net.URI
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^.{VdomElement, _}
 import me.spoter.components.bootstrap._
-import me.spoter.components.{AddressComponent, SpoterMap}
+import me.spoter.components.{AddressComponent, SpoterMap, _}
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
 import me.spoter.services.rdf_mapping.BasicField._
 import me.spoter.services.{GardenService, GeoCodingService}
-import org.scalajs.dom.ext.KeyCode
 
 /**
   * A page showing the data of an allotment garden.
@@ -36,21 +35,10 @@ object GardenPage {
 
     private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
 
-    private def handleKeyForName(e: ReactKeyboardEvent): Callback = handleExc.orElse(handleEnter).orElse(ignoreKey)(e.keyCode)
+    private def handleKeyForName(e: ReactKeyboardEvent): Callback =
+      handleEsc(onCancel()).orElse(handleEnter(onUpdateName())).orElse(ignoreKey)(e.keyCode)
 
-    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleExc.orElse(ignoreKey)(e.keyCode)
-
-    private val handleExc: PartialFunction[Int, Callback] = {
-      case KeyCode.Escape => onCancel()
-    }
-
-    private val handleEnter: PartialFunction[Int, Callback] = {
-      case KeyCode.Enter => onUpdateName()
-    }
-
-    private val ignoreKey: PartialFunction[Int, Callback] = {
-      case _ => Callback()
-    }
+    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleEsc(onCancel()).orElse(ignoreKey)(e.keyCode)
 
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
