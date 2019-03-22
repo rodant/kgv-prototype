@@ -45,6 +45,7 @@ object GardenPage {
             renderWhen(state.editing) {
               <.div(^.width := "100%",
                 FormControl(
+                  size = "lg",
                   value = s"${garden.name.value}",
                   onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
                   ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40)(),

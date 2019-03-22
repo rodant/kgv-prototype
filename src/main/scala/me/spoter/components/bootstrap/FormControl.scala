@@ -24,6 +24,7 @@ object FormControl extends ReactBridgeComponent {
             readOnly: js.UndefOr[Boolean] = js.undefined,
             plaintext: js.UndefOr[Boolean] = js.undefined,
             rows: js.UndefOr[Int] = js.undefined,
+            size: js.UndefOr[String] = js.undefined,
             onChange: js.UndefOr[ReactEventFromInput => Callback] = js.undefined): WithProps = auto
 
 }
