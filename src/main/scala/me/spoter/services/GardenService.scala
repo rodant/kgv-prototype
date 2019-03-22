@@ -51,11 +51,9 @@ object GardenService {
 
       case name =>
         val allotmentDesc = bestChoiceFor(allotmentUri, Description)
-        val latitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("latitude"))
-        val longitude = RDFHelper.get(allotmentUri, RDFHelper.SCHEMA_ORG("longitude"))
-        val latStr = latitude.toString
-        val lngStr = longitude.toString
-        val location = Location(latStr.toDouble, lngStr.toDouble)
+        val latitude = bestChoiceFor(allotmentUri, Latitude)
+        val longitude = bestChoiceFor(allotmentUri, Longitude)
+        val location = Location(latitude, longitude)
 
         val streetAddress = bestChoiceFor(allotmentUri, StreetAndNumber)
         val postalCode = bestChoiceFor(allotmentUri, PostalCode)
@@ -134,8 +132,10 @@ object GardenService {
       AddressRegion.st(sub, g.address.region, doc),
       AddressCountry.st(sub, g.address.country, doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("includes"), RDFLib.literal(g.bungalow.fold("")(_ => "Bungalow"), "de"), doc),
-      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("latitude"), RDFLib.literal(g.location.latitude.toString, typ = RDFHelper.XMLS("float")), doc),
-      RDFLib.st(sub, RDFHelper.SCHEMA_ORG("longitude"), RDFLib.literal(g.location.longitude.toString, typ = RDFHelper.XMLS("float")), doc),
+      Latitude.st(sub, g.location.latitude, doc),
+      //RDFLib.st(sub, RDFHelper.SCHEMA_ORG("latitude"), RDFLib.literal(g.location.latitude.toString, typ = RDFHelper.XMLS("float")), doc),
+      Longitude.st(sub, g.location.longitude, doc),
+      //RDFLib.st(sub, RDFHelper.SCHEMA_ORG("longitude"), RDFLib.literal(g.location.longitude.toString, typ = RDFHelper.XMLS("float")), doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("condition"), RDFLib.literal(g.condition.toString, "de"), doc)
     )
   }

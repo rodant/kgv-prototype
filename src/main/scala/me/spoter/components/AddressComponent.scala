@@ -2,7 +2,7 @@ package me.spoter.components
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import me.spoter.components.bootstrap.{Col, FormControl, FormLabel, Row}
+import me.spoter.components.bootstrap._
 import me.spoter.models.Address
 import me.spoter.services.rdf_mapping.BasicField.StreetAndNumber
 
@@ -33,6 +33,9 @@ object AddressComponent {
       bs.modState(old => old.copy(workingCopy = transform(old.workingCopy)))
     }
 
+    private def handleKey(e: ReactKeyboardEvent): Callback =
+      handleEsc(onCancel()).orElse(handleEnter(onConfirm())).orElse(ignoreKey)(e.keyCode)
+
     def render(state: State): VdomElement = {
       if (state.editing) {
         val address = state.workingCopy
@@ -43,19 +46,20 @@ object AddressComponent {
               FormControl(
                 value = address.streetAndNumber.value,
                 onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(streetAndNumber = a.streetAndNumber.copy(value = e.target.value)))
-              )(^.autoFocus := true)
+              )(^.autoFocus := true, ^.required := true, ^.onKeyUp ==> handleKey)
             ),
             Row()(^.className := "address-2nd-line",
               Col(xl = 5, lg = 5, md = 5)(
                 FormControl(
                   value = address.postalCode.value,
                   onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(postalCode = a.postalCode.copy(value = e.target.value)))
-                )()),
+                )(^.required := true, ^.`type` := "number", ^.max := 99999, ^.onKeyUp ==> handleKey),
+              ),
               Col(xl = 7, lg = 7, md = 7)(
                 FormControl(
                   value = address.region.value,
                   onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(region = a.region.copy(value = e.target.value)))
-                )())
+                )(^.required := true, ^.onKeyUp ==> handleKey))
             ),
             Row()(
               <.div(^.marginTop := 10.px,

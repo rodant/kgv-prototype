@@ -17,5 +17,6 @@ object Form extends ReactBridgeComponent {
 
   override protected lazy val componentValue: js.Any = RawComponent
 
-  def apply(inline: js.UndefOr[Boolean] = js.undefined): WithProps = auto
+  def apply(validated: js.UndefOr[Boolean] = js.undefined,
+            inline: js.UndefOr[Boolean] = js.undefined): WithProps = auto
 }

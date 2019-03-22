@@ -1,9 +1,17 @@
 package me.spoter.models
 
+import me.spoter.rdf.RdfLiteral
+import me.spoter.services.rdf_mapping.BasicField.{Latitude, Longitude}
+
 /**
   * A GPS location.
   */
-case class Location(latitude: Double, longitude: Double)
+case class Location(latitude: RdfLiteral = Latitude.default, longitude: RdfLiteral = Longitude.default)
+
+object Location {
+  def apply(latitude: Double, longitude: Double): Location =
+    new Location(RdfLiteral(latitude.toString), RdfLiteral(longitude.toString))
+}
 
 /**
   * Area in square meters
@@ -21,7 +29,7 @@ case class Money(amount: Long) extends AnyVal
 
 import enumeratum._
 import me.spoter.rdf.RdfLiteral
-import me.spoter.services.rdf_mapping.BasicField.{AddressCountry, AddressRegion, PostalCode, StreetAndNumber}
+import me.spoter.services.rdf_mapping.BasicField._
 
 import scala.collection.immutable
 

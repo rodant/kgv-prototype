@@ -47,7 +47,7 @@ object OfferingPage {
               )
             },
             Col() {
-              SpoterMap(garden.location.latitude, garden.location.longitude)
+              SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
             },
             Col()(
               FormGroup(controlId = "size") {
