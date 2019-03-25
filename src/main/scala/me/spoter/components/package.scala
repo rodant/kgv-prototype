@@ -7,12 +7,12 @@ import org.scalajs.dom.ext.KeyCode
   *
   */
 package object components {
-  def handleEsc(escHandler: => Callback): PartialFunction[Int, Callback] = {
-    case KeyCode.Escape => escHandler
+  def handleEsc(escHandler: () => Callback): PartialFunction[Int, Callback] = {
+    case KeyCode.Escape => escHandler()
   }
 
-  def handleEnter(enterHandler: => Callback): PartialFunction[Int, Callback] = {
-    case KeyCode.Enter => enterHandler
+  def handleEnter(enterHandler: () => Callback): PartialFunction[Int, Callback] = {
+    case KeyCode.Enter => enterHandler()
   }
 
   val ignoreKey: PartialFunction[Int, Callback] = {

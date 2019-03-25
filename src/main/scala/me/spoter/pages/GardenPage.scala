@@ -36,9 +36,9 @@ object GardenPage {
     private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
 
     private def handleKeyForName(e: ReactKeyboardEvent): Callback =
-      handleEsc(onCancel()).orElse(handleEnter(onUpdateName())).orElse(ignoreKey)(e.keyCode)
+      handleEsc(onCancel).orElse(handleEnter(onUpdateName)).orElse(ignoreKey)(e.keyCode)
 
-    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleEsc(onCancel()).orElse(ignoreKey)(e.keyCode)
+    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleEsc(onCancel).orElse(ignoreKey)(e.keyCode)
 
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
@@ -51,8 +51,9 @@ object GardenPage {
               <.div(^.width := "100%",
                 FormControl(
                   size = "lg",
-                  value = s"${garden.name.value}",
-                  onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
+                  value = garden.name.value,
+                  onChange = (e: ReactEventFromInput) =>
+                    changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
                   ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
                   ^.onKeyUp ==> handleKeyForName)(),
                 <.div(^.marginTop := 10.px,

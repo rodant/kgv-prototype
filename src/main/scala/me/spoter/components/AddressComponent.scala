@@ -34,7 +34,7 @@ object AddressComponent {
     }
 
     private def handleKey(e: ReactKeyboardEvent): Callback =
-      handleEsc(onCancel()).orElse(handleEnter(onConfirm())).orElse(ignoreKey)(e.keyCode)
+      handleEsc(onCancel).orElse(handleEnter(onConfirm)).orElse(ignoreKey)(e.keyCode)
 
     def render(state: State): VdomElement = {
       if (state.editing) {

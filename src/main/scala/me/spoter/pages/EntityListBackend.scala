@@ -43,8 +43,9 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
         sxs.state.newEntity.map { e =>
           Row()(
             Form(validated = true)(^.noValidate := true)(
-              FormControl(value = e.name.value, onChange = onChangeName(_))
-              (^.placeholder := "Name", ^.autoFocus := true, ^.onKeyUp ==> handleKey, ^.required := true, ^.maxLength := 40),
+              FormControl(value = e.name.value, onChange = onChangeName(_))(
+                ^.placeholder := "Name", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
+                ^.onKeyUp ==> handleKey)(),
               <.div(^.marginTop := 10.px,
                 <.i(^.className := "fas fa-check fa-lg",
                   ^.title := "Bestätigen",
@@ -55,7 +56,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
                   ^.title := "Abbrechen",
                   ^.color := "red",
                   ^.marginLeft := 10.px,
-                  ^.onClick --> onCancel())
+                  ^.onClick --> onCancel)
               )
             )
           )
@@ -67,13 +68,14 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
     )
   }
 
-  private def onConfirm(): Callback = bs.state.flatMap[Unit](onCreateGarden)
+  private def onConfirm(): Callback = bs.state.flatMap[Unit] { state =>
+    if (state.state.newEntity.get.name.value.isEmpty)
+      Callback()
+    else
+      createEntity(state)
+  }
 
   private def onCancel(): Callback = bs.modState(old => old.copy(state = old.state.copy(newEntity = None)))
-
-  private def onCreateGarden(sxs: StateXSession[State]): Callback =
-    if (sxs.state.newEntity.get.name.value.isEmpty) Callback()
-    else createEntity(sxs)
 
   private def renderWhen(b: Boolean)(r: => VdomElement): Option[VdomElement] = if (b) Some(r) else None
 
@@ -86,5 +88,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
   }
 
   private def handleKey(e: ReactKeyboardEvent): Callback =
-    handleEsc(onCancel()).orElse(handleEnter(onConfirm())).orElse(ignoreKey)(e.keyCode)
+  //TODO: the enter key in the name field is causing a weird runtime error, but this code is correct.
+  //Check later on if the error persists.
+    handleEsc(onCancel).orElse(handleEnter(onConfirm)).orElse(ignoreKey)(e.keyCode)
 }
