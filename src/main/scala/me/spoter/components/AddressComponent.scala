@@ -6,6 +6,8 @@ import me.spoter.components.bootstrap._
 import me.spoter.models.Address
 import me.spoter.services.rdf_mapping.BasicField.StreetAndNumber
 
+import scala.scalajs.js.RegExp
+
 /**
   *
   */
@@ -21,9 +23,19 @@ object AddressComponent {
       for {
         handler <- bs.props.map(_.changeHandler)
         address <- bs.state.map(_.workingCopy)
-        _ <- handler(address)
-        _ <- bs.modState(old => old.copy(address = address, editing = false))
+        valid = validate(address)
+        _ <- if (valid) {
+          handler(address).flatMap(_ => bs.modState(old => old.copy(address = address, editing = false)))
+        } else Callback.empty
       } yield ()
+    }
+
+    private def validate(a: Address): Boolean = {
+      val validZipCode = new RegExp("\\d{5}")
+      if (a.streetAndNumber.value.length == 0 || a.region.value.length == 0 || !validZipCode.test(a.postalCode.value))
+        false
+      else
+        true
     }
 
     private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.address))
@@ -53,7 +65,7 @@ object AddressComponent {
                 FormControl(
                   value = address.postalCode.value,
                   onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(postalCode = a.postalCode.copy(value = e.target.value)))
-                )(^.required := true, ^.`type` := "number", ^.max := 99999, ^.onKeyUp ==> handleKey),
+                )(^.minLength := 5, ^.maxLength := 5, ^.onKeyUp ==> handleKey),
               ),
               Col(xl = 7, lg = 7, md = 7)(
                 FormControl(
