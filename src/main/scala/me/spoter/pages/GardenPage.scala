@@ -72,20 +72,12 @@ object GardenPage {
             }
           ),
           Row()(^.height := 280.px)(
-            Col() {
-              Carousel(
-                garden.images.map { uri =>
-                  CarouselItem(
-                    <.img(^.src := uri.toString,
-                      ^.alt := "Bild x",
-                      ^.className := "d-block w-100")
-                  )
-                }: _*
-              )
-            },
-            Col() {
+            Col()(
+              ImageCarousel(garden.images, editable = true)
+            ),
+            Col()(
               SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
-            },
+            ),
             Col()(
               FormGroup(controlId = "size") {
                 Row()(
