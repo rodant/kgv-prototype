@@ -8,5 +8,5 @@ trait KGVEntity {
   val uri: URI
   val name: RdfLiteral
 
-  def withNewTitle(t: RdfLiteral): KGVEntity
+  def withNewName(t: RdfLiteral): KGVEntity
 }

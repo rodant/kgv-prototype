@@ -20,7 +20,7 @@ case class AllotmentGarden private(uri: URI,
                                    bungalow: Option[Bungalow],
                                    condition: AllotmentCondition) extends KGVEntity {
 
-  override def withNewTitle(t: RdfLiteral): KGVEntity = copy(name = t)
+  override def withNewName(t: RdfLiteral): KGVEntity = copy(name = t)
 }
 
 object AllotmentGarden {

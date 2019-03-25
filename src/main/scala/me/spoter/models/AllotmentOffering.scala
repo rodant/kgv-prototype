@@ -18,5 +18,5 @@ case class AllotmentOffering(uri: URI = URI.create(""),
                              offeredBy: User,
                              garden: AllotmentGarden) extends KGVEntity {
 
-  override def withNewTitle(t: RdfLiteral): KGVEntity = copy(name = t)
+  override def withNewName(t: RdfLiteral): KGVEntity = copy(name = t)
 }

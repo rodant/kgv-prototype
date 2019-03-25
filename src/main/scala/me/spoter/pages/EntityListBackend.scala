@@ -82,7 +82,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
     bs.modState(old =>
       old.copy(state =
         old.state.copy(newEntity =
-          old.state.newEntity.map(g => g.withNewTitle(g.name.copy(value = e.target.value))))))
+          old.state.newEntity.map(g => g.withNewName(g.name.copy(value = e.target.value))))))
   }
 
   private def handleKey(e: ReactKeyboardEvent): Callback =
