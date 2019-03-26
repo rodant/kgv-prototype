@@ -6,7 +6,10 @@ import japgolly.scalajs.react.{Callback, ScalaComponent, _}
 import me.spoter.components.bootstrap._
 import me.spoter.models.IRI
 import org.scalajs.dom.ext.Ajax.InputData
-import org.scalajs.dom.raw.FormData
+import org.scalajs.dom.raw.FileReader
+
+import scala.concurrent.Promise
+import scala.scalajs.js.typedarray.ArrayBufferView
 
 /**
   *
@@ -27,17 +30,18 @@ object ImageCarousel {
 
   case class Props(images: Seq[IRI], changeHandler: CommandHandler)
 
-  case class State(images: Seq[IRI], adding: Boolean = false)
+  case class State(adding: Boolean = false)
 
   class Backend(bs: BackendScope[Props, State]) {
     def render(props: Props, state: State): VdomElement = {
       val editable = props.changeHandler != NopCommandHandler$
       <.div(
         Carousel(
-          state.images.map { uri =>
+          props.images.map { uri =>
             CarouselItem(
               <.img(^.src := uri.toString,
-                ^.alt := "Bild x",
+                ^.maxHeight := 220.px,
+                ^.alt := "Garten-Bild",
                 ^.className := "d-block w-100")
             )
           }: _*
@@ -54,32 +58,42 @@ object ImageCarousel {
             ^.marginLeft := 10.px,
             ^.onClick --> Callback.empty)
         ).when(editable),
-        FormControl(`type` = "file", onChange = onFilesChange(_)).when(editable && state.adding)
+        FormControl(`type` = "file", onChange = onFilesChange(_))(^.autoFocus := true).when(editable && state.adding)
       )
     }
 
     private def onFilesChange(e: ReactEventFromInput): Callback = {
+      import scala.concurrent.ExecutionContext.Implicits.global
       e.persist()
       e.stopPropagation()
       e.preventDefault()
       val file = e.target.files(0)
-      val formData = new FormData()
-      formData.append("file", file)
-      val data = InputData.formdata2ajax(formData)
-      for {
-        handler <- bs.props.map(_.changeHandler)
-        _ <- handler.addImage(file.name, data)
-        _ <- Callback.alert(s"Sent file: $file")
-        _ <- bs.modState(_.copy(adding = false))
-      } yield ()
+      val promise = Promise[ArrayBufferView]()
+      val reader = new FileReader()
+      reader.onloadend = e => {
+        if (e.loaded == file.size) {
+          promise.success(reader.result.asInstanceOf[ArrayBufferView])
+        } else {
+          promise.failure(new Exception(s"Error reading the file: ${file.name}"))
+        }
+      }
+      reader.readAsArrayBuffer(file)
+      Callback.future {
+        promise.future.map { data =>
+          for {
+            handler <- bs.props.map(_.changeHandler)
+            _ <- handler.addImage(file.name, InputData.arrayBufferView2ajax(data))
+            _ <- bs.modState(_.copy(adding = false))
+          } yield ()
+        }
+      }
     }
   }
 
   private val component = ScalaComponent
     .builder[Props]("ImageCarousel")
-    .initialStateFromProps(props => State(images = props.images))
+    .initialState(State())
     .renderBackend[Backend]
-    .componentWillReceiveProps(c => c.modState(old => old.copy(images = c.nextProps.images)))
     .build
 
   def apply(images: Seq[IRI], commandHandler: CommandHandler = NopCommandHandler$): VdomElement = component(Props(images, commandHandler)).vdomElement

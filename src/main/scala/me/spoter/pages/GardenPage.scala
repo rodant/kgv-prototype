@@ -43,10 +43,15 @@ object GardenPage {
         for {
           uri <- bs.props.map(_.uri)
           imgIri = GardenService.imagesIRIFor(IRI(uri)).concatPath(name)
-          upload = RDFHelper.uploadFile(imgIri, data)
+          upload = RDFHelper.uploadFile(imgIri, data, contentType = "image")
           stateChange <- Callback.future {
             upload.map { _ =>
-              bs.modState(old => old.copy(g = old.g.copy(images = imgIri.innerUri +: old.g.images)))
+              bs.modState { old =>
+                val newImages =
+                  if (old.g.images != AllotmentGarden.defaultImages) imgIri.innerUri +: old.g.images
+                  else Seq(imgIri.innerUri)
+                old.copy(g = old.g.copy(images = newImages))
+              }
             }
           }
         } yield stateChange
