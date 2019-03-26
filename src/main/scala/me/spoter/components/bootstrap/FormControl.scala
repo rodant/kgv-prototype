@@ -19,6 +19,7 @@ object FormControl extends ReactBridgeComponent {
   override protected lazy val componentValue: js.Any = RawComponent
 
   def apply(as: js.UndefOr[String] = js.undefined,
+            `type`: js.UndefOr[String] = js.undefined,
             defaultValue: js.UndefOr[String] = js.undefined,
             value: js.UndefOr[String] = js.undefined,
             readOnly: js.UndefOr[Boolean] = js.undefined,

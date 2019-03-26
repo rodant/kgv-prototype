@@ -4,6 +4,8 @@ import java.net.URI
 
 import me.spoter.models.IRI
 import me.spoter.rdf.RdfLiteral
+import org.scalajs.dom.ext.Ajax.InputData
+import org.scalajs.dom.raw.FormData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
@@ -56,6 +58,15 @@ object RDFHelper {
     */
   def createContainerResource(parentUri: URI, containerName: String, metaString: Option[String] = None): Future[js.Object] = {
     fetcher.createContainer(parentUri.toString, containerName, metaString.orUndefined).toFuture
+  }
+
+  def uploadFile(uri: IRI, data: InputData): Future[js.Object] = {
+    fetcher.webOperation("PUT", uri.toString,
+      js.Dynamic.literal(
+        contentType = "multipart/form-data",
+        data = data
+      )
+    ).toFuture
   }
 
   def listDir(dirUri: URI, forceLoad: Boolean = false): Future[Seq[URI]] = RDFHelper.loadEntity[Seq[URI]](dirUri, forceLoad) {

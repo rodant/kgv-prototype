@@ -20,6 +20,8 @@ object GardenService {
   private val gardensDirName = "allotment_gardens"
   private val imagesDirName = "images"
 
+  def imagesIRIFor(iri: IRI): IRI = IRI(s"${iri.toString}$imagesDirName")
+
   def fetchGardensByWebId(webId: URI, forceLoad: Boolean = false): Future[Seq[AllotmentGarden]] = {
     for {
       gardensDirUri <- fetchGardensDirByWebId(webId)
@@ -108,7 +110,7 @@ object GardenService {
       baseIri = canonicalGardenIri.baseIRI
       uuid = canonicalGardenIri.lastPathComponent
       _ <- RDFHelper.createContainerResource(baseIri.innerUri, uuid)
-      imagesIri = IRI(s"${gardenIri.toString}$imagesDirName")
+      imagesIri = imagesIRIFor(gardenIri)
       _ <- RDFHelper.ensureContainerExists(imagesIri)
       _ <- RDFHelper.addStatementsToWeb(sts)
     } yield g
