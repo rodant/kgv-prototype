@@ -9,6 +9,7 @@ import org.scalajs.dom.ext.Ajax.InputData
 import org.scalajs.dom.raw.FileReader
 
 import scala.concurrent.Promise
+import scala.scalajs.js
 import scala.scalajs.js.typedarray.ArrayBufferView
 
 /**
@@ -22,21 +23,26 @@ object ImageCarousel {
     def removeImage(iri: IRI): Callback
   }
 
-  object NopCommandHandler$ extends CommandHandler {
+  object NopCommandHandler extends CommandHandler {
     override def addImage(name: String, data: InputData): Callback = Callback()
 
     override def removeImage(iri: IRI): Callback = Callback()
   }
 
-  case class Props(images: Seq[IRI], changeHandler: CommandHandler)
+  case class Props(images: Seq[IRI], activeIndex: Int, changeHandler: CommandHandler)
 
-  case class State(adding: Boolean = false)
+  case class State(currentIndex: Int = 0, adding: Boolean = false)
+
 
   class Backend(bs: BackendScope[Props, State]) {
+    private val onSelectHandler: Option[(js.Any, String, js.Object) => Callback] =
+      Option((eventKey, _, _) => bs.modState(_.copy(currentIndex = eventKey.asInstanceOf[Int])))
+
     def render(props: Props, state: State): VdomElement = {
-      val editable = props.changeHandler != NopCommandHandler$
+      import scala.scalajs.js.JSConverters._
+      val editable = props.changeHandler != NopCommandHandler
       <.div(
-        Carousel(
+        Carousel(interval = null, activeIndex = state.currentIndex, onSelect = onSelectHandler.orUndefined)(
           props.images.map { uri =>
             CarouselItem(
               <.img(^.src := uri.toString,
@@ -92,10 +98,12 @@ object ImageCarousel {
 
   private val component = ScalaComponent
     .builder[Props]("ImageCarousel")
-    .initialState(State())
+    .initialStateFromProps(props => State(currentIndex = props.activeIndex))
     .renderBackend[Backend]
+    .componentWillReceiveProps(c => c.modState(old => old.copy(currentIndex = c.nextProps.activeIndex)))
     .build
 
-  def apply(images: Seq[IRI], commandHandler: CommandHandler = NopCommandHandler$): VdomElement = component(Props(images, commandHandler)).vdomElement
+  def apply(images: Seq[IRI], activeIndex: Int = 0, commandHandler: CommandHandler = NopCommandHandler): VdomElement =
+    component(Props(images, activeIndex, commandHandler)).vdomElement
 
 }

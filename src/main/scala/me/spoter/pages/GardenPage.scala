@@ -100,7 +100,7 @@ object GardenPage {
           ),
           Row()(^.height := 280.px)(
             Col()(
-              ImageCarousel(garden.images.map(IRI(_)), ImageCommandHandler)
+              ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler)
             ),
             Col()(
               SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)

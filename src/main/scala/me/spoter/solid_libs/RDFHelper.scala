@@ -102,7 +102,6 @@ object RDFHelper {
   }
 
   def statementsMatching(sub: Option[URI], prop: Option[js.Dynamic], obj: Option[URI], doc: Option[URI]): Seq[js.Dynamic] = {
-    import js.JSConverters._
     val subNode = sub.map(s => RDFLib.sym(s.toString)).orUndefined
     val objNode = obj.map(o => RDFLib.sym(o.toString)).orUndefined
     val propNode = prop.orUndefined

@@ -4,8 +4,8 @@ import java.net.URI
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
-import me.spoter.components.{AddressComponent, SpoterMap}
 import me.spoter.components.bootstrap._
+import me.spoter.components.{AddressComponent, SpoterMap}
 import me.spoter.models.AllotmentCondition._
 import me.spoter.models._
 import me.spoter.services.OfferingService
@@ -36,7 +36,7 @@ object OfferingPage {
         Form()(
           Row()(^.height := 280.px)(
             Col() {
-              Carousel(
+              Carousel()(
                 garden.images.map { uri =>
                   CarouselItem(
                     <.img(^.src := uri.toString,
