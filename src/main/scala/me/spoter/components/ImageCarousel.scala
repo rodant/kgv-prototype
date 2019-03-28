@@ -54,7 +54,7 @@ object ImageCarousel {
         ),
         <.div(^.marginTop := 10.px,
           <.i(^.className := "fas fa-plus",
-            ^.title := "Bild hinzufügen",
+            ^.title := "Bild Hinzufügen",
             ^.color := "darkseagreen",
             ^.marginLeft := 10.px,
             ^.onClick --> bs.modState(_.copy(adding = true))),
@@ -64,7 +64,18 @@ object ImageCarousel {
             ^.marginLeft := 10.px,
             ^.onClick --> Callback.empty)
         ).when(editable),
-        FormControl(`type` = "file", onChange = onFilesChange(_))(^.autoFocus := true).when(editable && state.adding)
+        Row()(
+          Col(xl = 10, lg = 10, md = 10)(
+            FormControl(`type` = "file", onChange = onFilesChange(_))(^.autoFocus := true),
+          ),
+          Col(xl = 2, lg = 2, md = 2)(
+            <.i(^.className := "fas fa-times",
+              ^.title := "Abbrechen",
+              ^.color := "red",
+              ^.marginLeft := 10.px,
+              ^.onClick --> bs.modState(_.copy(adding = false)))
+          )
+        ).when(editable && state.adding)
       )
     }
 
