@@ -24,11 +24,13 @@ case class AllotmentGarden private(uri: URI,
 }
 
 object AllotmentGarden {
+  val defaultImages: Seq[URI] = Seq(URI.create("public/kgv/images/image-1.svg"))
+
   def apply(uri: URI = URI.create(""),
             name: RdfLiteral = Name.default,
             address: Address = Address(),
             location: Location = Location(0, 0),
-            images: Seq[URI] = List(URI.create("public/kgv/images/image-1.svg")),
+            images: Seq[URI] = defaultImages,
             description: RdfLiteral = Description.default,
             area: Area = Area(),
             bungalow: Option[Bungalow] = None,

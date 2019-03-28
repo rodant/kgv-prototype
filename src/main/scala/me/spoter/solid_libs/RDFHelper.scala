@@ -4,6 +4,7 @@ import java.net.URI
 
 import me.spoter.models.IRI
 import me.spoter.rdf.RdfLiteral
+import org.scalajs.dom.ext.Ajax.InputData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
@@ -58,6 +59,15 @@ object RDFHelper {
     fetcher.createContainer(parentUri.toString, containerName, metaString.orUndefined).toFuture
   }
 
+  def uploadFile(uri: IRI, data: InputData, contentType: String): Future[js.Object] = {
+    fetcher.webOperation("PUT", uri.toString,
+      js.Dynamic.literal(
+        contentType = contentType,
+        data = data
+      )
+    ).toFuture
+  }
+
   def listDir(dirUri: URI, forceLoad: Boolean = false): Future[Seq[URI]] = RDFHelper.loadEntity[Seq[URI]](dirUri, forceLoad) {
     val filesNodes = RDFHelper.getAll(dirUri, RDFHelper.LDP("contains"))
     filesNodes.map(f => new URI(f.value.toString))
@@ -92,7 +102,6 @@ object RDFHelper {
   }
 
   def statementsMatching(sub: Option[URI], prop: Option[js.Dynamic], obj: Option[URI], doc: Option[URI]): Seq[js.Dynamic] = {
-    import js.JSConverters._
     val subNode = sub.map(s => RDFLib.sym(s.toString)).orUndefined
     val objNode = obj.map(o => RDFLib.sym(o.toString)).orUndefined
     val propNode = prop.orUndefined

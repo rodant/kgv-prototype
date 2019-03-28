@@ -10,6 +10,8 @@ import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
 import me.spoter.services.rdf_mapping.BasicField._
 import me.spoter.services.{GardenService, GeoCodingService}
+import me.spoter.solid_libs.RDFHelper
+import org.scalajs.dom.ext.Ajax
 
 /**
   * A page showing the data of an allotment garden.
@@ -32,6 +34,31 @@ object GardenPage {
   case class State(g: AllotmentGarden = AllotmentGarden(), editing: Boolean = false, workingCopy: AllotmentGarden = AllotmentGarden())
 
   class Backend(bs: BackendScope[Props, State]) {
+
+    private val ImageCommandHandler = new ImageCarousel.CommandHandler {
+
+      import scala.concurrent.ExecutionContext.Implicits.global
+
+      override def addImage(name: String, data: Ajax.InputData): Callback = {
+        for {
+          uri <- bs.props.map(_.uri)
+          imgIri = GardenService.imagesIRIFor(IRI(uri)).concatPath(name)
+          upload = RDFHelper.uploadFile(imgIri, data, contentType = "image")
+          stateChange <- Callback.future {
+            upload.map { _ =>
+              bs.modState { old =>
+                val newImages =
+                  if (old.g.images != AllotmentGarden.defaultImages) imgIri.innerUri +: old.g.images
+                  else Seq(imgIri.innerUri)
+                old.copy(g = old.g.copy(images = newImages))
+              }
+            }
+          }
+        } yield stateChange
+      }
+
+      override def removeImage(iri: IRI): Callback = Callback()
+    }
 
     private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
 
@@ -72,20 +99,12 @@ object GardenPage {
             }
           ),
           Row()(^.height := 280.px)(
-            Col() {
-              Carousel(
-                garden.images.map { uri =>
-                  CarouselItem(
-                    <.img(^.src := uri.toString,
-                      ^.alt := "Bild x",
-                      ^.className := "d-block w-100")
-                  )
-                }: _*
-              )
-            },
-            Col() {
+            Col()(
+              ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler)
+            ),
+            Col()(
               SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
-            },
+            ),
             Col()(
               FormGroup(controlId = "size") {
                 Row()(

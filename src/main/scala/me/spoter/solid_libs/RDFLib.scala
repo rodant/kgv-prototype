@@ -26,6 +26,8 @@ class RDFFetcher(store: js.Dynamic) extends js.Object {
   def load(subject: String, options: js.UndefOr[js.Dynamic]): js.Promise[js.Object] = js.native
 
   def createContainer(parentURI: String, folderName: String, data: js.UndefOr[String]): js.Promise[js.Object] = js.native
+
+  def webOperation(method: String, uri: String, options: js.Dynamic = js.Dynamic.literal()): js.Promise[js.Object] = js.native
 }
 
 @js.native

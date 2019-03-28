@@ -1,8 +1,9 @@
 package me.spoter.components.bootstrap
 
+import com.payalabs.scalajs.react.bridge.{ReactBridgeComponent, WithProps}
 import japgolly.scalajs.react.CtorType.ChildArg
 import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.{Children, JsComponent}
+import japgolly.scalajs.react.{Callback, Children, JsComponent}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
@@ -11,15 +12,17 @@ import scala.scalajs.js.annotation.JSImport
   *
   */
 
-object Carousel {
+object Carousel extends ReactBridgeComponent {
 
   @JSImport("react-bootstrap", "Carousel")
   @js.native
   object RawComponent extends js.Object
 
-  val component = JsComponent[Null, Children.Varargs, Null](RawComponent)
+  override protected lazy val componentValue: js.Any = RawComponent
 
-  def apply(children: ChildArg*): VdomElement = component(children: _*).vdomElement
+  def apply(activeIndex: js.UndefOr[Int] = js.undefined,
+            interval: js.Any = 5000,
+            onSelect: js.UndefOr[(js.Any, String, js.Object) => Callback] = js.undefined): WithProps = auto
 }
 
 object CarouselItem {

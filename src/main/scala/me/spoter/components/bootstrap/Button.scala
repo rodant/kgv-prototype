@@ -19,6 +19,7 @@ object Button extends ReactBridgeComponent {
   override protected lazy val componentValue: js.Any = RawComponent
 
   def apply(variant: js.UndefOr[String] = js.undefined,
+            `type`: js.UndefOr[String] = js.undefined,
             size: js.UndefOr[String] = js.undefined,
             href: js.UndefOr[String] = js.undefined,
             active: js.UndefOr[Boolean] = js.undefined,
