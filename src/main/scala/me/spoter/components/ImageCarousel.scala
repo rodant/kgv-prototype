@@ -20,16 +20,16 @@ object ImageCarousel {
   trait CommandHandler {
     def addImage(name: String, data: InputData): Callback
 
-    def removeImage(iri: IRI): Callback
+    def removeImage(index: Int): Callback
   }
 
   object NopCommandHandler extends CommandHandler {
     override def addImage(name: String, data: InputData): Callback = Callback()
 
-    override def removeImage(iri: IRI): Callback = Callback()
+    override def removeImage(index: Int): Callback = Callback()
   }
 
-  case class Props(images: Seq[IRI], activeIndex: Int, changeHandler: CommandHandler)
+  case class Props(images: Seq[IRI], activeIndex: Int, commandHandler: CommandHandler)
 
   case class State(currentIndex: Int = 0, adding: Boolean = false)
 
@@ -40,7 +40,7 @@ object ImageCarousel {
 
     def render(props: Props, state: State): VdomElement = {
       import scala.scalajs.js.JSConverters._
-      val editable = props.changeHandler != NopCommandHandler
+      val editable = props.commandHandler != NopCommandHandler
       <.div(
         Carousel(interval = null, activeIndex = state.currentIndex, onSelect = onSelectHandler.orUndefined)(
           props.images.map { uri =>
@@ -59,10 +59,10 @@ object ImageCarousel {
             ^.marginLeft := 10.px,
             ^.onClick --> bs.modState(_.copy(adding = true))),
           <.i(^.className := "fas fa-minus",
-            ^.title := "Bild Entfernen",
+            ^.title := "Aktuelles Bild Entfernen",
             ^.color := "red",
             ^.marginLeft := 10.px,
-            ^.onClick --> Callback.empty)
+            ^.onClick --> onDeleteImage(bs))
         ).when(editable),
         Row()(
           Col(xl = 10, lg = 10, md = 10)(
@@ -77,6 +77,15 @@ object ImageCarousel {
           )
         ).when(editable && state.adding)
       )
+    }
+
+    private def onDeleteImage(bs: BackendScope[Props, State]): Callback = {
+      for {
+        state <- bs.state
+        props <- bs.props
+        handler = props.commandHandler
+        r <- handler.removeImage(state.currentIndex)
+      } yield r
     }
 
     private def onFilesChange(e: ReactEventFromInput): Callback = {
@@ -98,7 +107,7 @@ object ImageCarousel {
       Callback.future {
         promise.future.map { data =>
           for {
-            handler <- bs.props.map(_.changeHandler)
+            handler <- bs.props.map(_.commandHandler)
             _ <- handler.addImage(file.name, InputData.arrayBufferView2ajax(data))
             _ <- bs.modState(_.copy(adding = false))
           } yield ()

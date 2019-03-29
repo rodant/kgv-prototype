@@ -68,6 +68,8 @@ object RDFHelper {
     ).toFuture
   }
 
+  def deleteResource(iri: IRI): Future[js.Object] = fetcher.webOperation("DELETE", iri.toString).toFuture
+
   def listDir(dirUri: URI, forceLoad: Boolean = false): Future[Seq[URI]] = RDFHelper.loadEntity[Seq[URI]](dirUri, forceLoad) {
     val filesNodes = RDFHelper.getAll(dirUri, RDFHelper.LDP("contains"))
     filesNodes.map(f => new URI(f.value.toString))
@@ -92,11 +94,6 @@ object RDFHelper {
   def addStatementsToWeb(sts: Seq[js.Dynamic]): Future[Unit] = doUpdate(Seq(), sts)
 
   def updateStatement(previous: RdfLiteral, st: js.Dynamic): Future[Unit] = {
-    val existingSts = statementsMatching(
-      Some(URI.create(st.subject.value.toString)),
-      Some(st.predicate),
-      None,
-      None)
     val delSts = Seq(RDFLib.st(st.subject, st.predicate, previous.toJSRdfLiteral, st.why))
     doUpdate(delSts, Seq(st))
   }
