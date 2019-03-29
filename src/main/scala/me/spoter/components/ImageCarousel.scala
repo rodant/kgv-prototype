@@ -31,8 +31,7 @@ object ImageCarousel {
 
   case class Props(images: Seq[IRI], activeIndex: Int, commandHandler: CommandHandler)
 
-  case class State(currentIndex: Int = 0, adding: Boolean = false)
-
+  case class State(currentIndex: Int = 0, adding: Boolean = false, deleting: Boolean = false)
 
   class Backend(bs: BackendScope[Props, State]) {
     private val onSelectHandler: Option[(js.Any, String, js.Object) => Callback] =
@@ -62,7 +61,7 @@ object ImageCarousel {
             ^.title := "Aktuelles Bild Entfernen",
             ^.color := "red",
             ^.marginLeft := 10.px,
-            ^.onClick --> onDeleteImage(bs))
+            ^.onClick --> checkOnDelete(bs))
         ).when(editable),
         Row()(
           Col(xl = 10, lg = 10, md = 10)(
@@ -75,11 +74,31 @@ object ImageCarousel {
               ^.marginLeft := 10.px,
               ^.onClick --> bs.modState(_.copy(adding = false)))
           )
-        ).when(editable && state.adding)
+        ).when(editable && state.adding),
+
+        renderConfirmDeletion(state, bs).when(state.deleting)
       )
     }
 
-    private def onDeleteImage(bs: BackendScope[Props, State]): Callback = {
+    private def renderConfirmDeletion(state: State, bs: BackendScope[Props, State]): VdomElement = {
+      val close = (_: Unit) => bs.modState(_.copy(deleting = false))
+
+      def confirmDeletion(e: ReactEventFromInput): Callback = deleteImage(bs).flatMap(close)
+
+      Modal(size = "sm", show = state.deleting, onHide = close)(
+        ModalHeader(closeButton = true)(
+          ModalTitle()("Bild Entfernen")
+        ),
+        ModalBody()("Wollen Sie das aktuelle Bild wirklich löschen?"),
+        ModalFooter()(
+          Button(onClick = confirmDeletion(_))("Löschen")
+        )
+      )
+    }
+
+    private def checkOnDelete(bs: BackendScope[Props, State]): Callback = bs.modState(_.copy(deleting = true))
+
+    private def deleteImage(bs: BackendScope[Props, State]): Callback = {
       for {
         state <- bs.state
         props <- bs.props
