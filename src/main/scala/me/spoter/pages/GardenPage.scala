@@ -57,7 +57,20 @@ object GardenPage {
         } yield stateChange
       }
 
-      override def removeImage(iri: IRI): Callback = Callback()
+      override def removeImage(index: Int): Callback = {
+        for {
+          imgUri <- bs.state.map(_.g.images(index))
+          deletion = RDFHelper.deleteResource(IRI(imgUri))
+          stateChange <- Callback.future {
+            deletion.map { _ =>
+              bs.modState { old =>
+                val newImages = old.g.images.filter(_ != imgUri)
+                old.copy(g = old.g.copy(images = newImages))
+              }
+            }
+          }
+        } yield stateChange
+      }
     }
 
     private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
