@@ -40,7 +40,7 @@ object ImageCarousel {
     def render(props: Props, state: State): VdomElement = {
       import scala.scalajs.js.JSConverters._
       val editable = props.commandHandler != NopCommandHandler
-      <.div(
+      <.div(^.paddingBottom := 10.px,
         Carousel(interval = null, activeIndex = state.currentIndex, onSelect = onSelectHandler.orUndefined)(
           props.images.map { uri =>
             CarouselItem(
@@ -64,10 +64,10 @@ object ImageCarousel {
             ^.onClick --> checkOnDelete(bs))
         ).when(editable),
         Row()(
-          Col(xl = 10, lg = 10, md = 10)(
+          Col(xl = 10, lg = 10, md = 10, sm = 11, xs = 11)(
             FormControl(`type` = "file", onChange = onFilesChange(_))(^.autoFocus := true),
           ),
-          Col(xl = 2, lg = 2, md = 2)(
+          Col(xl = 2, lg = 2, md = 2, sm = 1, xs = 1)(
             <.i(^.className := "fas fa-times",
               ^.title := "Abbrechen",
               ^.color := "red",

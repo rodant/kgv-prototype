@@ -5,7 +5,7 @@ import java.net.URI
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
 import me.spoter.components.bootstrap._
-import me.spoter.components.{AddressComponent, SpoterMap}
+import me.spoter.components.{AddressComponent, ImageCarousel, SpoterMap}
 import me.spoter.models.AllotmentCondition._
 import me.spoter.models._
 import me.spoter.services.OfferingService
@@ -32,24 +32,20 @@ object OfferingPage {
     def render(offering: AllotmentOffering): VdomElement = {
       val garden = offering.garden
       Container(
-        <.h1(offering.name.value),
         Form()(
-          Row()(^.height := 280.px)(
-            Col() {
-              Carousel()(
-                garden.images.map { uri =>
-                  CarouselItem(
-                    <.img(^.src := uri.toString,
-                      ^.alt := "Bild x",
-                      ^.className := "d-block w-100")
-                  )
-                }: _*
+          Row()(
+            <.h1(offering.name.value)
+          ),
+          Row()(
+            Col(sm = 12, xs = 12) {
+              ImageCarousel(garden.images.map(IRI(_)))
+            },
+            Col(sm = 12, xs = 12) {
+              <.div(^.height := 280.px,
+                SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
               )
             },
-            Col() {
-              SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
-            },
-            Col()(
+            Col(sm = 12, xs = 12)(
               FormGroup(controlId = "size") {
                 Row()(
                   FormLabel(column = true)("Größe:"),
@@ -78,7 +74,7 @@ object OfferingPage {
             )
           ),
           Row()(
-            Col(xl = 8, lg = 8, md = 8) {
+            Col(xl = 8, lg = 8, md = 8, sm = 12, xs = 12) {
               FormGroup(controlId = "description") {
                 FormControl(
                   as = "textarea",
@@ -88,7 +84,7 @@ object OfferingPage {
                   plaintext = true)()
               }
             },
-            Col()(
+            Col(sm = 12, xs = 12)(
               FormGroup(controlId = "bungalow") {
                 Row()(
                   FormLabel(column = true)("Bungalow:"),

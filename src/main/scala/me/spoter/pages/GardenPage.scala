@@ -114,14 +114,16 @@ object GardenPage {
               )
             }
           ),
-          Row()(^.height := 280.px)(
-            Col()(
+          Row()(
+            Col(sm = 12, xs = 12)(
               ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler)
             ),
-            Col()(
-              SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
+            Col(sm = 12, xs = 12)(
+              <.div(^.height := 280.px,
+                SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
+              )
             ),
-            Col()(
+            Col(sm = 12, xs = 12)(
               FormGroup(controlId = "size") {
                 Row()(
                   FormLabel(column = true)("Größe:"),
@@ -139,7 +141,7 @@ object GardenPage {
             )
           ),
           Row()(
-            Col(xl = 8, lg = 8, md = 8) {
+            Col(xl = 8, lg = 8, md = 8, sm = 12, xs = 12) {
               FormGroup(controlId = "description")(
                 FormControl(
                   as = "textarea",
@@ -167,7 +169,7 @@ object GardenPage {
                 }
               )
             },
-            Col()(
+            Col(sm = 12, xs = 12)(
               FormGroup(controlId = "bungalow") {
                 Row()(
                   FormLabel(column = true)("Bungalow:"),
