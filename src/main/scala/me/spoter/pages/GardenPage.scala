@@ -54,7 +54,7 @@ object GardenPage {
                   if (old.g.images != AllotmentGarden.defaultImages) imgIri.innerUri +: old.g.images
                   else Seq(imgIri.innerUri)
                 old.copy(g = old.g.copy(images = newImages))
-              }
+              }.flatMap(_ => onCancel())
             }
           }
         } yield stateChange
@@ -69,7 +69,7 @@ object GardenPage {
               bs.modState { old =>
                 val newImages = old.g.images.filter(_ != imgUri)
                 old.copy(g = old.g.copy(images = newImages))
-              }
+              }.flatMap(_ => onCancel())
             }
           }
         } yield stateChange
