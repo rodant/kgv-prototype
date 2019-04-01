@@ -13,6 +13,8 @@ import me.spoter.services.{GardenService, GeoCodingService}
 import me.spoter.solid_libs.RDFHelper
 import org.scalajs.dom.ext.Ajax
 
+import scala.scalajs.js
+
 /**
   * A page showing the data of an allotment garden.
   */
@@ -42,7 +44,8 @@ object GardenPage {
       override def addImage(name: String, data: Ajax.InputData): Callback = {
         for {
           uri <- bs.props.map(_.uri)
-          imgIri = GardenService.imagesIRIFor(IRI(uri)).concatPath(name)
+          encodedName = js.Dynamic.global.encodeURI(name).toString
+          imgIri = GardenService.imagesIRIFor(IRI(uri)).concatPath(encodedName)
           upload = RDFHelper.uploadFile(imgIri, data, contentType = "image")
           stateChange <- Callback.future {
             upload.map { _ =>
