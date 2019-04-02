@@ -45,7 +45,6 @@ object ImageCarousel {
           props.images.map { uri =>
             CarouselItem(
               <.img(^.src := uri.toString,
-                ^.maxHeight := 220.px,
                 ^.alt := "Garten-Bild",
                 ^.className := "d-block w-100")
             )
