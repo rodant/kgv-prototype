@@ -48,7 +48,7 @@ object AddressComponent {
     private def handleKey(e: ReactKeyboardEvent): Callback =
       handleEsc(onCancel).orElse(handleEnter(onConfirm)).orElse(ignoreKey)(e.keyCode)
 
-    def render(state: State): VdomElement = {
+    def render(props: Props, state: State): VdomElement = {
       if (state.editing) {
         val address = state.workingCopy
         Row()(
@@ -99,11 +99,14 @@ object AddressComponent {
           FormLabel(column = true)("Adresse:"),
           Col(xl = 8, lg = 8, md = 8) {
             FormControl(value = viewString, readOnly = true, plaintext = true)(
-              ^.onClick --> bs.modState(old => old.copy(editing = true)))()
+              ^.onClick --> switchToEditing(props))()
           }
         )
       }
     }
+
+    private def switchToEditing(props: Props): Callback = if (props.changeHandler != defaultConfirmHandler)
+      bs.modState(old => old.copy(editing = true)) else Callback.empty
   }
 
   private val component = ScalaComponent
@@ -113,6 +116,8 @@ object AddressComponent {
     .componentWillReceiveProps(c => c.modState(_.copy(address = c.nextProps.address, workingCopy = c.nextProps.address)))
     .build
 
-  def apply(address: Address, changeHandler: Address => Callback = _ => Callback()): VdomElement =
+  private val defaultConfirmHandler: Address => Callback = _ => Callback.empty
+
+  def apply(address: Address, changeHandler: Address => Callback = defaultConfirmHandler): VdomElement =
     component(Props(address, changeHandler)).vdomElement
 }
