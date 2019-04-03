@@ -126,8 +126,10 @@ object GardenPage {
             Col(sm = 12, xs = 12)(
               FormGroup(controlId = "size") {
                 Row()(
-                  FormLabel(column = true)("Größe:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 3, xs = 3)(
+                    FormLabel(column = true)("Größe:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 9, xs = 9) {
                     FormControl(
                       value = s"${garden.area.a} m²",
                       readOnly = true,
@@ -172,8 +174,10 @@ object GardenPage {
             Col(sm = 12, xs = 12)(
               FormGroup(controlId = "bungalow") {
                 Row()(
-                  FormLabel(column = true)("Bungalow:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
+                    FormLabel(column = true)("Bungalow:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
                     FormControl(
                       value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
                       readOnly = true,
@@ -183,8 +187,10 @@ object GardenPage {
               },
               FormGroup(controlId = "condition") {
                 Row()(
-                  FormLabel(column = true)("Zustand:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
+                    FormLabel(column = true)("Zustand:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
                     FormControl(
                       value = garden.condition match {
                         case Excellent => "Ausgezeichnet"

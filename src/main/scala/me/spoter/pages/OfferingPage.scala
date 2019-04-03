@@ -48,8 +48,10 @@ object OfferingPage {
             Col(sm = 12, xs = 12)(
               FormGroup(controlId = "size") {
                 Row()(
-                  FormLabel(column = true)("Größe:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 3, xs = 3)(
+                    FormLabel(column = true)("Größe:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 9, xs = 9) {
                     FormControl(
                       value = s"${garden.area.a} m²",
                       readOnly = true,
@@ -62,8 +64,10 @@ object OfferingPage {
               },
               FormGroup(controlId = "price") {
                 Row()(
-                  FormLabel(column = true)("Preis:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 3, xs = 3)(
+                    FormLabel(column = true)("Preis:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 9, xs = 9) {
                     FormControl(
                       value = (offering.price.amount / 100.0).formatted("%.2f €"),
                       readOnly = true,
@@ -87,8 +91,10 @@ object OfferingPage {
             Col(sm = 12, xs = 12)(
               FormGroup(controlId = "bungalow") {
                 Row()(
-                  FormLabel(column = true)("Bungalow:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
+                    FormLabel(column = true)("Bungalow:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
                     FormControl(
                       value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
                       readOnly = true,
@@ -98,8 +104,10 @@ object OfferingPage {
               },
               FormGroup(controlId = "condition") {
                 Row()(
-                  FormLabel(column = true)("Zustand:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
+                    FormLabel(column = true)("Zustand:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
                     FormControl(
                       value = garden.condition match {
                         case Excellent => "Ausgezeichnet"
@@ -113,8 +121,10 @@ object OfferingPage {
               },
               FormGroup(controlId = "availabilityStarts") {
                 Row()(
-                  FormLabel(column = true)("Verfügbar ab:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
+                    FormLabel(column = true)("Verfügbar ab:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
                     FormControl(
                       value = offering.availabilityStarts.toLocaleDateString(),
                       readOnly = true,
@@ -123,8 +133,10 @@ object OfferingPage {
               },
               FormGroup(controlId = "contact") {
                 Row()(
-                  FormLabel(column = true)("Kontakt:"),
-                  Col(xl = 8, lg = 8, md = 8) {
+                  Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
+                    FormLabel(column = true)("Kontakt:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
                     offering.offeredBy.emailUri.fold(FormControl(value = "KA", readOnly = true, plaintext = true)()) { uri =>
                       FormControl(as = "a", readOnly = true, plaintext = true)(^.href := uri.toString)("Email zum Anbieter")
                     }

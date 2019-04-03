@@ -96,8 +96,10 @@ object AddressComponent {
             s"${address.streetAndNumber.value}, ${address.postalCode.value} ${address.region.value}"
           else ""
         Row()(
-          FormLabel(column = true)("Adresse:"),
-          Col(xl = 8, lg = 8, md = 8) {
+          Col(xl = 4, lg = 4, md = 4, sm = 3, xs = 3)(
+            FormLabel(column = true)("Adresse:")
+          ),
+          Col(xl = 8, lg = 8, md = 8, sm = 9, xs = 9) {
             FormControl(value = viewString, readOnly = true, plaintext = true)(
               ^.onClick --> switchToEditing(props))()
           }
