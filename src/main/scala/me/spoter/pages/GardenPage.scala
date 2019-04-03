@@ -18,7 +18,7 @@ import scala.scalajs.js
 /**
   * A page showing the data of an allotment garden.
   */
-object GardenPage {
+object GardenPage extends DetailsPageTemplate {
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
@@ -85,133 +85,76 @@ object GardenPage {
 
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
-      Container(
-        Form(validated = true)(^.noValidate := true)(
-          Row()(
-            renderWhen(!state.editing)(
-              <.h1(garden.name.value, ^.onClick --> switchToEditing())),
-            renderWhen(state.editing) {
-              <.div(^.width := "100%",
-                FormControl(
-                  size = "lg",
-                  value = garden.name.value,
-                  onChange = (e: ReactEventFromInput) =>
-                    changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
-                  ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
-                  ^.onKeyUp ==> handleKeyForName)(),
-                <.div(^.marginTop := 10.px,
-                  <.i(^.className := "fas fa-check fa-lg",
-                    ^.title := "Bestätigen",
-                    ^.color := "darkseagreen",
-                    ^.marginLeft := 10.px,
-                    ^.onClick --> onUpdateName()),
-                  <.i(^.className := "fas fa-times fa-lg",
-                    ^.title := "Abbrechen",
-                    ^.color := "red",
-                    ^.marginLeft := 10.px,
-                    ^.onClick --> onCancel())
-                )
+      fillInLayout(
+        titleSlot =
+          if (!state.editing) {
+            <.h1(garden.name.value, ^.onClick --> switchToEditing())
+          } else {
+            <.div(^.width := "100%",
+              FormControl(
+                size = "lg",
+                value = garden.name.value,
+                onChange = (e: ReactEventFromInput) =>
+                  changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
+                ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
+                ^.onKeyUp ==> handleKeyForName)(),
+              <.div(^.marginTop := 10.px,
+                <.i(^.className := "fas fa-check fa-lg",
+                  ^.title := "Bestätigen",
+                  ^.color := "darkseagreen",
+                  ^.marginLeft := 10.px,
+                  ^.onClick --> onUpdateName()),
+                <.i(^.className := "fas fa-times fa-lg",
+                  ^.title := "Abbrechen",
+                  ^.color := "red",
+                  ^.marginLeft := 10.px,
+                  ^.onClick --> onCancel())
               )
-            }
-          ),
-          Row()(
-            Col(sm = 12, xs = 12)(
-              ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler)
-            ),
-            Col(sm = 12, xs = 12)(
-              <.div(^.height := 280.px,
-                SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
-              )
-            ),
-            Col(sm = 12, xs = 12)(
-              FormGroup(controlId = "size") {
-                Row()(
-                  Col(xl = 4, lg = 4, md = 4, sm = 3, xs = 3)(
-                    FormLabel(column = true)("Größe:")
-                  ),
-                  Col(xl = 8, lg = 8, md = 8, sm = 9, xs = 9) {
-                    FormControl(
-                      value = s"${garden.area.a} m²",
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
-              },
-              FormGroup(controlId = "address") {
-                Row()(
-                  Col(xl = 4, lg = 4, md = 4, sm = 3, xs = 3)(
-                    FormLabel(column = true)("Adresse:")
-                  ),
-                  Col(xl = 8, lg = 8, md = 8, sm = 9, xs = 9) {
-                    AddressComponent(garden.address, addressChangeHandler)
-                  }
-                )
-              }
             )
-          ),
-          Row()(
-            Col(xl = 8, lg = 8, md = 8, sm = 12, xs = 12) {
-              FormGroup(controlId = "description")(
-                FormControl(
-                  as = "textarea",
-                  value = garden.description.value,
-                  rows = 18,
-                  readOnly = !state.editing,
-                  plaintext = !state.editing,
-                  onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
-                    g.copy(description = g.description.copy(value = e.target.value))))(
-                  ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing(),
-                  ^.onKeyUp ==> handleKeyForDesc)(),
-                renderWhen(state.editing) {
-                  <.div(^.marginTop := 10.px,
-                    <.i(^.className := "fas fa-check fa-lg",
-                      ^.title := "Bestätigen",
-                      ^.color := "darkseagreen",
-                      ^.marginLeft := 10.px,
-                      ^.onClick --> onUpdateDesc()),
-                    <.i(^.className := "fas fa-times fa-lg",
-                      ^.title := "Abbrechen",
-                      ^.color := "red",
-                      ^.marginLeft := 10.px,
-                      ^.onClick --> onCancel())
-                  )
-                }
-              )
-            },
-            Col(sm = 12, xs = 12)(
-              FormGroup(controlId = "bungalow") {
-                Row()(
-                  Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
-                    FormLabel(column = true)("Bungalow:")
-                  ),
-                  Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
-                    FormControl(
-                      value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
-              },
-              FormGroup(controlId = "condition") {
-                Row()(
-                  Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
-                    FormLabel(column = true)("Zustand:")
-                  ),
-                  Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
-                    FormControl(
-                      value = garden.condition match {
-                        case Excellent => "Ausgezeichnet"
-                        case Good => "Gut"
-                        case Poor => "Dürftig"
-                        case Undefined => "KA"
-                      },
-                      readOnly = true,
-                      plaintext = true)()
-                  })
-              }
+          },
+        imageSlot = ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler),
+        mapSlot = SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble),
+        addressSlot = AddressComponent(garden.address, addressChangeHandler),
+        sizeSlot = FormControl(value = s"${garden.area.a} m²", readOnly = true, plaintext = true)(),
+        descriptionSlot = <.div(
+          FormControl(
+            as = "textarea",
+            value = garden.description.value,
+            rows = 18,
+            readOnly = !state.editing,
+            plaintext = !state.editing,
+            onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
+              g.copy(description = g.description.copy(value = e.target.value))))(
+            ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing(),
+            ^.onKeyUp ==> handleKeyForDesc)(),
+          renderWhen(state.editing) {
+            <.div(^.marginTop := 10.px,
+              <.i(^.className := "fas fa-check fa-lg",
+                ^.title := "Bestätigen",
+                ^.color := "darkseagreen",
+                ^.marginLeft := 10.px,
+                ^.onClick --> onUpdateDesc()),
+              <.i(^.className := "fas fa-times fa-lg",
+                ^.title := "Abbrechen",
+                ^.color := "red",
+                ^.marginLeft := 10.px,
+                ^.onClick --> onCancel())
             )
-          )
-        )
+          }
+        ),
+        bungalowSlot = FormControl(
+          value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
+          readOnly = true,
+          plaintext = true)(),
+        conditionSlot = FormControl(
+          value = garden.condition match {
+            case Excellent => "Ausgezeichnet"
+            case Good => "Gut"
+            case Poor => "Dürftig"
+            case Undefined => "KA"
+          },
+          readOnly = true,
+          plaintext = true)()
       )
     }
 
