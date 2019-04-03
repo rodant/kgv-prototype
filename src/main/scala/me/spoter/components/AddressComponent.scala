@@ -51,41 +51,38 @@ object AddressComponent {
     def render(props: Props, state: State): VdomElement = {
       if (state.editing) {
         val address = state.workingCopy
-        Row()(
-          FormLabel(column = true)("Adresse:"),
-          Col(xl = 8, lg = 8, md = 8)(
-            Row()(
+        <.div(
+          Row()(
+            FormControl(
+              value = address.streetAndNumber.value,
+              onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(streetAndNumber = a.streetAndNumber.copy(value = e.target.value)))
+            )(^.autoFocus := true, ^.required := true, ^.onKeyUp ==> handleKey)
+          ),
+          Row()(^.className := "address-2nd-line",
+            Col(xl = 5, lg = 5, md = 5)(
               FormControl(
-                value = address.streetAndNumber.value,
-                onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(streetAndNumber = a.streetAndNumber.copy(value = e.target.value)))
-              )(^.autoFocus := true, ^.required := true, ^.onKeyUp ==> handleKey)
+                value = address.postalCode.value,
+                onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(postalCode = a.postalCode.copy(value = e.target.value)))
+              )(^.minLength := 5, ^.maxLength := 5, ^.onKeyUp ==> handleKey),
             ),
-            Row()(^.className := "address-2nd-line",
-              Col(xl = 5, lg = 5, md = 5)(
-                FormControl(
-                  value = address.postalCode.value,
-                  onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(postalCode = a.postalCode.copy(value = e.target.value)))
-                )(^.minLength := 5, ^.maxLength := 5, ^.onKeyUp ==> handleKey),
-              ),
-              Col(xl = 7, lg = 7, md = 7)(
-                FormControl(
-                  value = address.region.value,
-                  onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(region = a.region.copy(value = e.target.value)))
-                )(^.required := true, ^.onKeyUp ==> handleKey))
-            ),
-            Row()(
-              <.div(^.marginTop := 10.px,
-                <.i(^.className := "fas fa-check fa-lg",
-                  ^.title := "Bestätigen",
-                  ^.color := "darkseagreen",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onConfirm()),
-                <.i(^.className := "fas fa-times fa-lg",
-                  ^.title := "Abbrechen",
-                  ^.color := "red",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onCancel())
-              )
+            Col(xl = 7, lg = 7, md = 7)(
+              FormControl(
+                value = address.region.value,
+                onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(region = a.region.copy(value = e.target.value)))
+              )(^.required := true, ^.onKeyUp ==> handleKey))
+          ),
+          Row()(
+            <.div(^.marginTop := 10.px,
+              <.i(^.className := "fas fa-check fa-lg",
+                ^.title := "Bestätigen",
+                ^.color := "darkseagreen",
+                ^.marginLeft := 10.px,
+                ^.onClick --> onConfirm()),
+              <.i(^.className := "fas fa-times fa-lg",
+                ^.title := "Abbrechen",
+                ^.color := "red",
+                ^.marginLeft := 10.px,
+                ^.onClick --> onCancel())
             )
           )
         )
@@ -95,15 +92,8 @@ object AddressComponent {
           if (address.streetAndNumber != StreetAndNumber.default)
             s"${address.streetAndNumber.value}, ${address.postalCode.value} ${address.region.value}"
           else ""
-        Row()(
-          Col(xl = 4, lg = 4, md = 4, sm = 3, xs = 3)(
-            FormLabel(column = true)("Adresse:")
-          ),
-          Col(xl = 8, lg = 8, md = 8, sm = 9, xs = 9) {
-            FormControl(value = viewString, readOnly = true, plaintext = true)(
-              ^.onClick --> switchToEditing(props))()
-          }
-        )
+        FormControl(value = viewString, readOnly = true, plaintext = true)(
+          ^.onClick --> switchToEditing(props))()
       }
     }
 

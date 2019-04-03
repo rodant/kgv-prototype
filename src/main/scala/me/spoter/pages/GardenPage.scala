@@ -137,8 +137,15 @@ object GardenPage {
                   }
                 )
               },
-              FormGroup(controlId = "newAddress") {
-                AddressComponent(garden.address, addressChangeHandler)
+              FormGroup(controlId = "address") {
+                Row()(
+                  Col(xl = 4, lg = 4, md = 4, sm = 3, xs = 3)(
+                    FormLabel(column = true)("Adresse:")
+                  ),
+                  Col(xl = 8, lg = 8, md = 8, sm = 9, xs = 9) {
+                    AddressComponent(garden.address, addressChangeHandler)
+                  }
+                )
               }
             )
           ),
