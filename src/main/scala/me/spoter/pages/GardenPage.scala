@@ -115,7 +115,7 @@ object GardenPage extends DetailsPageTemplate {
         imageSlot = ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler),
         mapSlot = SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble),
         addressSlot = AddressComponent(garden.address, addressChangeHandler),
-        sizeSlot = FormControl(value = s"${garden.area.a} m²", readOnly = true, plaintext = true)(),
+        sizeSlot = AreaComponent(garden.area),
         descriptionSlot = <.div(
           FormControl(
             as = "textarea",
