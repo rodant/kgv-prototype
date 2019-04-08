@@ -50,4 +50,15 @@ object BasicField {
     override val predicate: js.Dynamic = RDFHelper.SCHEMA_ORG("longitude")
     override val default: RdfLiteral = RdfLiteral("0")
   }
+
+  case object Width extends RdfField {
+    override val predicate: js.Dynamic = RDFHelper.GOOD_REL("width")
+    override val default: RdfLiteral = RdfLiteral("0")
+  }
+
+  case object Depth extends RdfField {
+    override val predicate: js.Dynamic = RDFHelper.GOOD_REL("depth")
+    override val default: RdfLiteral = RdfLiteral("0")
+  }
+
 }

@@ -66,8 +66,8 @@ object GardenService {
         val includes = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("includes"))
         val condition = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("condition"))
 
-        val width = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("width"))
-        val depth = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("depth"))
+        val width = bestChoiceFor(allotmentUri, Width)
+        val depth = bestChoiceFor(allotmentUri, Depth)
 
         val garden = AllotmentGarden(
           uri = allotmentUri,
@@ -76,7 +76,7 @@ object GardenService {
           location = location,
           address = address,
           bungalow = if (!includes.toString.isEmpty) Some(Bungalow()) else None,
-          area = Area(width.toString.toDouble * depth.toString.toDouble),
+          area = Area(width.value.toDouble * depth.value.toDouble),
           condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
         )
         if (imageUris.nonEmpty) garden.copy(images = imageUris) else garden
@@ -135,9 +135,7 @@ object GardenService {
       AddressCountry.st(sub, g.address.country, doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("includes"), RDFLib.literal(g.bungalow.fold("")(_ => "Bungalow"), "de"), doc),
       Latitude.st(sub, g.location.latitude, doc),
-      //RDFLib.st(sub, RDFHelper.SCHEMA_ORG("latitude"), RDFLib.literal(g.location.latitude.toString, typ = RDFHelper.XMLS("float")), doc),
       Longitude.st(sub, g.location.longitude, doc),
-      //RDFLib.st(sub, RDFHelper.SCHEMA_ORG("longitude"), RDFLib.literal(g.location.longitude.toString, typ = RDFHelper.XMLS("float")), doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("condition"), RDFLib.literal(g.condition.toString, "de"), doc)
     )
   }

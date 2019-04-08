@@ -8,6 +8,7 @@ import me.spoter.components.bootstrap._
 import me.spoter.components.{AddressComponent, SpoterMap, _}
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
+import me.spoter.rdf.RdfLiteral
 import me.spoter.services.rdf_mapping.BasicField._
 import me.spoter.services.{GardenService, GeoCodingService}
 import me.spoter.solid_libs.RDFHelper
@@ -115,7 +116,7 @@ object GardenPage extends DetailsPageTemplate {
         imageSlot = ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler),
         mapSlot = SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble),
         addressSlot = AddressComponent(garden.address, addressChangeHandler),
-        sizeSlot = AreaComponent(garden.area),
+        sizeSlot = AreaComponent(garden.area, Some(areaUpdateHandler)),
         descriptionSlot = <.div(
           FormControl(
             as = "textarea",
@@ -200,6 +201,17 @@ object GardenPage extends DetailsPageTemplate {
           _ <- GardenService.update(IRI(garden.uri), Latitude, garden.location.latitude, loc.latitude)
           _ <- GardenService.update(IRI(garden.uri), Longitude, garden.location.longitude, loc.longitude)
         } yield bs.setState(state.copy(g = garden.copy(address = newAddress, location = loc), editing = false))
+      }
+    }
+
+    private def areaUpdateHandler(area: Area): Callback = bs.state.flatMap { state =>
+      val garden = state.g
+      val prevDepthRdf = RdfLiteral(garden.area.a.toString)
+      val nextDepthRdf = RdfLiteral(area.a.toString)
+      Callback.future {
+        for {
+          _ <- GardenService.update(IRI(garden.uri), Depth, prevDepthRdf, nextDepthRdf)
+        } yield bs.setState(state.copy(g = garden.copy(area = area), editing = false))
       }
     }
 
