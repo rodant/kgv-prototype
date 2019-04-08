@@ -20,14 +20,15 @@ object AreaComponent {
         FormControl(
           value = s"${area.a} m²",
           readOnly = true,
-          plaintext = true)(^.onClick --> bs.modState(_.copy(editing = true)))
+          plaintext = true)(^.onClick --> bs.modState(_.copy(editing = true)),
+          ^.onFocus ==> (_ => bs.modState(_.copy(editing = true))))
       } else {
         Row()(
           FormControl(
             value = s"${area.a}",
             `type` = "number",
             onChange = fieldUpdater((v, a) => a.copy(a = v))(_)
-          )(^.min := 0, ^.autoFocus := true, ^.onKeyUp ==> handleKey)
+          )(^.min := 0, ^.autoFocus := true, ^.onBlur ==> (_ => confirm()) ,^.onKeyUp ==> handleKey)
         )
       }
     }
@@ -40,9 +41,10 @@ object AreaComponent {
     private def confirm(): Callback = {
       for {
         handler <- bs.props.map(_.updateHandler)
-        area <- bs.state.map(_.workingCopy)
-        _ <- handler.fold(Callback.empty)(_ (area))
-          .flatMap(_ => bs.modState(old => old.copy(area = area, editing = false)))
+        area <- bs.state.map(_.area)
+        newArea <- bs.state.map(_.workingCopy)
+        _ <- if (area != newArea) handler.fold(Callback.empty)(_ (newArea)) else Callback.empty
+          .flatMap(_ => bs.modState(old => old.copy(area = newArea, editing = false)))
       } yield ()
     }
 
