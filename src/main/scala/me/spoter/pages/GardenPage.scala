@@ -91,58 +91,37 @@ object GardenPage extends DetailsPageTemplate {
           if (!state.editing) {
             <.h1(garden.name.value, ^.onClick --> switchToEditing())
           } else {
-            <.div(^.width := "100%",
-              FormControl(
-                size = "lg",
-                value = garden.name.value,
-                onChange = (e: ReactEventFromInput) =>
-                  changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
-                ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
-                ^.onKeyUp ==> handleKeyForName)(),
-              <.div(^.marginTop := 10.px,
-                <.i(^.className := "fas fa-check fa-lg",
-                  ^.title := "Bestätigen",
-                  ^.color := "darkseagreen",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onUpdateName()),
-                <.i(^.className := "fas fa-times fa-lg",
-                  ^.title := "Abbrechen",
-                  ^.color := "red",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onCancel())
+            WithConfirmAndCancel(() => onUpdateName(), () => onCancel()) {
+              <.div(^.width := "100%",
+                FormControl(
+                  size = "lg",
+                  value = garden.name.value,
+                  onChange = (e: ReactEventFromInput) =>
+                    changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
+                  ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
+                  ^.onKeyUp ==> handleKeyForName)()
               )
-            )
+            }
           },
         imageSlot = ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler),
         mapSlot = SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble),
         addressSlot = AddressComponent(garden.address, addressChangeHandler),
         sizeSlot = AreaComponent(garden.area, Some(areaUpdateHandler)),
-        descriptionSlot = <.div(
-          FormControl(
-            as = "textarea",
-            value = garden.description.value,
-            rows = 18,
-            readOnly = !state.editing,
-            plaintext = !state.editing,
-            onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
-              g.copy(description = g.description.copy(value = e.target.value))))(
-            ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing(),
-            ^.onKeyUp ==> handleKeyForDesc)(),
-          renderWhen(state.editing) {
-            <.div(^.marginTop := 10.px,
-              <.i(^.className := "fas fa-check fa-lg",
-                ^.title := "Bestätigen",
-                ^.color := "darkseagreen",
-                ^.marginLeft := 10.px,
-                ^.onClick --> onUpdateDesc()),
-              <.i(^.className := "fas fa-times fa-lg",
-                ^.title := "Abbrechen",
-                ^.color := "red",
-                ^.marginLeft := 10.px,
-                ^.onClick --> onCancel())
+        descriptionSlot =
+          WithConfirmAndCancel(() => onUpdateDesc(), () => onCancel(), show = state.editing) {
+            <.div(
+              FormControl(
+                as = "textarea",
+                value = garden.description.value,
+                rows = 18,
+                readOnly = !state.editing,
+                plaintext = !state.editing,
+                onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
+                  g.copy(description = g.description.copy(value = e.target.value))))(
+                ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing(),
+                ^.onKeyUp ==> handleKeyForDesc)()
             )
-          }
-        ),
+          },
         bungalowSlot = FormControl(
           value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
           readOnly = true,

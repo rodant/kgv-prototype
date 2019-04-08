@@ -1,6 +1,5 @@
 package me.spoter.components
 
-import com.payalabs.scalajs.react.bridge.WithPropsAndTagsMods
 import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, ReactKeyboardEvent, ScalaComponent}
@@ -14,7 +13,7 @@ object AreaComponent {
   case class State(area: Area, editing: Boolean = false, workingCopy: Area)
 
   class Backend(bs: BackendScope[Props, State]) {
-    def render(props: Props, state: State): WithPropsAndTagsMods = {
+    def render(props: Props, state: State): VdomNode = {
       val area = if (!state.editing) props.area else state.workingCopy
       if (!state.editing || props.updateHandler.isEmpty) {
         FormControl(
@@ -23,13 +22,15 @@ object AreaComponent {
           plaintext = true)(^.onClick --> bs.modState(_.copy(editing = true)),
           ^.onFocus ==> (_ => bs.modState(_.copy(editing = true))))
       } else {
-        Row()(
-          FormControl(
-            value = s"${area.a}",
-            `type` = "number",
-            onChange = fieldUpdater((v, a) => a.copy(a = v))(_)
-          )(^.min := 0, ^.autoFocus := true, ^.onBlur ==> (_ => confirm()) ,^.onKeyUp ==> handleKey)
-        )
+        WithConfirmAndCancel(() => confirm(), () => cancel()) {
+          Row()(
+            FormControl(
+              value = s"${area.a}",
+              `type` = "number",
+              onChange = fieldUpdater((v, a) => a.copy(a = v))(_)
+            )(^.min := 0, ^.autoFocus := true, ^.onKeyUp ==> handleKey)
+          )
+        }
       }
     }
 

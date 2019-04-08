@@ -48,44 +48,32 @@ object AddressComponent {
     private def handleKey(e: ReactKeyboardEvent): Callback =
       handleEsc(onCancel).orElse(handleEnter(onConfirm)).orElse(ignoreKey)(e.keyCode)
 
-    def render(props: Props, state: State): VdomElement = {
+    def render(props: Props, state: State): VdomNode = {
       if (state.editing) {
         val address = state.workingCopy
-        <.div(
-          Row()(
-            FormControl(
-              value = address.streetAndNumber.value,
-              onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(streetAndNumber = a.streetAndNumber.copy(value = e.target.value)))
-            )(^.autoFocus := true, ^.required := true, ^.onKeyUp ==> handleKey)
-          ),
-          Row()(^.className := "address-2nd-line",
-            Col(xl = 5, lg = 5, md = 5)(
+        WithConfirmAndCancel(() => onConfirm(), () => onCancel()) {
+          <.div(
+            Row()(
               FormControl(
-                value = address.postalCode.value,
-                onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(postalCode = a.postalCode.copy(value = e.target.value)))
-              )(^.minLength := 5, ^.maxLength := 5, ^.onKeyUp ==> handleKey),
+                value = address.streetAndNumber.value,
+                onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(streetAndNumber = a.streetAndNumber.copy(value = e.target.value)))
+              )(^.autoFocus := true, ^.required := true, ^.onKeyUp ==> handleKey)
             ),
-            Col(xl = 7, lg = 7, md = 7)(
-              FormControl(
-                value = address.region.value,
-                onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(region = a.region.copy(value = e.target.value)))
-              )(^.required := true, ^.onKeyUp ==> handleKey))
-          ),
-          Row()(
-            <.div(^.marginTop := 10.px,
-              <.i(^.className := "fas fa-check fa-lg",
-                ^.title := "Bestätigen",
-                ^.color := "darkseagreen",
-                ^.marginLeft := 10.px,
-                ^.onClick --> onConfirm()),
-              <.i(^.className := "fas fa-times fa-lg",
-                ^.title := "Abbrechen",
-                ^.color := "red",
-                ^.marginLeft := 10.px,
-                ^.onClick --> onCancel())
+            Row()(^.className := "address-2nd-line",
+              Col(xl = 5, lg = 5, md = 5)(
+                FormControl(
+                  value = address.postalCode.value,
+                  onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(postalCode = a.postalCode.copy(value = e.target.value)))
+                )(^.minLength := 5, ^.maxLength := 5, ^.onKeyUp ==> handleKey),
+              ),
+              Col(xl = 7, lg = 7, md = 7)(
+                FormControl(
+                  value = address.region.value,
+                  onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(region = a.region.copy(value = e.target.value)))
+                )(^.required := true, ^.onKeyUp ==> handleKey))
             )
           )
-        )
+        }
       } else {
         val address = state.address
         val viewString =
