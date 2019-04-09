@@ -87,7 +87,7 @@ object GardenPage extends DetailsPageTemplate {
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
       fillInLayout(
-        titleSlot =
+        nameSlot =
           if (!state.editing) {
             <.h1(garden.name.value, ^.onClick --> switchToEditing())
           } else {
@@ -124,20 +124,20 @@ object GardenPage extends DetailsPageTemplate {
           },
         bungalowSlot = FormControl(
           as = "select",
-          plaintext = true,
           value = garden.bungalow.fold("no")(_ => "yes"),
           onChange = updateBungalow(_))(
           <.option(^.value := "no", "Nein"),
           <.option(^.value := "yes", "Ja")),
+
         conditionSlot = FormControl(
-          value = garden.condition match {
-            case Excellent => "Ausgezeichnet"
-            case Good => "Gut"
-            case Poor => "Dürftig"
-            case Undefined => "KA"
-          },
-          readOnly = true,
-          plaintext = true)()
+          as = "select",
+          value = garden.condition.toString,
+          onChange = updateCondition(_))(
+          <.option(^.value := Excellent.entryName, "Ausgezeichnet"),
+          <.option(^.value := Good.entryName, "Gut"),
+          <.option(^.value := Poor.entryName, "Dürftig"),
+          <.option(^.value := Undefined.entryName, "Keine Angabe")
+        )
       )
     }
 
@@ -205,6 +205,17 @@ object GardenPage extends DetailsPageTemplate {
         GardenService
           .update(IRI(garden.uri), BungalowField, BungalowField.literal(prevValue), BungalowField.literal(nextValue))
           .map(_ => bs.modState(_.copy(g = garden.copy(bungalow = nextValue))))
+      }
+    }
+
+    private def updateCondition(e: ReactEventFromInput): Callback = bs.state.flatMap { state =>
+      val garden = state.g
+      val prevValue = garden.condition
+      val nextValue = AllotmentCondition.withNameInsensitive(e.target.value)
+      Callback.future {
+        GardenService
+          .update(IRI(garden.uri), Condition, Condition.literal(prevValue), Condition.literal(nextValue))
+          .map(_ => bs.modState(_.copy(g = garden.copy(condition = nextValue))))
       }
     }
 

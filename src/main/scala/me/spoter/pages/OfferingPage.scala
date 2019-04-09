@@ -32,7 +32,7 @@ object OfferingPage extends DetailsPageTemplate {
     def render(offering: AllotmentOffering): VdomElement = {
       val garden = offering.garden
       fillInLayout(
-        titleSlot = <.h1(offering.name.value),
+        nameSlot = <.h1(offering.name.value),
         imageSlot = ImageCarousel(garden.images.map(IRI(_))),
         mapSlot = SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble),
         sizeSlot = FormControl(

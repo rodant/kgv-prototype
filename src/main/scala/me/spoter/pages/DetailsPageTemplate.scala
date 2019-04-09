@@ -8,7 +8,7 @@ import me.spoter.components.bootstrap._
   * Template for the detail garden and offering pages.
   */
 trait DetailsPageTemplate {
-  def fillInLayout(titleSlot: VdomElement,
+  def fillInLayout(nameSlot: VdomElement,
                    imageSlot: VdomElement,
                    mapSlot: VdomElement,
                    sizeSlot: VdomElement,
@@ -22,7 +22,7 @@ trait DetailsPageTemplate {
     Container(
       Form(validated = true)(^.noValidate := true)(
         Row()(
-          titleSlot
+          nameSlot
         ),
         Row()(
           Col(sm = 12, xs = 12)(

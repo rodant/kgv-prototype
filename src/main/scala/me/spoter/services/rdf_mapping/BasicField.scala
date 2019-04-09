@@ -1,6 +1,7 @@
 package me.spoter.services.rdf_mapping
 
-import me.spoter.models.Bungalow
+import me.spoter.models.AllotmentCondition.Good
+import me.spoter.models.{AllotmentCondition, Bungalow}
 import me.spoter.rdf.{LangAnnotation, RdfLiteral}
 import me.spoter.solid_libs.RDFHelper
 
@@ -67,8 +68,17 @@ object BasicField {
     override val default: RdfLiteral = literal(None)
 
     def literal(value: Option[Bungalow]): RdfLiteral = {
-      val langAnnotation = Some(LangAnnotation("de"))
-      value.fold(RdfLiteral("", langAnnotation))(_ => RdfLiteral("Bungalow", langAnnotation))
+      value.fold(RdfLiteral(""))(_ => RdfLiteral("Bungalow"))
+    }
+  }
+
+  case object Condition extends RdfField {
+    override val predicate: js.Dynamic = RDFHelper.GOOD_REL("condition")
+    override val default: RdfLiteral = literal(Good)
+
+    def literal(value: AllotmentCondition): RdfLiteral = {
+      val langAnnotation = Some(LangAnnotation("en"))
+      RdfLiteral(value.entryName, langAnnotation)
     }
   }
 

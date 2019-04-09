@@ -64,7 +64,7 @@ object GardenService {
         val address = Address(streetAddress, postalCode, addressRegion, addressCountry)
 
         val includes = bestChoiceFor(allotmentUri, BungalowField)
-        val condition = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("condition"))
+        val condition = bestChoiceFor(allotmentUri, Condition)
 
         val width = bestChoiceFor(allotmentUri, Width)
         val depth = bestChoiceFor(allotmentUri, Depth)
@@ -77,7 +77,8 @@ object GardenService {
           address = address,
           bungalow = if (includes != BungalowField.default) Some(Bungalow()) else None,
           area = Area(width.value.toDouble * depth.value.toDouble),
-          condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
+          condition = AllotmentCondition.withNameInsensitiveOption(condition.value)
+            .fold[AllotmentCondition](AllotmentCondition.Undefined)(c => c)
         )
         if (imageUris.nonEmpty) garden.copy(images = imageUris) else garden
     }
@@ -133,7 +134,7 @@ object GardenService {
       BungalowField.st(sub, BungalowField.literal(g.bungalow), doc),
       Latitude.st(sub, g.location.latitude, doc),
       Longitude.st(sub, g.location.longitude, doc),
-      RDFLib.st(sub, RDFHelper.GOOD_REL("condition"), RDFLib.literal(g.condition.toString, "de"), doc)
+      Condition.st(sub, Condition.literal(g.condition), doc)
     )
   }
 
