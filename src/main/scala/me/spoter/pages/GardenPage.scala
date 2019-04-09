@@ -123,9 +123,12 @@ object GardenPage extends DetailsPageTemplate {
             )
           },
         bungalowSlot = FormControl(
-          value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
-          readOnly = true,
-          plaintext = true)(),
+          as = "select",
+          plaintext = true,
+          value = garden.bungalow.fold("no")(_ => "yes"),
+          onChange = updateBungalow(_))(
+          <.option(^.value := "no", "Nein"),
+          <.option(^.value := "yes", "Ja")),
         conditionSlot = FormControl(
           value = garden.condition match {
             case Excellent => "Ausgezeichnet"
@@ -191,6 +194,17 @@ object GardenPage extends DetailsPageTemplate {
         for {
           _ <- GardenService.update(IRI(garden.uri), Depth, prevDepthRdf, nextDepthRdf)
         } yield bs.setState(state.copy(g = garden.copy(area = area), editing = false))
+      }
+    }
+
+    private def updateBungalow(e: ReactEventFromInput): Callback = bs.state.flatMap { state =>
+      val garden = state.g
+      val prevValue = garden.bungalow
+      val nextValue = if (e.target.value == "no") None else Option(Bungalow())
+      Callback.future {
+        GardenService
+          .update(IRI(garden.uri), BungalowField, BungalowField.literal(prevValue), BungalowField.literal(nextValue))
+          .map(_ => bs.modState(_.copy(g = garden.copy(bungalow = nextValue))))
       }
     }
 

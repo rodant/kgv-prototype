@@ -1,5 +1,6 @@
 package me.spoter.services.rdf_mapping
 
+import me.spoter.models.Bungalow
 import me.spoter.rdf.{LangAnnotation, RdfLiteral}
 import me.spoter.solid_libs.RDFHelper
 
@@ -59,6 +60,16 @@ object BasicField {
   case object Depth extends RdfField {
     override val predicate: js.Dynamic = RDFHelper.GOOD_REL("depth")
     override val default: RdfLiteral = RdfLiteral("0")
+  }
+
+  case object BungalowField extends RdfField {
+    override val predicate: js.Dynamic = RDFHelper.GOOD_REL("includes")
+    override val default: RdfLiteral = literal(None)
+
+    def literal(value: Option[Bungalow]): RdfLiteral = {
+      val langAnnotation = Some(LangAnnotation("de"))
+      value.fold(RdfLiteral("", langAnnotation))(_ => RdfLiteral("Bungalow", langAnnotation))
+    }
   }
 
 }

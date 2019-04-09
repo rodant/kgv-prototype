@@ -63,7 +63,7 @@ object GardenService {
         val addressCountry = bestChoiceFor(allotmentUri, AddressCountry)
         val address = Address(streetAddress, postalCode, addressRegion, addressCountry)
 
-        val includes = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("includes"))
+        val includes = bestChoiceFor(allotmentUri, BungalowField)
         val condition = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("condition"))
 
         val width = bestChoiceFor(allotmentUri, Width)
@@ -75,7 +75,7 @@ object GardenService {
           description = allotmentDesc,
           location = location,
           address = address,
-          bungalow = if (!includes.toString.isEmpty) Some(Bungalow()) else None,
+          bungalow = if (includes != BungalowField.default) Some(Bungalow()) else None,
           area = Area(width.value.toDouble * depth.value.toDouble),
           condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
         )
@@ -117,10 +117,7 @@ object GardenService {
   }
 
   private def gardenToSentences(g: AllotmentGarden): List[js.Dynamic] = {
-    val gardenIri = IRI(g.uri)
-    val gardenIriS = gardenIri.toString
-    val sub = RDFLib.sym(gardenIriS)
-    val doc = RDFLib.sym(gardenIriS + ".meta")
+    val (sub, doc) = subAndDocFor(IRI(g.uri))
     List(
       RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.PROD("Allotment_(gardening)"), doc),
       RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.GOOD_REL("Individual"), doc),
@@ -133,11 +130,18 @@ object GardenService {
       PostalCode.st(sub, g.address.postalCode, doc),
       AddressRegion.st(sub, g.address.region, doc),
       AddressCountry.st(sub, g.address.country, doc),
-      RDFLib.st(sub, RDFHelper.GOOD_REL("includes"), RDFLib.literal(g.bungalow.fold("")(_ => "Bungalow"), "de"), doc),
+      BungalowField.st(sub, BungalowField.literal(g.bungalow), doc),
       Latitude.st(sub, g.location.latitude, doc),
       Longitude.st(sub, g.location.longitude, doc),
       RDFLib.st(sub, RDFHelper.GOOD_REL("condition"), RDFLib.literal(g.condition.toString, "de"), doc)
     )
+  }
+
+  private def subAndDocFor(iri: IRI): (js.Dynamic, js.Dynamic) = {
+    val iriS = iri.toString
+    val sub = RDFLib.sym(iriS)
+    val doc = RDFLib.sym(iriS + ".meta")
+    (sub, doc)
   }
 
   def update(sub: IRI, field: RdfField, previous: RdfLiteral, next: RdfLiteral): Future[Unit] = {
