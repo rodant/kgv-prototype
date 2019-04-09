@@ -65,11 +65,9 @@ object BasicField {
 
   case object BungalowField extends RdfField {
     override val predicate: js.Dynamic = RDFHelper.GOOD_REL("includes")
-    override val default: RdfLiteral = literal(None)
+    override val default: RdfLiteral = literal(Bungalow())
 
-    def literal(value: Option[Bungalow]): RdfLiteral = {
-      value.fold(RdfLiteral(""))(_ => RdfLiteral("Bungalow"))
-    }
+    def literal(value: Bungalow): RdfLiteral = RdfLiteral("Bungalow")
   }
 
   case object Condition extends RdfField {

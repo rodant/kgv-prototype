@@ -203,7 +203,7 @@ object GardenPage extends DetailsPageTemplate {
       val nextValue = if (e.target.value == "no") None else Option(Bungalow())
       Callback.future {
         GardenService
-          .update(IRI(garden.uri), BungalowField, BungalowField.literal(prevValue), BungalowField.literal(nextValue))
+          .patch(IRI(garden.uri), BungalowField, prevValue.map(BungalowField.literal), nextValue.map(BungalowField.literal))
           .map(_ => bs.modState(_.copy(g = garden.copy(bungalow = nextValue))))
       }
     }

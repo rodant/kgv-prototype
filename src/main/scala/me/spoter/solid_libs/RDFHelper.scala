@@ -93,6 +93,10 @@ object RDFHelper {
 
   def addStatementsToWeb(sts: Seq[js.Dynamic]): Future[Unit] = doUpdate(Seq(), sts)
 
+  def delStatementFromWeb(st: js.Dynamic): Future[Unit] = delStatementsFromWeb(Seq(st))
+
+  def delStatementsFromWeb(sts: Seq[js.Dynamic]): Future[Unit] = doUpdate(sts, Seq())
+
   def updateStatement(previous: RdfLiteral, st: js.Dynamic): Future[Unit] = {
     val delSts = Seq(RDFLib.st(st.subject, st.predicate, previous.toJSRdfLiteral, st.why))
     doUpdate(delSts, Seq(st))
