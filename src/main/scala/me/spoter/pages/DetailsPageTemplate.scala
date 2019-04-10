@@ -88,7 +88,7 @@ trait DetailsPageTemplate {
             FormGroup(controlId = "condition") {
               Row()(
                 Col(xl = 4, lg = 4, md = 4, sm = 6, xs = 6)(
-                  FormLabel(column = true)("Zustand:")
+                  FormLabel(column = true)("Gartenzustand:")
                 ),
                 Col(xl = 8, lg = 8, md = 8, sm = 6, xs = 6) {
                   conditionSlot
