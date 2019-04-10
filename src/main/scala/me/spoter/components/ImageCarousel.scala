@@ -71,6 +71,7 @@ object ImageCarousel {
               ^.title := "Abbrechen",
               ^.color := "red",
               ^.marginLeft := 10.px,
+              ^.verticalAlign := "bottom",
               ^.onClick --> bs.modState(_.copy(adding = false)))
           )
         ).when(editable && state.adding),
