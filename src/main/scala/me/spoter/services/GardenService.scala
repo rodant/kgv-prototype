@@ -120,6 +120,17 @@ object GardenService {
     } yield g
   }
 
+  def delete(iri: IRI): Future[Unit] = {
+    val imagesDir = imagesIRIFor(iri)
+    for {
+      g <- fetchGarden(iri.innerUri)
+      _ <- Future.sequence(g.images.filter(!AllotmentGarden.defaultImages.contains(_))
+        .map(uri => RDFHelper.deleteResource(IRI(uri))))
+      _ <- RDFHelper.deleteResource(imagesDir)
+      _ <- RDFHelper.deleteResource(iri)
+    } yield ()
+  }
+
   private def gardenToSentences(g: AllotmentGarden): List[js.Dynamic] = {
     val (sub, doc) = subAndDocFor(IRI(g.uri))
     List(

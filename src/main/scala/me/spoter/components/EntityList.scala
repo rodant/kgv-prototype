@@ -3,22 +3,26 @@ package me.spoter.components
 import japgolly.scalajs.react.component.builder.Lifecycle
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, ScalaComponent}
-import me.spoter.components.bootstrap.{Button, Col, Form, Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle, NavLink, Row}
+import me.spoter.components.bootstrap._
 import me.spoter.models.{IRI, KGVEntity}
 
 object EntityList {
 
-  case class Props(entityUriFragment: String, es: Iterable[KGVEntity], deleteHandler: Option[IRI => Callback] = None)
+  case class Props(entityUriFragment: String, es: Iterable[KGVEntity], deleteHandler: Option[IRI => Callback])
 
   case class State(entityToDelete: Option[KGVEntity] = None)
 
   private val component = ScalaComponent
     .builder[Props]("EntityList")
     .initialState(State())
-    .renderP(($, P) => Form()(P.es.toTagMod(renderEntity($))))
+    .renderP(($, P) => Form()(
+      <.div(
+        P.es.toTagMod(renderEntity($)),
+        renderConfirmDeletion($))))
     .build
 
-  def apply(entityUriFragment: String, es: Iterable[KGVEntity]): VdomElement = component(Props(entityUriFragment, es)).vdomElement
+  def apply(entityUriFragment: String, es: Iterable[KGVEntity], deleteHandler: Option[IRI => Callback] = None): VdomElement =
+    component(Props(entityUriFragment, es, deleteHandler)).vdomElement
 
   private def renderEntity($: Lifecycle.RenderScope[Props, State, Unit])(e: KGVEntity): VdomElement = {
     val uriFragment = $.props.entityUriFragment
@@ -35,8 +39,7 @@ object EntityList {
             ^.verticalAlign := "bottom",
             ^.onClick --> $.modState(_.copy(entityToDelete = Some(e))))
         ).when($.props.deleteHandler.isDefined)
-      ),
-      renderConfirmDeletion($)
+      )
     )
   }
 

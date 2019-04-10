@@ -6,7 +6,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.bootstrap.{Container, Form, FormControl, Row}
 import me.spoter.components.{EntityList, _}
-import me.spoter.models.KGVEntity
+import me.spoter.models.{IRI, KGVEntity}
 import me.spoter.{Session, StateXSession}
 
 case class State(es: Iterable[KGVEntity], newEntity: Option[KGVEntity] = None)
@@ -15,6 +15,8 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
   private val initialSession = Session(URI.create("_blank"))
   protected val entityUriFragment: String
   protected val entityRenderName: String
+
+  protected val deleteEntity: Option[IRI => Callback] = None
 
   protected def newEntity(): KGVEntity
 
@@ -53,7 +55,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
         }
       },
       renderWhen(sxs.session.isDefined) {
-        EntityList(entityUriFragment, es)
+        EntityList(entityUriFragment, es, deleteEntity)
       }
     )
   }
