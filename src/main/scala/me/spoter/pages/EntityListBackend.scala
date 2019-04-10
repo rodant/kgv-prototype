@@ -43,20 +43,10 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
         sxs.state.newEntity.map { e =>
           Row()(
             Form(validated = true)(^.noValidate := true)(
-              FormControl(value = e.name.value, onChange = onChangeName(_))(
-                ^.placeholder := "Name", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
-                ^.onKeyUp ==> handleKey)(),
-              <.div(^.marginTop := 10.px,
-                <.i(^.className := "fas fa-check fa-lg",
-                  ^.title := "Bestätigen",
-                  ^.color := "darkseagreen",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onConfirm),
-                <.i(^.className := "fas fa-times fa-lg",
-                  ^.title := "Abbrechen",
-                  ^.color := "red",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onCancel)
+              WithConfirmAndCancel(() => onConfirm(), () => onCancel())(
+                FormControl(value = e.name.value, onChange = onChangeName(_))(
+                  ^.placeholder := "Name", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
+                  ^.onKeyUp ==> handleKey)(),
               )
             )
           )
