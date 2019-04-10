@@ -63,11 +63,11 @@ object GardenService {
         val addressCountry = bestChoiceFor(allotmentUri, AddressCountry)
         val address = Address(streetAddress, postalCode, addressRegion, addressCountry)
 
-        val includes = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("includes"))
-        val condition = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("condition"))
+        val includes = bestOptChoiceFor(allotmentUri, BungalowField)
+        val condition = bestChoiceFor(allotmentUri, Condition)
 
-        val width = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("width"))
-        val depth = RDFHelper.get(allotmentUri, RDFHelper.GOOD_REL("depth"))
+        val width = bestChoiceFor(allotmentUri, Width)
+        val depth = bestChoiceFor(allotmentUri, Depth)
 
         val garden = AllotmentGarden(
           uri = allotmentUri,
@@ -75,19 +75,23 @@ object GardenService {
           description = allotmentDesc,
           location = location,
           address = address,
-          bungalow = if (!includes.toString.isEmpty) Some(Bungalow()) else None,
-          area = Area(width.toString.toDouble * depth.toString.toDouble),
-          condition = AllotmentCondition.namesToValuesMap.getOrElse(condition.toString, AllotmentCondition.Undefined)
+          bungalow = includes.map(_ => Bungalow()),
+          area = Area(width.value.toDouble * depth.value.toDouble),
+          condition = AllotmentCondition.withNameInsensitiveOption(condition.value)
+            .fold[AllotmentCondition](AllotmentCondition.Undefined)(c => c)
         )
         if (imageUris.nonEmpty) garden.copy(images = imageUris) else garden
     }
   }
 
-  private def bestChoiceFor(sub: URI, field: RdfField): RdfLiteral = {
+  private def bestChoiceFor(sub: URI, field: RdfField): RdfLiteral =
+    bestOptChoiceFor(sub, field).getOrElse(field.default)
+
+  private def bestOptChoiceFor(sub: URI, field: RdfField): Option[RdfLiteral] = {
     val sts = RDFHelper.statementsMatching(Some(sub), Some(field.predicate), None, None)
     sts.find(_.why.value.toString.endsWith("/.meta"))
       .orElse(sts.headOption)
-      .map(st => RdfLiteral.fromJSRflLiteral(st.`object`)).getOrElse(field.default)
+      .map(st => RdfLiteral.fromJSRflLiteral(st.`object`))
   }
 
   def fetchGardensDirByWebId(webId: URI): Future[URI] = RDFHelper.loadEntity(webId) {
@@ -117,10 +121,7 @@ object GardenService {
   }
 
   private def gardenToSentences(g: AllotmentGarden): List[js.Dynamic] = {
-    val gardenIri = IRI(g.uri)
-    val gardenIriS = gardenIri.toString
-    val sub = RDFLib.sym(gardenIriS)
-    val doc = RDFLib.sym(gardenIriS + ".meta")
+    val (sub, doc) = subAndDocFor(IRI(g.uri))
     List(
       RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.PROD("Allotment_(gardening)"), doc),
       RDFLib.st(sub, RDFHelper.RDF("type"), RDFHelper.GOOD_REL("Individual"), doc),
@@ -133,19 +134,27 @@ object GardenService {
       PostalCode.st(sub, g.address.postalCode, doc),
       AddressRegion.st(sub, g.address.region, doc),
       AddressCountry.st(sub, g.address.country, doc),
-      RDFLib.st(sub, RDFHelper.GOOD_REL("includes"), RDFLib.literal(g.bungalow.fold("")(_ => "Bungalow"), "de"), doc),
       Latitude.st(sub, g.location.latitude, doc),
-      //RDFLib.st(sub, RDFHelper.SCHEMA_ORG("latitude"), RDFLib.literal(g.location.latitude.toString, typ = RDFHelper.XMLS("float")), doc),
       Longitude.st(sub, g.location.longitude, doc),
-      //RDFLib.st(sub, RDFHelper.SCHEMA_ORG("longitude"), RDFLib.literal(g.location.longitude.toString, typ = RDFHelper.XMLS("float")), doc),
-      RDFLib.st(sub, RDFHelper.GOOD_REL("condition"), RDFLib.literal(g.condition.toString, "de"), doc)
-    )
+      Condition.st(sub, Condition.literal(g.condition), doc)
+    ) ++ g.bungalow.map(b => BungalowField.st(sub, BungalowField.literal(b), doc)).toList
+  }
+
+  private def subAndDocFor(iri: IRI): (js.Dynamic, js.Dynamic) = {
+    val iriS = iri.toString
+    val sub = RDFLib.sym(iriS)
+    val doc = RDFLib.sym(iriS + ".meta")
+    (sub, doc)
   }
 
   def update(sub: IRI, field: RdfField, previous: RdfLiteral, next: RdfLiteral): Future[Unit] = {
-    val subIriS = sub.toString
-    val subSym = RDFLib.sym(subIriS)
-    val docSym = RDFLib.sym(subIriS + ".meta")
+    val (subSym, docSym) = subAndDocFor(sub)
     RDFHelper.updateStatement(previous, field.st(subSym, next, docSym))
+  }
+
+  def patch(sub: IRI, field: RdfField, previous: Option[RdfLiteral], next: Option[RdfLiteral]): Future[Unit] = {
+    val (subSym, docSym) = subAndDocFor(sub)
+    previous.fold(Future.unit)(l => RDFHelper.delStatementFromWeb(field.st(subSym, l, docSym)))
+      .flatMap(_ => next.fold(Future.unit)(l => RDFHelper.addStatementToWeb(field.st(subSym, l, docSym))))
   }
 }

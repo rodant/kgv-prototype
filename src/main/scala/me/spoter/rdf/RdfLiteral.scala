@@ -17,7 +17,7 @@ case class RdfLiteral(value: String, lang: Option[LangAnnotation] = None, typ: j
 
 object RdfLiteral {
   def fromJSRflLiteral(literal: js.Dynamic): RdfLiteral = {
-    val lang = if (literal.lang.asInstanceOf[UndefOr[_]] != js.undefined) Some(LangAnnotation(literal.lang.toString)) else None
+    val lang = if (literal.lang.toString != "") Some(LangAnnotation(literal.lang.toString)) else None
     RdfLiteral(literal.value.toString, lang)
   }
 }

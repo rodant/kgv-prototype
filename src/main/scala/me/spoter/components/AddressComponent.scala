@@ -48,12 +48,11 @@ object AddressComponent {
     private def handleKey(e: ReactKeyboardEvent): Callback =
       handleEsc(onCancel).orElse(handleEnter(onConfirm)).orElse(ignoreKey)(e.keyCode)
 
-    def render(state: State): VdomElement = {
+    def render(props: Props, state: State): VdomNode = {
       if (state.editing) {
         val address = state.workingCopy
-        Row()(
-          FormLabel(column = true)("Adresse:"),
-          Col(xl = 8, lg = 8, md = 8)(
+        WithConfirmAndCancel(() => onConfirm(), () => onCancel()) {
+          <.div(
             Row()(
               FormControl(
                 value = address.streetAndNumber.value,
@@ -72,38 +71,22 @@ object AddressComponent {
                   value = address.region.value,
                   onChange = (e: ReactEventFromInput) => updateHandler(e)(a => a.copy(region = a.region.copy(value = e.target.value)))
                 )(^.required := true, ^.onKeyUp ==> handleKey))
-            ),
-            Row()(
-              <.div(^.marginTop := 10.px,
-                <.i(^.className := "fas fa-check fa-lg",
-                  ^.title := "Bestätigen",
-                  ^.color := "darkseagreen",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onConfirm()),
-                <.i(^.className := "fas fa-times fa-lg",
-                  ^.title := "Abbrechen",
-                  ^.color := "red",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onCancel())
-              )
             )
           )
-        )
+        }
       } else {
         val address = state.address
         val viewString =
           if (address.streetAndNumber != StreetAndNumber.default)
             s"${address.streetAndNumber.value}, ${address.postalCode.value} ${address.region.value}"
           else ""
-        Row()(
-          FormLabel(column = true)("Adresse:"),
-          Col(xl = 8, lg = 8, md = 8) {
-            FormControl(value = viewString, readOnly = true, plaintext = true)(
-              ^.onClick --> bs.modState(old => old.copy(editing = true)))()
-          }
-        )
+        FormControl(value = viewString, readOnly = true, plaintext = true)(
+          ^.onClick --> switchToEditing(props))()
       }
     }
+
+    private def switchToEditing(props: Props): Callback = if (props.changeHandler != defaultConfirmHandler)
+      bs.modState(old => old.copy(editing = true)) else Callback.empty
   }
 
   private val component = ScalaComponent
@@ -113,6 +96,8 @@ object AddressComponent {
     .componentWillReceiveProps(c => c.modState(_.copy(address = c.nextProps.address, workingCopy = c.nextProps.address)))
     .build
 
-  def apply(address: Address, changeHandler: Address => Callback = _ => Callback()): VdomElement =
+  private val defaultConfirmHandler: Address => Callback = _ => Callback.empty
+
+  def apply(address: Address, changeHandler: Address => Callback = defaultConfirmHandler): VdomElement =
     component(Props(address, changeHandler)).vdomElement
 }

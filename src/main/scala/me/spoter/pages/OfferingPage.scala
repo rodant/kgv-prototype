@@ -13,7 +13,7 @@ import me.spoter.services.OfferingService
 /**
   *
   */
-object OfferingPage {
+object OfferingPage extends DetailsPageTemplate {
   //val uriRegex =
   //  "(?:(https?|ircs?):\\/\\/(?:www\\.)?|www\\.)((?:(?:[-\\w]+\\.)+)[-\\w]+)(?::\\d+)?(?:\\/((?:[-a-zA-Z;./\\d#:_?=&,]*)))?"
 
@@ -31,108 +31,48 @@ object OfferingPage {
   class Backend(bs: BackendScope[Props, AllotmentOffering]) {
     def render(offering: AllotmentOffering): VdomElement = {
       val garden = offering.garden
-      Container(
-        Form()(
-          Row()(
-            <.h1(offering.name.value)
-          ),
-          Row()(
-            Col(sm = 12, xs = 12) {
-              ImageCarousel(garden.images.map(IRI(_)))
-            },
-            Col(sm = 12, xs = 12) {
-              <.div(^.height := 280.px,
-                SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
-              )
-            },
-            Col(sm = 12, xs = 12)(
-              FormGroup(controlId = "size") {
-                Row()(
-                  FormLabel(column = true)("Größe:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = s"${garden.area.a} m²",
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
-              },
-              FormGroup(controlId = "address") {
-                AddressComponent(garden.address)
-              },
-              FormGroup(controlId = "price") {
-                Row()(
-                  FormLabel(column = true)("Preis:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = (offering.price.amount / 100.0).formatted("%.2f €"),
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
-              }
-            )
-          ),
-          Row()(
-            Col(xl = 8, lg = 8, md = 8, sm = 12, xs = 12) {
-              FormGroup(controlId = "description") {
-                FormControl(
-                  as = "textarea",
-                  value = offering.description,
-                  rows = 20,
-                  readOnly = true,
-                  plaintext = true)()
-              }
-            },
-            Col(sm = 12, xs = 12)(
-              FormGroup(controlId = "bungalow") {
-                Row()(
-                  FormLabel(column = true)("Bungalow:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
-              },
-              FormGroup(controlId = "condition") {
-                Row()(
-                  FormLabel(column = true)("Zustand:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = garden.condition match {
-                        case Excellent => "Ausgezeichnet"
-                        case Good => "Gut"
-                        case Poor => "Dürftig"
-                        case Undefined => "KA"
-                      },
-                      readOnly = true,
-                      plaintext = true)()
-                  })
-              },
-              FormGroup(controlId = "availabilityStarts") {
-                Row()(
-                  FormLabel(column = true)("Verfügbar ab:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = offering.availabilityStarts.toLocaleDateString(),
-                      readOnly = true,
-                      plaintext = true)()
-                  })
-              },
-              FormGroup(controlId = "contact") {
-                Row()(
-                  FormLabel(column = true)("Kontakt:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    offering.offeredBy.emailUri.fold(FormControl(value = "KA", readOnly = true, plaintext = true)()) { uri =>
-                      FormControl(as = "a", readOnly = true, plaintext = true)(^.href := uri.toString)("Email zum Anbieter")
-                    }
-                  })
-              }
-            )
-          )
-        )
+      fillInLayout(
+        nameSlot = <.h1(offering.name.value),
+        imageSlot = ImageCarousel(garden.images.map(IRI(_))),
+        mapSlot = SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble),
+        sizeSlot = FormControl(
+          value = s"${garden.area.a} m²",
+          readOnly = true,
+          plaintext = true)(),
+        addressSlot = AddressComponent(garden.address),
+        priceSlot = Some(
+          FormControl(
+            value = (offering.price.amount / 100.0).formatted("%.2f €"),
+            readOnly = true,
+            plaintext = true)()),
+        descriptionSlot = FormControl(
+          as = "textarea",
+          value = offering.description,
+          rows = 20,
+          readOnly = true,
+          plaintext = true)(),
+        bungalowSlot = FormControl(
+          value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
+          readOnly = true,
+          plaintext = true)(),
+        conditionSlot = FormControl(
+          value = garden.condition match {
+            case Excellent => "Ausgezeichnet"
+            case Good => "Gut"
+            case Poor => "Dürftig"
+            case Undefined => "KA"
+          },
+          readOnly = true,
+          plaintext = true)(),
+        availableAfterSlot = Some(
+          FormControl(
+            value = offering.availabilityStarts.toLocaleDateString(),
+            readOnly = true,
+            plaintext = true)()),
+        contactSlot = Some(
+          offering.offeredBy.emailUri.fold(FormControl(value = "KA", readOnly = true, plaintext = true)()) { uri =>
+            FormControl(as = "a", readOnly = true, plaintext = true)(^.href := uri.toString)("Email zum Anbieter")
+          })
       )
     }
 

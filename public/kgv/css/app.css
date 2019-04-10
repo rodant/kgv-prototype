@@ -9,3 +9,15 @@
 .address-2nd-line :last-child {
     padding-right: 0;
 }
+
+@media (min-width: 1300px) {
+    .container {
+        max-width: 1240px;
+    }
+}
+
+@media (min-width: 1500px) {
+    .container {
+        max-width: 1440px;
+    }
+}

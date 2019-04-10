@@ -8,6 +8,7 @@ import me.spoter.components.bootstrap._
 import me.spoter.components.{AddressComponent, SpoterMap, _}
 import me.spoter.models.AllotmentCondition.{Excellent, Good, Poor, Undefined}
 import me.spoter.models._
+import me.spoter.rdf.RdfLiteral
 import me.spoter.services.rdf_mapping.BasicField._
 import me.spoter.services.{GardenService, GeoCodingService}
 import me.spoter.solid_libs.RDFHelper
@@ -18,7 +19,7 @@ import scala.scalajs.js
 /**
   * A page showing the data of an allotment garden.
   */
-object GardenPage {
+object GardenPage extends DetailsPageTemplate {
 
   private val component = ScalaComponent
     .builder[Props]("GardenPage")
@@ -54,7 +55,7 @@ object GardenPage {
                   if (old.g.images != AllotmentGarden.defaultImages) imgIri.innerUri +: old.g.images
                   else Seq(imgIri.innerUri)
                 old.copy(g = old.g.copy(images = newImages))
-              }.flatMap(_ => onCancel())
+              }.flatMap(_ => resetEditing())
             }
           }
         } yield stateChange
@@ -69,135 +70,73 @@ object GardenPage {
               bs.modState { old =>
                 val newImages = old.g.images.filter(_ != imgUri)
                 old.copy(g = old.g.copy(images = newImages))
-              }.flatMap(_ => onCancel())
+              }.flatMap(_ => resetEditing())
             }
           }
         } yield stateChange
       }
     }
 
-    private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
+    private def resetEditing(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
 
     private def handleKeyForName(e: ReactKeyboardEvent): Callback =
-      handleEsc(onCancel).orElse(handleEnter(onUpdateName)).orElse(ignoreKey)(e.keyCode)
+      handleEsc(resetEditing).orElse(handleEnter(onUpdateName)).orElse(ignoreKey)(e.keyCode)
 
-    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleEsc(onCancel).orElse(ignoreKey)(e.keyCode)
+    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleEsc(resetEditing).orElse(ignoreKey)(e.keyCode)
 
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
-      Container(
-        Form(validated = true)(^.noValidate := true)(
-          Row()(
-            renderWhen(!state.editing)(
-              <.h1(garden.name.value, ^.onClick --> switchToEditing())),
-            renderWhen(state.editing) {
+      fillInLayout(
+        nameSlot =
+          if (!state.editing) {
+            <.h1(garden.name.value, ^.onClick --> switchToEditing())
+          } else {
+            WithConfirmAndCancel(() => onUpdateName(), () => resetEditing()) {
               <.div(^.width := "100%",
                 FormControl(
                   size = "lg",
                   value = garden.name.value,
                   onChange = (e: ReactEventFromInput) =>
                     changeHandler(e, bs)(g => g.copy(name = g.name.copy(value = e.target.value))))(
-                  ^.placeholder := "Name des Gartens", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
-                  ^.onKeyUp ==> handleKeyForName)(),
-                <.div(^.marginTop := 10.px,
-                  <.i(^.className := "fas fa-check fa-lg",
-                    ^.title := "Bestätigen",
-                    ^.color := "darkseagreen",
-                    ^.marginLeft := 10.px,
-                    ^.onClick --> onUpdateName()),
-                  <.i(^.className := "fas fa-times fa-lg",
-                    ^.title := "Abbrechen",
-                    ^.color := "red",
-                    ^.marginLeft := 10.px,
-                    ^.onClick --> onCancel())
-                )
+                  ^.placeholder := "Name des Gartens", ^.required := true, ^.maxLength := 40,
+                  ^.onKeyUp ==> handleKeyForName)()
               )
             }
-          ),
-          Row()(
-            Col(sm = 12, xs = 12)(
-              ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler)
-            ),
-            Col(sm = 12, xs = 12)(
-              <.div(^.height := 280.px,
-                SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble)
-              )
-            ),
-            Col(sm = 12, xs = 12)(
-              FormGroup(controlId = "size") {
-                Row()(
-                  FormLabel(column = true)("Größe:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = s"${garden.area.a} m²",
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
-              },
-              FormGroup(controlId = "newAddress") {
-                AddressComponent(garden.address, addressChangeHandler)
-              }
+          },
+        imageSlot = ImageCarousel(garden.images.map(IRI(_)), activeIndex = 0, ImageCommandHandler),
+        mapSlot = SpoterMap(garden.location.latitude.value.toDouble, garden.location.longitude.value.toDouble),
+        addressSlot = AddressComponent(garden.address, addressChangeHandler),
+        sizeSlot = AreaComponent(garden.area, Some(areaUpdateHandler)),
+        descriptionSlot =
+          WithConfirmAndCancel(() => onUpdateDesc(), () => resetEditing(), show = state.editing) {
+            <.div(
+              FormControl(
+                as = "textarea",
+                value = garden.description.value,
+                rows = 18,
+                readOnly = !state.editing,
+                plaintext = !state.editing,
+                onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
+                  g.copy(description = g.description.copy(value = e.target.value))))(
+                ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing(),
+                ^.onKeyUp ==> handleKeyForDesc)()
             )
-          ),
-          Row()(
-            Col(xl = 8, lg = 8, md = 8, sm = 12, xs = 12) {
-              FormGroup(controlId = "description")(
-                FormControl(
-                  as = "textarea",
-                  value = garden.description.value,
-                  rows = 18,
-                  readOnly = !state.editing,
-                  plaintext = !state.editing,
-                  onChange = (e: ReactEventFromInput) => changeHandler(e, bs)(g =>
-                    g.copy(description = g.description.copy(value = e.target.value))))(
-                  ^.placeholder := "Beschreibung", ^.maxLength := 3000, ^.onClick --> switchToEditing(),
-                  ^.onKeyUp ==> handleKeyForDesc)(),
-                renderWhen(state.editing) {
-                  <.div(^.marginTop := 10.px,
-                    <.i(^.className := "fas fa-check fa-lg",
-                      ^.title := "Bestätigen",
-                      ^.color := "darkseagreen",
-                      ^.marginLeft := 10.px,
-                      ^.onClick --> onUpdateDesc()),
-                    <.i(^.className := "fas fa-times fa-lg",
-                      ^.title := "Abbrechen",
-                      ^.color := "red",
-                      ^.marginLeft := 10.px,
-                      ^.onClick --> onCancel())
-                  )
-                }
-              )
-            },
-            Col(sm = 12, xs = 12)(
-              FormGroup(controlId = "bungalow") {
-                Row()(
-                  FormLabel(column = true)("Bungalow:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = garden.bungalow.map(_ => "Ja").getOrElse[String]("Nein"),
-                      readOnly = true,
-                      plaintext = true)()
-                  }
-                )
-              },
-              FormGroup(controlId = "condition") {
-                Row()(
-                  FormLabel(column = true)("Zustand:"),
-                  Col(xl = 8, lg = 8, md = 8) {
-                    FormControl(
-                      value = garden.condition match {
-                        case Excellent => "Ausgezeichnet"
-                        case Good => "Gut"
-                        case Poor => "Dürftig"
-                        case Undefined => "KA"
-                      },
-                      readOnly = true,
-                      plaintext = true)()
-                  })
-              }
-            )
-          )
+          },
+        bungalowSlot = FormControl(
+          as = "select",
+          value = garden.bungalow.fold("no")(_ => "yes"),
+          onChange = updateBungalow(_))(
+          <.option(^.value := "no", "Nein"),
+          <.option(^.value := "yes", "Ja")),
+
+        conditionSlot = FormControl(
+          as = "select",
+          value = garden.condition.toString,
+          onChange = updateCondition(_))(
+          <.option(^.value := Excellent.entryName, "Ausgezeichnet"),
+          <.option(^.value := Good.entryName, "Gut"),
+          <.option(^.value := Poor.entryName, "Dürftig"),
+          <.option(^.value := Undefined.entryName, "Keine Angabe")
         )
       )
     }
@@ -243,7 +182,41 @@ object GardenPage {
           loc <- GeoCodingService.locationFrom(newAddress).recover { case _ => Location() }
           _ <- GardenService.update(IRI(garden.uri), Latitude, garden.location.latitude, loc.latitude)
           _ <- GardenService.update(IRI(garden.uri), Longitude, garden.location.longitude, loc.longitude)
-        } yield bs.setState(state.copy(g = garden.copy(address = newAddress, location = loc), editing = false))
+        } yield bs.setState(state.copy(g = garden.copy(address = newAddress, location = loc)))
+          .flatMap(_ => resetEditing())
+      }
+    }
+
+    private def areaUpdateHandler(area: Area): Callback = bs.state.flatMap { state =>
+      val garden = state.g
+      val prevDepthRdf = RdfLiteral(garden.area.a.toString)
+      val nextDepthRdf = RdfLiteral(area.a.toString)
+      Callback.future {
+        for {
+          _ <- GardenService.update(IRI(garden.uri), Depth, prevDepthRdf, nextDepthRdf)
+        } yield bs.setState(state.copy(g = garden.copy(area = area))).flatMap(_ => resetEditing())
+      }
+    }
+
+    private def updateBungalow(e: ReactEventFromInput): Callback = bs.state.flatMap { state =>
+      val garden = state.g
+      val prevValue = garden.bungalow
+      val nextValue = if (e.target.value == "no") None else Option(Bungalow())
+      Callback.future {
+        GardenService
+          .patch(IRI(garden.uri), BungalowField, prevValue.map(BungalowField.literal), nextValue.map(BungalowField.literal))
+          .map(_ => bs.modState(_.copy(g = garden.copy(bungalow = nextValue))).flatMap(_ => resetEditing()))
+      }
+    }
+
+    private def updateCondition(e: ReactEventFromInput): Callback = bs.state.flatMap { state =>
+      val garden = state.g
+      val prevValue = garden.condition
+      val nextValue = AllotmentCondition.withNameInsensitive(e.target.value)
+      Callback.future {
+        GardenService
+          .update(IRI(garden.uri), Condition, Condition.literal(prevValue), Condition.literal(nextValue))
+          .map(_ => bs.modState(_.copy(g = garden.copy(condition = nextValue))).flatMap(_ => resetEditing()))
       }
     }
 
