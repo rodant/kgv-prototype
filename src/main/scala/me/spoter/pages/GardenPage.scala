@@ -55,7 +55,7 @@ object GardenPage extends DetailsPageTemplate {
                   if (old.g.images != AllotmentGarden.defaultImages) imgIri.innerUri +: old.g.images
                   else Seq(imgIri.innerUri)
                 old.copy(g = old.g.copy(images = newImages))
-              }.flatMap(_ => onCancel())
+              }.flatMap(_ => resetEditing())
             }
           }
         } yield stateChange
@@ -70,19 +70,19 @@ object GardenPage extends DetailsPageTemplate {
               bs.modState { old =>
                 val newImages = old.g.images.filter(_ != imgUri)
                 old.copy(g = old.g.copy(images = newImages))
-              }.flatMap(_ => onCancel())
+              }.flatMap(_ => resetEditing())
             }
           }
         } yield stateChange
       }
     }
 
-    private def onCancel(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
+    private def resetEditing(): Callback = bs.modState(s => s.copy(editing = false, workingCopy = s.g))
 
     private def handleKeyForName(e: ReactKeyboardEvent): Callback =
-      handleEsc(onCancel).orElse(handleEnter(onUpdateName)).orElse(ignoreKey)(e.keyCode)
+      handleEsc(resetEditing).orElse(handleEnter(onUpdateName)).orElse(ignoreKey)(e.keyCode)
 
-    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleEsc(onCancel).orElse(ignoreKey)(e.keyCode)
+    private def handleKeyForDesc(e: ReactKeyboardEvent): Callback = handleEsc(resetEditing).orElse(ignoreKey)(e.keyCode)
 
     def render(state: State): VdomElement = {
       val garden = if (state.editing) state.workingCopy else state.g
@@ -91,7 +91,7 @@ object GardenPage extends DetailsPageTemplate {
           if (!state.editing) {
             <.h1(garden.name.value, ^.onClick --> switchToEditing())
           } else {
-            WithConfirmAndCancel(() => onUpdateName(), () => onCancel()) {
+            WithConfirmAndCancel(() => onUpdateName(), () => resetEditing()) {
               <.div(^.width := "100%",
                 FormControl(
                   size = "lg",
@@ -108,7 +108,7 @@ object GardenPage extends DetailsPageTemplate {
         addressSlot = AddressComponent(garden.address, addressChangeHandler),
         sizeSlot = AreaComponent(garden.area, Some(areaUpdateHandler)),
         descriptionSlot =
-          WithConfirmAndCancel(() => onUpdateDesc(), () => onCancel(), show = state.editing) {
+          WithConfirmAndCancel(() => onUpdateDesc(), () => resetEditing(), show = state.editing) {
             <.div(
               FormControl(
                 as = "textarea",
@@ -182,7 +182,8 @@ object GardenPage extends DetailsPageTemplate {
           loc <- GeoCodingService.locationFrom(newAddress).recover { case _ => Location() }
           _ <- GardenService.update(IRI(garden.uri), Latitude, garden.location.latitude, loc.latitude)
           _ <- GardenService.update(IRI(garden.uri), Longitude, garden.location.longitude, loc.longitude)
-        } yield bs.setState(state.copy(g = garden.copy(address = newAddress, location = loc), editing = false))
+        } yield bs.setState(state.copy(g = garden.copy(address = newAddress, location = loc)))
+          .flatMap(_ => resetEditing())
       }
     }
 
@@ -193,7 +194,7 @@ object GardenPage extends DetailsPageTemplate {
       Callback.future {
         for {
           _ <- GardenService.update(IRI(garden.uri), Depth, prevDepthRdf, nextDepthRdf)
-        } yield bs.setState(state.copy(g = garden.copy(area = area), editing = false))
+        } yield bs.setState(state.copy(g = garden.copy(area = area))).flatMap(_ => resetEditing())
       }
     }
 
@@ -204,7 +205,7 @@ object GardenPage extends DetailsPageTemplate {
       Callback.future {
         GardenService
           .patch(IRI(garden.uri), BungalowField, prevValue.map(BungalowField.literal), nextValue.map(BungalowField.literal))
-          .map(_ => bs.modState(_.copy(g = garden.copy(bungalow = nextValue))))
+          .map(_ => bs.modState(_.copy(g = garden.copy(bungalow = nextValue))).flatMap(_ => resetEditing()))
       }
     }
 
@@ -215,7 +216,7 @@ object GardenPage extends DetailsPageTemplate {
       Callback.future {
         GardenService
           .update(IRI(garden.uri), Condition, Condition.literal(prevValue), Condition.literal(nextValue))
-          .map(_ => bs.modState(_.copy(g = garden.copy(condition = nextValue))))
+          .map(_ => bs.modState(_.copy(g = garden.copy(condition = nextValue))).flatMap(_ => resetEditing()))
       }
     }
 
