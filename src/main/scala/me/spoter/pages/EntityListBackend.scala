@@ -6,7 +6,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.bootstrap.{Container, Form, FormControl, Row}
 import me.spoter.components.{EntityList, _}
-import me.spoter.models.KGVEntity
+import me.spoter.models.{IRI, KGVEntity}
 import me.spoter.{Session, StateXSession}
 
 case class State(es: Iterable[KGVEntity], newEntity: Option[KGVEntity] = None)
@@ -15,6 +15,8 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
   private val initialSession = Session(URI.create("_blank"))
   protected val entityUriFragment: String
   protected val entityRenderName: String
+
+  protected val deleteEntity: Option[IRI => Callback] = None
 
   protected def newEntity(): KGVEntity
 
@@ -43,27 +45,17 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
         sxs.state.newEntity.map { e =>
           Row()(
             Form(validated = true)(^.noValidate := true)(
-              FormControl(value = e.name.value, onChange = onChangeName(_))(
-                ^.placeholder := "Name", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
-                ^.onKeyUp ==> handleKey)(),
-              <.div(^.marginTop := 10.px,
-                <.i(^.className := "fas fa-check fa-lg",
-                  ^.title := "Bestätigen",
-                  ^.color := "darkseagreen",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onConfirm),
-                <.i(^.className := "fas fa-times fa-lg",
-                  ^.title := "Abbrechen",
-                  ^.color := "red",
-                  ^.marginLeft := 10.px,
-                  ^.onClick --> onCancel)
+              WithConfirmAndCancel(() => onConfirm(), () => onCancel())(
+                FormControl(value = e.name.value, onChange = onChangeName(_))(
+                  ^.placeholder := "Name", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
+                  ^.onKeyUp ==> handleKey)(),
               )
             )
           )
         }
       },
       renderWhen(sxs.session.isDefined) {
-        EntityList(entityUriFragment, es)
+        EntityList(entityUriFragment, es, deleteEntity)
       }
     )
   }

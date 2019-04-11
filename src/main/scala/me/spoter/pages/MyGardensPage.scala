@@ -7,7 +7,7 @@ import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.{Callback, ScalaComponent}
-import me.spoter.models.AllotmentGarden
+import me.spoter.models.{AllotmentGarden, IRI}
 import me.spoter.services.GardenService
 import me.spoter.{Session, SessionTracker, StateXSession}
 
@@ -33,6 +33,14 @@ class MyGardensBackend(bs: BackendScope[Unit, StateXSession[State]]) extends Ent
       }
     createdGardenF.flatMap { _ =>
       fetchEntities(sxs.session.get, forceLoad = true).map(s => bs.modState(_.copy(state = s)))
+    }
+  }
+
+  override protected val deleteEntity: Option[IRI => Callback] = Some { iri =>
+    Callback.future {
+      GardenService.delete(iri).map { _ =>
+        bs.modState(old => old.copy(state = old.state.copy(es = old.state.es.filter(_.uri != iri.innerUri))))
+      }
     }
   }
 

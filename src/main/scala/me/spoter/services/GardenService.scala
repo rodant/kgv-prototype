@@ -7,10 +7,12 @@ import me.spoter.rdf.RdfLiteral
 import me.spoter.services.rdf_mapping.BasicField._
 import me.spoter.services.rdf_mapping.RdfField
 import me.spoter.solid_libs.{RDFHelper, RDFLib}
+import org.scalajs.dom.ext.Ajax
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.util.Success
 
 /**
   * RDF implementation of the garden service.
@@ -118,6 +120,37 @@ object GardenService {
       _ <- RDFHelper.ensureContainerExists(imagesIri)
       _ <- RDFHelper.addStatementsToWeb(sts)
     } yield g
+  }
+
+  def delete(iri: IRI): Future[Unit] = {
+    val imagesDir = imagesIRIFor(iri)
+    for {
+      g <- fetchGarden(iri.innerUri)
+      _ <- Future.sequence(g.images.filter(!AllotmentGarden.defaultImages.contains(_))
+        .map(uri => RDFHelper.deleteResource(IRI(uri))))
+      _ <- RDFHelper.deleteResource(imagesDir)
+      _ <- RDFHelper.deleteResource(iri)
+      _ = RDFHelper.reloadAndSync(iri.parent)
+    } yield ()
+  }
+
+  def uploadImage(iri: IRI, name: String, data: Ajax.InputData): Future[(js.Object, IRI)] = {
+    val encodedName = js.Dynamic.global.encodeURI(name).toString
+    val imgIri = GardenService.imagesIRIFor(iri).concatPath(encodedName)
+    val upload = RDFHelper.uploadFile(imgIri, data, contentType = "image")
+    upload.andThen {
+      case Success(res) =>
+        RDFHelper.reloadAndSync(imgIri.parent)
+        res
+    }.zip(Future(imgIri))
+  }
+
+  def deleteImage(iri: IRI): Future[js.Object] = {
+    RDFHelper.deleteResource(iri).andThen {
+      case Success(res) =>
+        RDFHelper.reloadAndSync(iri.parent)
+        res
+    }
   }
 
   private def gardenToSentences(g: AllotmentGarden): List[js.Dynamic] = {

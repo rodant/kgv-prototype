@@ -21,6 +21,8 @@ case class IRI(private val sourceUri: URI) {
     else uriStr
   }
 
+  def parent: IRI = removeTailingSlash.baseIRI
+
   override def toString: String = innerUri.toString
 }
 
