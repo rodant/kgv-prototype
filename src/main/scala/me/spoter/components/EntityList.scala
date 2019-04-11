@@ -35,6 +35,7 @@ object EntityList {
           <.i(^.className := "fas fa-times",
             ^.title := "Löschen",
             ^.color := "red",
+            ^.marginTop := 10.px,
             ^.marginLeft := 10.px,
             ^.verticalAlign := "bottom",
             ^.onClick --> $.modState(_.copy(entityToDelete = Some(e))))
