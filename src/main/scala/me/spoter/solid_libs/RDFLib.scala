@@ -39,4 +39,6 @@ class RDFUpdateManager(store: js.Dynamic) extends js.Object {
   def put(doc: js.Dynamic, data: js.Array[js.Dynamic], contentType: String, callback: js.Function): js.Promise[js.Object] = js.native
 
   def update(deletions: js.UndefOr[js.Array[js.Dynamic]], insertions: js.UndefOr[js.Array[js.Dynamic]], callback: js.Function): Unit = js.native
+
+  def reloadAndSync(doc: js.Dynamic): Unit = js.native
 }

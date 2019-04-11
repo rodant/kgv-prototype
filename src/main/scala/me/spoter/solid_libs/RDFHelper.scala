@@ -70,6 +70,8 @@ object RDFHelper {
 
   def deleteResource(iri: IRI): Future[js.Object] = fetcher.webOperation("DELETE", iri.toString).toFuture
 
+  def reloadAndSync(iri: IRI): Unit = updateManager.reloadAndSync(RDFLib.sym(iri.toString))
+
   def listDir(dirUri: URI, forceLoad: Boolean = false): Future[Seq[URI]] = RDFHelper.loadEntity[Seq[URI]](dirUri, forceLoad) {
     val filesNodes = RDFHelper.getAll(dirUri, RDFHelper.LDP("contains"))
     filesNodes.map(f => new URI(f.value.toString))

@@ -28,10 +28,10 @@ object EntityList {
     val uriFragment = $.props.entityUriFragment
     <.div(
       Row()(
-        Col(xl = 3, lg = 3, md = 3, sm = 9, xs = 9)(
+        Col(xl = 4, lg = 4, md = 4, sm = 9, xs = 9)(
           NavLink(href = s"#$uriFragment?uri=${e.uri}")(e.name.value)
         ),
-        Col(xl = 9, lg = 9, md = 9, sm = 3, xs = 3)(
+        Col(xl = 8, lg = 8, md = 8, sm = 3, xs = 3)(
           <.i(^.className := "fas fa-times",
             ^.title := "Löschen",
             ^.color := "red",

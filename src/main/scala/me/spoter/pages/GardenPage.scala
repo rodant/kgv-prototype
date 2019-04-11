@@ -11,10 +11,7 @@ import me.spoter.models._
 import me.spoter.rdf.RdfLiteral
 import me.spoter.services.rdf_mapping.BasicField._
 import me.spoter.services.{GardenService, GeoCodingService}
-import me.spoter.solid_libs.RDFHelper
 import org.scalajs.dom.ext.Ajax
-
-import scala.scalajs.js
 
 /**
   * A page showing the data of an allotment garden.
@@ -45,15 +42,15 @@ object GardenPage extends DetailsPageTemplate {
       override def addImage(name: String, data: Ajax.InputData): Callback = {
         for {
           uri <- bs.props.map(_.uri)
-          encodedName = js.Dynamic.global.encodeURI(name).toString
-          imgIri = GardenService.imagesIRIFor(IRI(uri)).concatPath(encodedName)
-          upload = RDFHelper.uploadFile(imgIri, data, contentType = "image")
+          iri = IRI(uri)
+          upload = GardenService.uploadImage(iri, name, data)
           stateChange <- Callback.future {
-            upload.map { _ =>
+            upload.map { pair =>
+              val (_, imageIri) = pair
               bs.modState { old =>
                 val newImages =
-                  if (old.g.images != AllotmentGarden.defaultImages) imgIri.innerUri +: old.g.images
-                  else Seq(imgIri.innerUri)
+                  if (old.g.images != AllotmentGarden.defaultImages) imageIri.innerUri +: old.g.images
+                  else Seq(imageIri.innerUri)
                 old.copy(g = old.g.copy(images = newImages))
               }.flatMap(_ => resetEditing())
             }
@@ -64,7 +61,7 @@ object GardenPage extends DetailsPageTemplate {
       override def removeImage(index: Int): Callback = {
         for {
           imgUri <- bs.state.map(_.g.images(index))
-          deletion = RDFHelper.deleteResource(IRI(imgUri))
+          deletion = GardenService.deleteImage(IRI(imgUri))
           stateChange <- Callback.future {
             deletion.map { _ =>
               bs.modState { old =>
