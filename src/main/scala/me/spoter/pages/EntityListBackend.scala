@@ -36,7 +36,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
         }
       ),
       renderWhen(sxs.session.isEmpty) {
-        <.h2("Bitten einloggen!")
+        <.h2("Bitte einloggen!")
       },
       renderWhen(es.isEmpty && sxs.session.getOrElse(initialSession) != initialSession) {
         <.h2(s"Keine $entityRenderName gefunden.")
