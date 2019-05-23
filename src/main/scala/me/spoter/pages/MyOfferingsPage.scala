@@ -3,9 +3,8 @@ package me.spoter.pages
 import java.net.URI
 
 import japgolly.scalajs.react.component.Scala.BackendScope
-import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.{Callback, ScalaComponent}
+import japgolly.scalajs.react.{Callback, Reusability, ScalaComponent}
 import me.spoter.models.{AllotmentGarden, AllotmentOffering, User}
 import me.spoter.services.OfferingService
 import me.spoter.{Session, SessionTracker, StateXSession}

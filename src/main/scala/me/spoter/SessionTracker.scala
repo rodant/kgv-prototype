@@ -2,9 +2,8 @@ package me.spoter
 
 import java.net.URI
 
-import japgolly.scalajs.react.Callback
+import japgolly.scalajs.react.{Callback, Reusability}
 import japgolly.scalajs.react.component.builder.Lifecycle.ComponentDidMount
-import japgolly.scalajs.react.extra.Reusability
 import me.spoter.solid_libs.SolidAuth
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -79,5 +78,9 @@ trait SessionTracker[P, S, B] {
 }
 
 case class StateXSession[S](state: S, session: Option[Session])
+
+object StateXSession {
+  implicit def stateReuse[S]: Reusability[StateXSession[S]] = Reusability.by_==[StateXSession[S]]
+}
 
 case class Session(webId: URI) extends AnyVal

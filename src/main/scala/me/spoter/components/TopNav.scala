@@ -2,7 +2,6 @@ package me.spoter.components
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.component.Scala.Unmounted
-import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.html_<^._
 import me.spoter.components.bootstrap._
 import me.spoter.components.solid.Value

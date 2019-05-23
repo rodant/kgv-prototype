@@ -4,9 +4,8 @@ import java.net.URI
 import java.util.UUID
 
 import japgolly.scalajs.react.component.Scala.BackendScope
-import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.{Callback, ScalaComponent}
+import japgolly.scalajs.react.{Callback, Reusability, ScalaComponent}
 import me.spoter.models.{AllotmentGarden, IRI}
 import me.spoter.services.GardenService
 import me.spoter.{Session, SessionTracker, StateXSession}

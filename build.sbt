@@ -1,7 +1,7 @@
 import Dependencies._
 
 val reactVersion = "16.7.0"
-val scalaJSReactVersion = "1.3.1"
+val scalaJSReactVersion = "1.4.2"
 val scalaCssVersion = "0.5.5"
 
 lazy val root = (project in file(".")).
@@ -26,7 +26,7 @@ lazy val root = (project in file(".")).
       "com.github.japgolly.scalajs-react" %%% "extra" % scalaJSReactVersion,
       "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
       "com.github.japgolly.scalacss" %%% "ext-react" % scalaCssVersion,
-      "com.payalabs" %%% "scalajs-react-bridge" % "0.7.0",
+      "com.payalabs" %%% "scalajs-react-bridge" % "0.8.0",
       "org.scala-js" %%% "scalajs-java-time" % "0.2.5",
       "com.beachape" %%% "enumeratum" % "1.5.13",
       //"org.typelevel" %%% "cats-core" % "1.6.0",
