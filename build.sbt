@@ -2,7 +2,7 @@ import Dependencies._
 
 val reactVersion = "16.7.0"
 val scalaJSReactVersion = "1.4.2"
-val scalaCssVersion = "0.5.5"
+val scalaCssVersion = "0.5.6"
 
 lazy val root = (project in file(".")).
   settings(
@@ -21,7 +21,7 @@ lazy val root = (project in file(".")).
     version in webpack := "4.28.1",
     version in startWebpackDevServer := "3.1.14",
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.9.5",
+      "org.scala-js" %%% "scalajs-dom" % "0.9.7",
       "com.github.japgolly.scalajs-react" %%% "core" % scalaJSReactVersion,
       "com.github.japgolly.scalajs-react" %%% "extra" % scalaJSReactVersion,
       "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
