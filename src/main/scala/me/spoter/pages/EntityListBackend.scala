@@ -44,7 +44,7 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
       sxs.session.flatMap { _ =>
         sxs.state.newEntity.map { e =>
           Row()(
-            Form(validated = true)(^.noValidate := true)(
+            Form(validated = true)(^.noValidate := true, ^.onSubmit ==> dismissOnSubmit)(
               WithConfirmAndCancel(() => onConfirm(), () => onCancel())(
                 FormControl(value = e.name.value, onChange = onChangeName(_))(
                   ^.placeholder := "Name", ^.autoFocus := true, ^.required := true, ^.maxLength := 40,
@@ -80,7 +80,5 @@ abstract class EntityListBackend(bs: BackendScope[Unit, StateXSession[State]]) {
   }
 
   private def handleKey(e: ReactKeyboardEvent): Callback =
-  //TODO: the enter key in the name field is causing a weird runtime error, but this code is correct.
-  //Check later on if the error persists.
     handleEsc(onCancel).orElse(handleEnter(onConfirm)).orElse(ignoreKey)(e.keyCode)
 }
