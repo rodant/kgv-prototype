@@ -1,3 +1,7 @@
 *.class
 *.log
 .idea
+.bloop
+.metals
+target/
+public/kgv/js/kgv-prototype-opt-bundle.js
